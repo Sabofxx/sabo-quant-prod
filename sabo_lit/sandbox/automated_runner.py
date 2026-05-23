@@ -303,9 +303,12 @@ def main() -> None:
     elif not execution_allowed:
         log(f"INFO: skipping Capital execution: {execution_reason}")
     else:
+        min_notional = os.environ.get("EXEC_MIN_NOTIONAL_USD", "500")
+        max_per_order = os.environ.get("MAX_NOTIONAL_PER_ORDER_USD", "250000")
         rc = run_step("capital_executor", [
             py, "capital_connector.py", "--execute", str(delta_csv),
-            "--min-notional", "500",
+            "--min-notional", min_notional,
+            "--live-max-notional", max_per_order,
             "--reset",  # close all existing before opening fresh — idempotent rebalance
         ])
         if rc != 0:

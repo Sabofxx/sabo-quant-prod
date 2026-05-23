@@ -56,6 +56,9 @@ jobs:
           CAPITAL_ENVIRONMENT: ${{ secrets.CAPITAL_ENVIRONMENT || 'demo' }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # Tunable thresholds via repo variables (Settings → Variables → Actions)
+          EXEC_MIN_NOTIONAL_USD: ${{ vars.EXEC_MIN_NOTIONAL_USD || '500' }}
+          MAX_NOTIONAL_PER_ORDER_USD: ${{ vars.MAX_NOTIONAL_PER_ORDER_USD || '250000' }}
         run: |
           cd sabo_lit/sandbox
           python automated_runner.py
