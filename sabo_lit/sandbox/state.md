@@ -2301,3 +2301,134 @@ Only after:
 - no rule warnings,
 - tracker alerts clean,
 consider buying exactly one $100k-$200k challenge.
+
+## Audit Pass 12 — Telegram + Static Web Dashboard
+Run date: 2026-05-23.
+
+### 47. Telegram notifier hardened
+File: `sandbox/telegram_notifier.py`.
+
+Capabilities:
+- sends Telegram Bot API messages via `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`
+- `--run-summary --status success|failure`
+- `--message "..."`
+- `--test`
+- `--print-only` for local rendering without sending
+- includes daily ops decision, delta summary, signal summary, tracker alerts, Capital snapshots/executions if present, and links to GitHub Actions/dashboard
+
+Local render test passed:
+```text
+python telegram_notifier.py --run-summary --status success --print-only
+```
+
+Telegram real send was not tested because secrets are not set locally. This is expected.
+
+### 48. Static HTML dashboard hardened
+File: `sandbox/dashboard_generator.py`.
+
+Output:
+```text
+sandbox/live/dashboard.html
+```
+
+Dashboard reads:
+- `daily_ops_metrics_latest.json`
+- `prop_signals_latest.json`
+- `tracker_alerts.json`
+- `automated_daily_pnl.jsonl` if present
+- `capital_executions.jsonl` if present
+- `automated_runner.log` if present
+
+Local generation test passed:
+```text
+Dashboard written: sandbox/live/dashboard.html
+Signals: True, Daily ops: True, Snapshots: 0, Executions: 0
+```
+
+### 49. Daily runner integration
+Patched `sandbox/daily_ops_runner.py`:
+- runs `dashboard_generator.py` every daily run
+- sends Telegram summary if env vars exist
+- records dashboard/telegram steps in daily ops metrics/report
+- skips Telegram safely if secrets are missing
+
+Dry-run test on 2025-12-30 passed:
+```text
+Decision: DEMO_OK_LIVE_NO_GO
+broker_selection      OK
+broker_map            WARN  broker map default_mt5 is template-only; live not approved
+news                  OK
+positions             OK
+signal_generation     OK
+delta_csv             OK    39 rows, $5,990,925 gross delta, max lots 3.56
+mt5_dry_run           OK
+live_tracker          OK
+dashboard_generator   OK
+telegram_notify       WARN  TELEGRAM_* env vars not set; skipped
+```
+
+### 50. Automated runner + GitHub Actions status
+Existing `sandbox/automated_runner.py` already includes:
+- dashboard generation after final snapshot
+- Telegram success summary when secrets exist
+
+Existing `.github/workflows/daily_propfirm.yml` includes:
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
+- Telegram failure notification
+- no Discord notification remaining
+
+What can be honestly claimed now:
+- Local dry-run pipeline works.
+- Dashboard generation works.
+- Telegram message rendering works.
+- Real Telegram send is ready but untested until secrets are configured.
+- Full GitHub Actions + Capital.com live/demo automation is not verified locally because Capital credentials are not available in this environment.
+
+## Audit Pass 13 — GitHub Actions execution incident fix
+Run date: 2026-05-23.
+
+### 51. Incident observed from GitHub Actions run 26333201860
+Workflow result was `success`, but logs showed Capital.com order rejections:
+```text
+Rejected. USDJPY is currently closed.
+Rejected. AUDUSD is currently closed.
+Rejected. NZDUSD is currently closed.
+Rejected. USDCAD is currently closed.
+Rejected. GBPUSD is currently closed.
+```
+
+Cause:
+- Manual workflow was triggered on Saturday while FX market was closed.
+- `capital_connector.py` logged per-order errors but exited with code 0.
+- `automated_runner.py` treated the connector failure path as warning/continuation.
+
+This means the previous green GitHub status confirmed the pipeline ran, but did **not** confirm clean execution.
+
+### 52. Fix applied
+Patched `sandbox/automated_runner.py`:
+- added `market_execution_allowed()` guard using observed Capital.com timetable
+- skips Capital execution on Saturday, Friday post-close, Sunday pre-open, and daily 20:55-21:10 UTC maintenance
+- logs explicit market execution decision
+- treats non-zero `capital_connector.py` execution as FATAL and exits non-zero
+
+Patched `sandbox/capital_connector.py`:
+- pricing failures are now logged as execution records with `status=error`
+- if any order has `status=error` in non-dry-run mode, connector exits with code 4
+
+Validation:
+```text
+2026-05-23T12:53:00+00:00 -> False, Saturday FX market closed
+2026-05-22T22:05:00+00:00 -> False, Friday post-close FX market closed
+2026-05-24T20:30:00+00:00 -> False, Sunday pre-open FX market closed
+2026-05-24T22:05:00+00:00 -> True, FX execution window open
+2026-05-25T22:05:00+00:00 -> True, FX execution window open
+2026-05-25T21:00:00+00:00 -> False, Daily maintenance break
+```
+
+### 53. Operational action required
+Before re-running live/demo execution:
+1. Check Capital.com demo positions manually.
+2. If unexpected positions exist, close them manually or run reset during open market only.
+3. Commit/push this fix before next GitHub Actions run.
+4. Re-run workflow Sunday after 21:10 UTC or Monday-Thursday after 21:10 UTC.

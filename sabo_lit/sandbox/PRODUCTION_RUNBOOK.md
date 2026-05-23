@@ -57,6 +57,42 @@ sabo_lit/sandbox/live/daily_ops_metrics_latest.json
 `DEMO_OK_LIVE_NO_GO` is normal until broker symbols are verified from the real
 platform. This runner never sends live orders.
 
+
+### Telegram + Dashboard
+
+Telegram uses the Bot API. Configure these environment variables locally or as GitHub Actions secrets:
+
+```bash
+export TELEGRAM_BOT_TOKEN="123456:ABC..."
+export TELEGRAM_CHAT_ID="123456789"
+```
+
+Test without sending:
+
+```bash
+/Users/oscarmischler/sabo-quant/.venv/bin/python sabo_lit/sandbox/telegram_notifier.py --run-summary --print-only
+```
+
+Send real test message:
+
+```bash
+/Users/oscarmischler/sabo-quant/.venv/bin/python sabo_lit/sandbox/telegram_notifier.py --test
+```
+
+Generate static dashboard:
+
+```bash
+/Users/oscarmischler/sabo-quant/.venv/bin/python sabo_lit/sandbox/dashboard_generator.py
+```
+
+Output:
+
+```text
+sabo_lit/sandbox/live/dashboard.html
+```
+
+The daily runner generates `dashboard.html` automatically. Telegram sends automatically only when `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are present.
+
 ### Step 1 — Update/verify news calendar
 
 Trading Economics is used only if `TRADING_ECONOMICS_KEY` exists. Otherwise the

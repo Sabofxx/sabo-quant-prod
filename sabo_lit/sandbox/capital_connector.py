@@ -248,7 +248,21 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
             try:
                 price = client.get_price(epic)
             except Exception as e:
+                record = {
+                    "ts": datetime.now(UTC).isoformat(timespec="seconds"),
+                    "account_id": row.get("account_id"),
+                    "epic": epic,
+                    "direction": "PRICE_ERROR",
+                    "delta_usd": delta_usd,
+                    "price_mid": 0.0,
+                    "size": 0.0,
+                    "dry_run": dry_run,
+                    "status": "error",
+                    "error": f"pricing failed: {e}",
+                }
                 print(f"  ERROR pricing {epic}: {e}")
+                executions.append(record)
+                append_log(record)
                 continue
             size = usd_notional_to_size(epic, delta_usd, price)
             if size == 0:
@@ -350,7 +364,10 @@ def main() -> None:
                                         min_notional=args.min_notional,
                                         dry_run=args.dry_run,
                                         reset=args.reset)
-        print(f"\nExecuted {len(executions)} orders. Log: {TRADE_LOG}")
+        n_errors = sum(1 for item in executions if item.get("status") == "error")
+        print(f"\nExecuted {len(executions)} orders ({n_errors} errors). Log: {TRADE_LOG}")
+        if n_errors and not args.dry_run:
+            sys.exit(4)
         return
 
     parser.print_help()

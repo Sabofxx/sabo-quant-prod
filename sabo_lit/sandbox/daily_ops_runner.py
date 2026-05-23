@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import subprocess
 import sys
 from dataclasses import asdict, dataclass
@@ -38,6 +39,8 @@ DEFAULT_OUT_DIR = LIVE_DIR
 SIGNAL_GENERATOR = HERE / "propfirm_signal_generator.py"
 MT5_CONNECTOR = HERE / "mt5_connector.py"
 LIVE_TRACKER = HERE / "live_tracker.py"
+DASHBOARD_GENERATOR = HERE / "dashboard_generator.py"
+TELEGRAM_NOTIFIER = HERE / "telegram_notifier.py"
 
 
 @dataclass(frozen=True)
@@ -243,6 +246,10 @@ def write_report(
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
+
+def os_environ_has_telegram() -> bool:
+    return bool(os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"))
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run daily FX prop-firm operations in dry-run mode.")
     parser.add_argument("--as-of", default=None, help="Completed close date YYYY-MM-DD. Default: today UTC.")
@@ -255,6 +262,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--refresh-news", action="store_true", help="Refresh Trading Economics cache if key is configured.")
     parser.add_argument("--ignore-news", action="store_true", help="Pass through to signal generator; not recommended.")
     parser.add_argument("--skip-mt5-dry-run", action="store_true")
+    parser.add_argument("--skip-dashboard", action="store_true")
+    parser.add_argument("--skip-telegram", action="store_true")
     parser.add_argument("--require-live-ready", action="store_true", help="Treat warnings as live blockers.")
     parser.add_argument("--max-lots-per-order", type=float, default=5.0)
     return parser.parse_args()
@@ -328,6 +337,14 @@ def main() -> None:
     commands.append(tracker_result)
     steps.append(command_step(tracker_result))
 
+    if not args.skip_dashboard:
+        dashboard_cmd = [sys.executable, str(DASHBOARD_GENERATOR)]
+        dashboard_result = run_command("dashboard_generator", dashboard_cmd)
+        commands.append(dashboard_result)
+        steps.append(command_step(dashboard_result))
+    else:
+        steps.append(StepResult("dashboard_generator", "WARN", "skipped by CLI"))
+
     final_decision = decision(steps, args.require_live_ready)
     report_path = out_dir / f"daily_ops_report_{as_of.date()}.md"
     latest_report = out_dir / "daily_ops_report_latest.md"
@@ -347,6 +364,35 @@ def main() -> None:
     latest_metrics = out_dir / "daily_ops_metrics_latest.json"
     metrics_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     latest_metrics.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+    if not args.skip_telegram and os_environ_has_telegram():
+        telegram_status = "failure" if final_decision == "NO_GO" else "success"
+        telegram_cmd = [
+            sys.executable,
+            str(TELEGRAM_NOTIFIER),
+            "--run-summary",
+            "--status",
+            telegram_status,
+        ]
+        telegram_result = run_command("telegram_notify", telegram_cmd)
+        commands.append(telegram_result)
+        steps.append(command_step(telegram_result))
+        final_decision = decision(steps, args.require_live_ready)
+        payload["decision"] = final_decision
+        payload["steps"] = [asdict(step) for step in steps]
+        metrics_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        latest_metrics.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        write_report(report_path, as_of, broker, steps, commands, delta_summary, final_decision)
+        latest_report.write_text(report_path.read_text(encoding="utf-8"), encoding="utf-8")
+    elif not args.skip_telegram:
+        steps.append(StepResult("telegram_notify", "WARN", "TELEGRAM_* env vars not set; skipped"))
+        final_decision = decision(steps, args.require_live_ready)
+        payload["decision"] = final_decision
+        payload["steps"] = [asdict(step) for step in steps]
+        metrics_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        latest_metrics.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        write_report(report_path, as_of, broker, steps, commands, delta_summary, final_decision)
+        latest_report.write_text(report_path.read_text(encoding="utf-8"), encoding="utf-8")
 
     print(f"Decision: {final_decision}")
     for step in steps:

@@ -37,6 +37,8 @@ jobs:
           CAPITAL_IDENTIFIER: ${{ secrets.CAPITAL_IDENTIFIER }}
           CAPITAL_API_PASSWORD: ${{ secrets.CAPITAL_API_PASSWORD }}
           CAPITAL_ENVIRONMENT: ${{ secrets.CAPITAL_ENVIRONMENT || 'demo' }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           cd sabo_lit/sandbox
           python automated_runner.py
@@ -49,13 +51,14 @@ jobs:
           git diff --staged --quiet || git commit -m "Daily run $(date -u +%Y-%m-%d)"
           git push || echo "Nothing to push"
 
-      - name: Notify on failure
+      - name: Notify on failure (Telegram)
         if: failure()
         env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          if [ -n "$DISCORD_WEBHOOK" ]; then
-            curl -X POST "$DISCORD_WEBHOOK" \
-              -H "Content-Type: application/json" \
-              -d '{"content": "❌ Daily prop firm signal FAILED. Check GitHub Actions logs."}'
+          if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+            cd sabo_lit/sandbox
+            python telegram_notifier.py --run-summary --status failure || \
+              python telegram_notifier.py --message "❌ Sabo Quant daily run FAILED — check GitHub Actions"
           fi

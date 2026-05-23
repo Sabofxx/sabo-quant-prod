@@ -60,6 +60,8 @@ sabo_lit/sandbox/PRODUCTION_RUNBOOK.md
 - `sandbox/propfirm_news_calendar.py`: static fallback FOMC/NFP/ECB/BoE/BoC calendar.
 - `sandbox/live_tracker.py`: daily P&L, slippage, and breach monitor.
 - `sandbox/daily_ops_runner.py`: one-command daily dry-run workflow and GO/NO-GO report.
+- `sandbox/telegram_notifier.py`: Telegram Bot API daily summaries and failure alerts.
+- `sandbox/dashboard_generator.py`: static HTML dashboard at `sandbox/live/dashboard.html`.
 - `sandbox/mt5_connector.py`: minimal MT5 dry-run/live delta-order connector.
 - `sandbox/firm_rule_audit.py`: firm-rule compatibility simulator.
 - `sandbox/demo_30day_harness.py`: offline 30-day paper-trade rehearsal.

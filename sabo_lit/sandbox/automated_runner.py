@@ -11,7 +11,7 @@ Pipeline:
   7. Log fills + daily P&L
   8. Generate dashboard
 
-If any step fails, exits non-zero (GitHub Actions catches → Discord alert).
+If any critical step fails, exits non-zero (GitHub Actions catches → Telegram alert).
 """
 from __future__ import annotations
 
@@ -148,6 +148,30 @@ def log_account_snapshot(client: CapitalClient) -> None:
         f"avail={snapshot['available']:.2f} pl={snapshot['profit_loss']:+.2f}")
 
 
+
+def market_execution_allowed(now: datetime | None = None) -> tuple[bool, str]:
+    """Return whether FX execution is allowed on Capital.com at current UTC time.
+
+    Capital.com FX timetable from rejected orders observed in logs:
+    - Mon-Thu close at 20:59:50 UTC, reopen 21:05 UTC
+    - Fri close at 20:59:50 UTC
+    - Sun open at 21:00 UTC
+
+    We use conservative minute-level guards to avoid submitting during closure.
+    """
+    current = now or datetime.now(UTC)
+    weekday = current.weekday()  # Mon=0, Sun=6
+    minutes = current.hour * 60 + current.minute
+    if weekday == 5:
+        return False, "Saturday FX market closed"
+    if weekday == 4 and minutes >= 20 * 60 + 55:
+        return False, "Friday post-close FX market closed"
+    if weekday == 6 and minutes < 21 * 60 + 10:
+        return False, "Sunday pre-open FX market closed"
+    if weekday in {0, 1, 2, 3} and (20 * 60 + 55) <= minutes < (21 * 60 + 10):
+        return False, "Daily maintenance break 20:55-21:10 UTC"
+    return True, "FX execution window open"
+
 def main() -> None:
     log("=" * 60)
     log("Automated daily runner started")
@@ -192,8 +216,12 @@ def main() -> None:
         sys.exit(rc)
 
     delta_csv = LIVE_DIR / "prop_delta_orders_latest.csv"
+    execution_allowed, execution_reason = market_execution_allowed()
+    log(f"Market execution check: {execution_reason}")
     if not delta_csv.exists():
         log(f"WARN: {delta_csv} not found, skipping execution")
+    elif not execution_allowed:
+        log(f"INFO: skipping Capital execution: {execution_reason}")
     else:
         rc = run_step("capital_executor", [
             py, "capital_connector.py", "--execute", str(delta_csv),
@@ -201,7 +229,8 @@ def main() -> None:
             "--reset",  # close all existing before opening fresh — idempotent rebalance
         ])
         if rc != 0:
-            log("WARN: capital_connector failed (continuing for state commit)")
+            log("FATAL: capital_connector failed; execution state uncertain")
+            sys.exit(rc)
 
     rc = run_step("live_tracker_refresh", [py, "live_tracker.py"])
     if rc != 0:
@@ -211,6 +240,21 @@ def main() -> None:
         log_account_snapshot(client)
     except Exception as e:
         log(f"WARN: final snapshot failed: {e}")
+
+    # Generate static HTML dashboard from latest state files
+    rc = run_step("dashboard_generator", [py, "dashboard_generator.py"])
+    if rc != 0:
+        log("WARN: dashboard_generator failed")
+
+    # Send Telegram daily summary (success path)
+    if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):
+        rc = run_step("telegram_notify", [
+            py, "telegram_notifier.py", "--run-summary", "--status", "success"
+        ])
+        if rc != 0:
+            log("WARN: telegram notify failed")
+    else:
+        log("INFO: TELEGRAM_* env vars not set, skipping notification")
 
     log("Automated daily runner completed successfully")
     log("=" * 60)
