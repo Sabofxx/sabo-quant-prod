@@ -1,6 +1,6 @@
 # Prop Firm Daily Signals
 
-Generated at: 2026-05-23T13:03:52+00:00
+Generated at: 2026-05-23T16:48:41+00:00
 As of close: 2026-05-22
 Portfolio: adaptive_75_50_fx_core_8x200
 
