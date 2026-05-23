@@ -75,14 +75,26 @@ def candles_to_df(candles: list[dict]) -> pd.DataFrame:
 
 
 def update_historical_csv(pair: str, fresh_daily: pd.DataFrame) -> int:
-    """Append new daily bars to existing M5 CSV history.
-    Returns count of new bars appended."""
+    """Bootstrap or append daily bars to M5 CSV history.
+    On GitHub Actions runner the CSV is gitignored (too big), so first run
+    creates it from fetched Capital bars. Subsequent runs append fresh tail.
+    Returns count of new bars added."""
     if fresh_daily.empty:
         return 0
     csv_path = DATA_DIR / f"{pair.lower()}-m5-bid-2019-01-01-2026-01-01.csv"
+
+    # BOOTSTRAP : create file with header + all fetched bars
     if not csv_path.exists():
-        log(f"WARN: historical CSV missing for {pair}, skipping update")
-        return 0
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        with csv_path.open("w") as f:
+            f.write("timestamp,open,high,low,close\n")
+            for ts, row in fresh_daily.iterrows():
+                ts_ms = int(ts.timestamp() * 1000)
+                f.write(f"{ts_ms},{row['open']},{row['high']},{row['low']},{row['close']}\n")
+        log(f"  BOOTSTRAP: created {csv_path.name} with {len(fresh_daily)} bars")
+        return len(fresh_daily)
+
+    # APPEND : existing CSV → only new bars after last timestamp
     last_line = subprocess.run(
         ["tail", "-1", str(csv_path)],
         capture_output=True, text=True
@@ -157,9 +169,10 @@ def main() -> None:
 
     log("Fetching fresh daily candles from Capital.com...")
     updated_pairs = 0
+    # 200 bars : enough headroom for MR21 lookback + ~6 months stability
     for pair, epic in SYMBOL_MAP.items():
         try:
-            candles = client.get_daily_candles(epic, max_bars=30)
+            candles = client.get_daily_candles(epic, max_bars=200)
             df = candles_to_df(candles)
             n_new = update_historical_csv(pair, df)
             log(f"  {pair} ({epic}): fetched {len(df)} bars, appended {n_new}")
