@@ -1,16 +1,16 @@
 # Setup automation 100% gratuit, zero-touch
 
-GitHub Actions cron + Capital.com demo = full pipeline 24/7, $0/mois.
+GitHub Actions cron + Capital.com demo + Telegram bot = full pipeline 24/7, $0/mois.
 Une fois setup, tu ne touches plus rien. Le système :
-- Trade tous les jours à 22:05 UTC (5 min après FX close)
-- Fetch fresh data from Capital.com
+- Trade Dimanche-Jeudi à 22:05 UTC (5 min après FX close, skip Fri+Sat = marché fermé)
+- Fetch fresh daily candles from Capital.com (cached entre runs)
 - Compute signals (ADAPTIVE_75_50)
-- Execute delta orders via Capital.com REST API
-- Log P&L + alerts
+- Execute delta orders via Capital.com REST API (skip si marché fermé)
+- Génère dashboard HTML statique
+- Telegram notif daily summary + erreurs
 - Commit state back to repo
-- Email/Discord notif si échec
 
-## 1. Setup Capital.com demo account (5 min, GRATUIT)
+## 1. Capital.com demo account (5 min, GRATUIT)
 
 ```
 1. https://capital.com → Sign up (no card needed, EU friendly)
@@ -25,77 +25,83 @@ Une fois setup, tu ne touches plus rien. Le système :
    - API password (the custom one you just set, NOT login pwd)
 ```
 
-## 2. Push project to GitHub (5 min)
+## 2. Telegram bot (3 min, GRATUIT)
+
+```
+1. Telegram → search @BotFather → /start
+2. /newbot → choose name (e.g. "Sabo Quant Daily") → choose username (must end _bot)
+3. Copy bot TOKEN (format 123456:ABC-DEF...)
+4. Telegram → search @userinfobot → /start
+5. Copy your CHAT_ID (numeric)
+6. Open your bot DM → send "/start" or any message → bot can now send to you
+```
+
+## 3. Push project to GitHub (5 min)
 
 ```bash
 cd /Users/oscarmischler/sabo-quant
-
-# Add gitignore to skip large files
-cat > .gitignore <<'EOF'
-__pycache__/
-*.pyc
-.venv/
-.ruff_cache/
-.pytest_cache/
-sandbox/data/dukascopy_*/
-sandbox/data/*.csv
-sandbox/reports/*.html
-EOF
-
-# Init repo
 git init
 git add .
 git commit -m "Initial sabo-quant automated trading system"
 
-# Create private GitHub repo (use gh CLI)
+# Private repo via gh CLI
 gh repo create sabo-quant-prod --private --source=. --push
 
-# Or manually : create repo on github.com, then:
+# OR manually : create repo on github.com, then:
 # git remote add origin git@github.com:USER/sabo-quant-prod.git
-# git branch -M main
-# git push -u origin main
+# git branch -M main && git push -u origin main
 ```
 
-## 3. Configure secrets in GitHub (5 min)
+## 4. Configure GitHub secrets (5 min)
 
 ```bash
-# Using gh CLI (fastest) — paste values when prompted, never on command line:
+# Capital.com (paste value when prompted, Enter, Ctrl+D to finish):
 gh secret set CAPITAL_API_KEY
 gh secret set CAPITAL_IDENTIFIER
 gh secret set CAPITAL_API_PASSWORD
 gh secret set CAPITAL_ENVIRONMENT --body "demo"
 
-# Optional Discord notification on failure:
-gh secret set DISCORD_WEBHOOK --body "https://discord.com/api/webhooks/..."
+# Telegram notifications:
+gh secret set TELEGRAM_BOT_TOKEN
+gh secret set TELEGRAM_CHAT_ID
 ```
 
-Discord webhook = optional. Create one :
-- Discord server > Channel settings > Integrations > Webhooks > New > Copy URL
+**ATTENTION** : la valeur du secret = stdin de `gh secret set`. Pipeline :
+1. Type `gh secret set NAME` + Enter
+2. Paste la valeur
+3. Enter pour newline (optional)
+4. Ctrl+D pour soumettre stdin
 
-OR via GitHub UI :
-```
-Repo > Settings > Secrets and variables > Actions > New repository secret
-```
+**JAMAIS** `gh secret set <valeur>` — la valeur deviendrait le NOM du secret et fuirait dans `~/.zsh_history`.
 
-## 4. Verify setup (2 min)
+OR via GitHub UI : Repo > Settings > Secrets and variables > Actions > New repository secret
+
+## 5. Test Telegram locally (1 min)
 
 ```bash
-# Test workflow manually (don't wait until tomorrow)
+export TELEGRAM_BOT_TOKEN="123456:ABC-DEF..."
+export TELEGRAM_CHAT_ID="123456789"
+cd sabo_lit/sandbox
+python telegram_notifier.py --test
+# → "🤖 Sabo Quant Test ..." doit arriver dans le DM bot
+```
+
+## 6. Vérifier setup complet (2 min)
+
+```bash
+# Trigger workflow manuel (don't wait until tomorrow)
 gh workflow run "Daily Prop Firm Signal"
 
 # Watch progress
 gh run watch
 
 # Or view in browser
-gh repo view --web
-# → Actions tab → Daily Prop Firm Signal
+gh repo view --web   # → Actions tab
 ```
 
-If green ✅ = system live. Tomorrow 22:05 UTC will run automatically. Forever.
+Si green ✅ : Telegram daily summary arrive. Dimanche 22:05 UTC = auto run. Forever.
 
-## 5. Verify Capital.com test (optional, 2 min)
-
-Local test before relying on GitHub Actions :
+## 7. Capital.com local test (optionnel, 2 min)
 
 ```bash
 export CAPITAL_API_KEY="ton-api-key"
@@ -103,117 +109,113 @@ export CAPITAL_IDENTIFIER="ton-email-login"
 export CAPITAL_API_PASSWORD="ton-api-password-custom"
 export CAPITAL_ENVIRONMENT="demo"
 
-/Users/oscarmischler/sabo-quant/.venv/bin/pip install requests pandas
+.venv/bin/pip install requests pandas
 
-# Test account access
-/Users/oscarmischler/sabo-quant/.venv/bin/python sabo_lit/sandbox/capital_connector.py --account-info
+# Account access
+.venv/bin/python sabo_lit/sandbox/capital_connector.py --account-info
 
-# Should output JSON with balance, available, currency etc.
-# Then check positions:
-/Users/oscarmischler/sabo-quant/.venv/bin/python sabo_lit/sandbox/capital_connector.py --positions
+# Positions
+.venv/bin/python sabo_lit/sandbox/capital_connector.py --positions
 
-# Dry-run a fake execution (no orders sent):
-/Users/oscarmischler/sabo-quant/.venv/bin/python sabo_lit/sandbox/capital_connector.py \
+# Dry-run (no orders sent)
+.venv/bin/python sabo_lit/sandbox/capital_connector.py \
   --execute sabo_lit/sandbox/live/prop_delta_orders_latest.csv --dry-run
 ```
 
-## 6. Daily cycle (you do nothing)
+## 8. Daily cycle (tu ne touches rien)
 
 ```
-22:05 UTC every day:
+22:05 UTC Dim-Jeu :
   GitHub Actions wakes up
   Runs sabo_lit/sandbox/automated_runner.py:
     a. Login Capital.com (session token)
-    b. Snapshot Capital account balance (before)
-    c. Fetch last 30 days daily candles from Capital for 6 FX pairs
-    d. Append fresh bars to local CSV history
-    e. Run signal generator with --adaptive (ADAPTIVE_75_50)
-    f. Read current Capital positions
-    g. Compute delta orders = target - current
-    h. Submit BUY/SELL orders for each non-zero delta
-    i. Log fills to live/capital_executions.jsonl
-    j. Refresh dashboard
-    k. Snapshot Capital balance (after)
+    b. Snapshot balance (before)
+    c. Fetch 200 daily candles per pair (cached après 1er run)
+    d. Append fresh bars
+    e. Signal generator --adaptive (ADAPTIVE_75_50)
+    f. Market hours check (skip si FX closed)
+    g. capital_connector --execute --reset (close all + open fresh)
+    h. Log fills to live/capital_executions.jsonl
+    i. Snapshot balance (after)
+    j. Generate live/dashboard.html
+    k. Telegram daily summary
   Commit state files back to repo
-  If fail → Discord notif + email
+  Si fail → Telegram alert
 ```
 
-## 7. Weekly review (5 min/semaine)
+## 9. Weekly review (5 min/sem)
 
 ```bash
-git pull   # local sync of state
+git pull   # sync state
 
-# View latest signals + executions
+# Latest signals + executions
 cat sabo_lit/sandbox/live/prop_signals_latest.md
-cat sabo_lit/sandbox/live/capital_executions.jsonl | tail -50
+tail -50 sabo_lit/sandbox/live/capital_executions.jsonl
 
-# View P&L trajectory
-cat sabo_lit/sandbox/live/automated_daily_pnl.jsonl | tail -7
+# P&L trajectory
+tail -7 sabo_lit/sandbox/live/automated_daily_pnl.jsonl
 
-# Run live tracker dashboard
+# Dashboard (web)
+open https://htmlpreview.github.io/?https://github.com/USER/sabo-quant-prod/blob/main/sabo_lit/sandbox/live/dashboard.html
+
+# Live tracker
 python sabo_lit/sandbox/live_tracker.py
 cat sabo_lit/sandbox/live/tracker_dashboard.md
 ```
 
-## 8. Cost check
+## 10. Cost check
 
 ```
-GitHub Actions free tier : 2000 minutes/month for private repos
-Daily run usage          : ~3 min/day = ~90 min/month
-Safety margin            : 22× under limit
-OANDA practice           : free forever
-Disk usage on GitHub     : <100 MB (data CSVs gitignored)
-Discord webhook          : free
+GitHub Actions free tier : 2000 min/month private repo
+Daily run usage          : ~1.5 min × 22 jours/mois = ~33 min/mois
+Safety margin            : 60× sous la limite
+Capital.com demo         : free forever
+Telegram bot             : free forever
+Disk on GitHub           : <50 MB (data cached, pas committed)
 ─────────────────────────────────────────────────
 TOTAL MONTHLY COST       : $0
 ```
 
-## 9. Stop / pause system
+## 11. Stop / pause
 
-Pause anytime :
 ```bash
-# Disable workflow without deleting:
-gh workflow disable "Daily Prop Firm Signal"
+gh workflow disable "Daily Prop Firm Signal"   # pause
+gh workflow enable  "Daily Prop Firm Signal"   # resume
 
-# Re-enable:
-gh workflow enable "Daily Prop Firm Signal"
-
-# Permanently remove:
+# Permanent remove:
 rm .github/workflows/daily_propfirm.yml
-git commit -am "remove automation"
-git push
+git commit -am "remove automation" && git push
 ```
 
-## 10. Monitoring sans Mac
+## 12. Monitoring sans Mac
 
-Tout est on GitHub :
-- **Logs runs** : github.com/USER/sabo-quant-prod/actions
-- **State files** : github.com/USER/sabo-quant-prod/tree/main/sabo_lit/sandbox/live
-- **P&L history** : `automated_daily_pnl.jsonl` (commit history visible)
-- **Failure alerts** : email auto + Discord webhook (si configuré)
-
-Mobile :
-- GitHub mobile app → notifications workflow failures
-- Discord mobile → push notif si Discord webhook configuré
+- **Telegram** : daily summary + erreurs push direct mobile
+- **GitHub Actions UI** : github.com/USER/sabo-quant-prod/actions
+- **State files** : `sabo_lit/sandbox/live/` (commit history visible)
+- **Dashboard web** : htmlpreview link Telegram message
 
 ## TROUBLESHOOTING
 
 ### Workflow ne se déclenche pas
-- GitHub Actions désactive auto les workflows si pas d'activité 60 jours sur repo
-- Solution : push un commit dummy mensuel, OU `gh workflow run` manuellement
+- GitHub désactive auto les workflows si pas d'activité 60 jours
+- Solution : push commit dummy mensuel, OU `gh workflow run` manuel
 
 ### Capital.com orders rejected
-- Vérifier que demo account est ACTIVE (relogin web platform si dormant)
-- Vérifier epic naming (EURUSD, GBPUSD — pas EUR_USD)
-- Vérifier balance/margin disponible
-- Si "INVALID_SIZE" → check `dealingRules.minDealSize` via /markets/{epic}
-- Account hedging vs netting : non-issue, le runner appelle --reset (close all)
-  avant d'ouvrir nouvelles positions, donc rebalance idempotent dans les deux modes
+- Vérifier demo account ACTIVE (relogin web si dormant)
+- Epic naming : EURUSD, GBPUSD (pas EUR_USD)
+- Margin disponible
+- "INVALID_SIZE" → check `dealingRules.minDealSize` via /markets/{epic}
+- Marché fermé : runner check market_execution_allowed() → skip propre
+
+### Telegram silence
+- `python telegram_notifier.py --test` localement
+- Vérifier bot DM ouvert (envoie au moins 1 message au bot)
+- Vérifier TELEGRAM_CHAT_ID numérique (pas username)
 
 ### Données pas à jour
-- Capital.com daily bars closent à 21:00 UTC (FX close)
-- Workflow tourne à 22:05 UTC pour capter close du jour
-- Si weekend (Vendredi 21:00 UTC à Dimanche 22:00 UTC) : pas de nouvelles bars, system idle
+- Capital daily bars closent à 21:00 UTC (FX close)
+- Workflow tourne à 22:05 UTC pour capter close
+- Fri 20:59 → Sun 21:00 UTC : marché fermé, skip propre
 
 ### State file conflicts
 - Si commit échoue (rare), workflow continue mais state pas pushed
@@ -222,16 +224,16 @@ Mobile :
 ## CHECKLIST FINAL DEPLOY
 
 ```
-[ ] Capital.com demo créé, API key + custom password générés
-[ ] Repo pushed sur GitHub (private)
-[ ] GitHub Secrets : CAPITAL_API_KEY + CAPITAL_IDENTIFIER + CAPITAL_API_PASSWORD
-[ ] Discord webhook créé (optionnel)
-[ ] Local test : capital_connector.py --account-info → balance OK
-[ ] Local test : capital_connector.py --execute ... --dry-run → orders simulés OK
-[ ] gh workflow run "Daily Prop Firm Signal" → workflow vert
-[ ] Logs lisibles dans GitHub Actions UI
-[ ] State files committed dans repo après 1er run
-[ ] Tomorrow 22:05 UTC = auto run, verify pendant 7 jours
+[ ] Capital.com demo : API key + custom password
+[ ] Telegram bot : TOKEN + CHAT_ID
+[ ] Repo pushed GitHub (private)
+[ ] gh secret set : CAPITAL_API_KEY, CAPITAL_IDENTIFIER, CAPITAL_API_PASSWORD,
+                    CAPITAL_ENVIRONMENT, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+[ ] python telegram_notifier.py --test → message reçu
+[ ] capital_connector.py --account-info → balance OK
+[ ] gh workflow run "Daily Prop Firm Signal" → green
+[ ] Telegram daily summary reçu après run
+[ ] Dimanche 22:05 UTC auto run, verify 7 jours
 ```
 
-After 30 days : compare realized P&L vs backtest expectation, decide go-real with FTMO/FundingPips challenge.
+After 30 days : compare realized P&L vs backtest expectation, decide go-real avec FTMO/FundingPips challenge.

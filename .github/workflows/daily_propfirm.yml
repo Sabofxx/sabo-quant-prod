@@ -2,8 +2,8 @@ name: Daily Prop Firm Signal
 
 on:
   schedule:
-    # 22:05 UTC every day (after FX session close at 22:00 UTC)
-    - cron: '5 22 * * *'
+    # 22:05 UTC Sun-Thu only (Fri 20:59 → Sun 21:00 UTC: FX closed → skip Fri+Sat runs)
+    - cron: '5 22 * * 0-4'
   workflow_dispatch:        # manual trigger button
 
 permissions:
@@ -34,6 +34,14 @@ jobs:
         with:
           python-version: '3.12'
           cache: 'pip'
+
+      - name: Cache Capital daily bars
+        uses: actions/cache@v4
+        with:
+          path: sabo_lit/sandbox/data
+          key: capital-daily-bars-v1
+          restore-keys: |
+            capital-daily-bars-
 
       - name: Install dependencies
         run: |

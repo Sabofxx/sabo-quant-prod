@@ -263,9 +263,13 @@ def build_summary(status: str = "success", repo: str = "Sabofxx/sabo-quant-prod"
     add_tracker_alerts_section(lines)
     add_log_warnings_section(lines)
     safe_repo = html_escape(repo)
+    dashboard_url = (
+        f"https://htmlpreview.github.io/?"
+        f"https://github.com/{safe_repo}/blob/main/sabo_lit/sandbox/live/dashboard.html"
+    )
     lines.append(
         f"🔗 <a href=\"https://github.com/{safe_repo}/actions\">GitHub Actions</a> · "
-        f"<a href=\"https://github.com/{safe_repo}/blob/main/sabo_lit/sandbox/live/dashboard.html\">Dashboard</a> · "
+        f"<a href=\"{dashboard_url}\">Dashboard</a> · "
         f"<a href=\"https://capital.com\">Capital.com</a>"
     )
     return "\n".join(lines)
