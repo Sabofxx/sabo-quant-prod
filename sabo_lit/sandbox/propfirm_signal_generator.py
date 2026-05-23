@@ -223,9 +223,21 @@ def build_specs(as_of: pd.Timestamp | None) -> tuple[dict[str, SpecState], pd.Ti
     specs: dict[str, SpecState] = {}
     for name, members in FX_SPECS.items():
         specs[name] = build_fx_spec(name, members, closes, preliminary_as_of)
+
+    # H1 specs optional : skip on missing Dukascopy H1 data (gitignored on GH runner).
+    # Active accounts JSON references FX only, so H1 absence is non-fatal.
     for name, definition in H1_SPECS.items():
-        specs[name] = build_h1_spec(name, definition, preliminary_as_of)
+        try:
+            specs[name] = build_h1_spec(name, definition, preliminary_as_of)
+        except (RuntimeError, FileNotFoundError) as exc:
+            print(f"WARN: H1 spec {name} unavailable ({exc}); skipping", flush=True)
+
+    # Composite specs : skip if any member missing (H1 dependency)
     for name, members in COMPOSITE_SPECS.items():
+        missing = [m for m in members if m not in specs]
+        if missing:
+            print(f"WARN: composite {name} missing members {missing}; skipping", flush=True)
+            continue
         specs[name] = combine_spec(name, members, specs)
 
     final_as_of = as_of or latest_common_date(specs)
