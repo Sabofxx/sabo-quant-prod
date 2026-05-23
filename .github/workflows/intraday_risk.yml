@@ -1,0 +1,64 @@
+name: Intraday Risk Check
+
+on:
+  schedule:
+    # Every 4h on weekdays during FX session (00:00, 04:00, 08:00, 12:00, 16:00, 20:00 UTC)
+    # Mon-Fri only — weekend market closed, nothing to check.
+    - cron: '0 */4 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write   # to commit intraday_risk_alerts.jsonl
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: intraday-risk-check
+  cancel-in-progress: false
+
+jobs:
+  risk-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r sabo_lit/sandbox/requirements.txt
+
+      - name: Run intraday risk check
+        env:
+          CAPITAL_API_KEY: ${{ secrets.CAPITAL_API_KEY }}
+          CAPITAL_IDENTIFIER: ${{ secrets.CAPITAL_IDENTIFIER }}
+          CAPITAL_API_PASSWORD: ${{ secrets.CAPITAL_API_PASSWORD }}
+          CAPITAL_ENVIRONMENT: ${{ secrets.CAPITAL_ENVIRONMENT || 'demo' }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # Override thresholds with repo variables if you want — defaults below
+          RISK_DD_PCT: ${{ vars.RISK_DD_PCT || '-3.0' }}
+          RISK_SINGLE_POS_PCT: ${{ vars.RISK_SINGLE_POS_PCT || '-1.5' }}
+          RISK_MARGIN_PCT: ${{ vars.RISK_MARGIN_PCT || '70.0' }}
+        run: |
+          cd sabo_lit/sandbox
+          python intraday_risk_check.py
+
+      - name: Commit alert log (if any)
+        run: |
+          git config user.email "automation@github.com"
+          git config user.name "GitHub Actions Bot"
+          git add sabo_lit/sandbox/live/intraday_risk_alerts.jsonl 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "Intraday alert $(date -u +%Y-%m-%dT%H:%M)"
+          git push || echo "Nothing to push"
