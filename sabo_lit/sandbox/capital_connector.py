@@ -209,12 +209,51 @@ def append_log(record: dict) -> None:
         f.write(json.dumps(record, default=str) + "\n")
 
 
+LIVE_MAX_NOTIONAL_USD_DEFAULT = 250_000.0
+
+
+def assert_live_safety(client: CapitalClient, executions_preview_notional: float,
+                        live_max_notional: float, allow_live_unsafe: bool) -> None:
+    """Gate live trading with explicit opt-in + per-order notional cap.
+
+    When CAPITAL_ENVIRONMENT=live the runner must either pass --allow-live (or
+    set ALLOW_LIVE=1) AND every individual delta_notional_usd must be below
+    live_max_notional. This is a defense in depth: a misconfigured demo
+    rebalance ($3M gross visible in current sandbox) would blow a real account.
+    """
+    if client.base == LIVE_BASE:
+        if not allow_live_unsafe:
+            print(
+                "FATAL: CAPITAL_ENVIRONMENT=live but --allow-live not set. "
+                "Re-run with --allow-live or set ALLOW_LIVE=1 to confirm.",
+                file=sys.stderr,
+            )
+            sys.exit(5)
+        if executions_preview_notional > live_max_notional:
+            print(
+                f"FATAL: live order notional ${executions_preview_notional:,.0f} > "
+                f"cap ${live_max_notional:,.0f}. Bump --live-max-notional explicitly to override.",
+                file=sys.stderr,
+            )
+            sys.exit(6)
+
+
 def execute_delta_csv(client: CapitalClient, csv_path: Path,
                        min_notional: float = 100.0, dry_run: bool = False,
-                       reset: bool = False) -> list[dict]:
+                       reset: bool = False,
+                       allow_live: bool = False,
+                       live_max_notional: float = LIVE_MAX_NOTIONAL_USD_DEFAULT) -> list[dict]:
     if not csv_path.exists():
         print(f"ERROR: delta CSV not found: {csv_path}", file=sys.stderr)
         sys.exit(3)
+
+    # Live safety preflight: scan max single-order notional before any submit
+    if client.base == LIVE_BASE and not dry_run:
+        max_delta = 0.0
+        with csv_path.open() as preview:
+            for row in csv.DictReader(preview):
+                max_delta = max(max_delta, abs(float(row.get("delta_notional_usd", 0) or 0)))
+        assert_live_safety(client, max_delta, live_max_notional, allow_live)
 
     if reset and not dry_run:
         print("RESET mode: closing all existing positions first...")
@@ -312,7 +351,14 @@ def main() -> None:
     parser.add_argument("--min-notional", type=float, default=100.0)
     parser.add_argument("--reset", action="store_true",
                           help="Close all open positions (standalone) OR close-then-open with --execute")
+    parser.add_argument("--allow-live", action="store_true",
+                          help="Required to submit on CAPITAL_ENVIRONMENT=live. "
+                               "Also honored via env ALLOW_LIVE=1.")
+    parser.add_argument("--live-max-notional", type=float,
+                          default=LIVE_MAX_NOTIONAL_USD_DEFAULT,
+                          help=f"Per-order notional cap on live (default ${LIVE_MAX_NOTIONAL_USD_DEFAULT:,.0f})")
     args = parser.parse_args()
+    args.allow_live = args.allow_live or os.environ.get("ALLOW_LIVE", "") == "1"
 
     api_key = os.environ.get("CAPITAL_API_KEY")
     identifier = os.environ.get("CAPITAL_IDENTIFIER")
@@ -363,7 +409,9 @@ def main() -> None:
         executions = execute_delta_csv(client, args.execute,
                                         min_notional=args.min_notional,
                                         dry_run=args.dry_run,
-                                        reset=args.reset)
+                                        reset=args.reset,
+                                        allow_live=args.allow_live,
+                                        live_max_notional=args.live_max_notional)
         n_errors = sum(1 for item in executions if item.get("status") == "error")
         print(f"\nExecuted {len(executions)} orders ({n_errors} errors). Log: {TRADE_LOG}")
         if n_errors and not args.dry_run:

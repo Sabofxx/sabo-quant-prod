@@ -212,7 +212,10 @@ def load_events(
             write_cache(events, cache_path, start_ts.strftime("%Y-%m-%d"), end_ts.strftime("%Y-%m-%d"))
             return events, "trading_economics"
     except RuntimeError as exc:
-        print(f"WARNING: {exc}; using hardcoded fallback.")
+        # Only warn when key was attempted but failed; silent when no key configured
+        # (fallback is the documented default for users without a TE API subscription).
+        if os.environ.get("TRADING_ECONOMICS_KEY", "").strip():
+            print(f"WARNING: {exc}; using hardcoded fallback.")
     events = fallback_events(start_ts, end_ts)
     write_cache(events, cache_path, start_ts.strftime("%Y-%m-%d"), end_ts.strftime("%Y-%m-%d"))
     return events, "fallback"

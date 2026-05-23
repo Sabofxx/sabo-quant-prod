@@ -33,6 +33,7 @@ LIVE_DIR = HERE / "live"
 DATA_DIR = HERE / "data"
 RUN_LOG = LIVE_DIR / "automated_runner.log"
 LATEST_PNL = LIVE_DIR / "automated_daily_pnl.jsonl"
+ACCOUNT_STATE = LIVE_DIR / "account_state.json"
 
 
 def log(msg: str) -> None:
@@ -130,11 +131,13 @@ def run_step(label: str, cmd: list[str]) -> int:
 
 
 def log_account_snapshot(client: CapitalClient) -> None:
+    """Append daily snapshot to JSONL (capped at 1 entry per UTC date — overwrite latest)."""
     acc = client.account_summary()
     bal = acc.get("balance", {})
+    today = datetime.now(UTC).date().isoformat()
     snapshot = {
         "ts": datetime.now(UTC).isoformat(timespec="seconds"),
-        "date": datetime.now(UTC).date().isoformat(),
+        "date": today,
         "balance": float(bal.get("balance", 0)),
         "available": float(bal.get("available", 0)),
         "deposit": float(bal.get("deposit", 0)),
@@ -142,10 +145,86 @@ def log_account_snapshot(client: CapitalClient) -> None:
         "currency": acc.get("currency"),
     }
     LIVE_DIR.mkdir(exist_ok=True)
-    with LATEST_PNL.open("a") as f:
-        f.write(json.dumps(snapshot) + "\n")
+
+    # Cap 1 entry per date : rewrite file dropping any existing row with same date
+    existing_rows = []
+    if LATEST_PNL.exists():
+        for line in LATEST_PNL.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if row.get("date") != today:
+                existing_rows.append(row)
+    existing_rows.append(snapshot)
+    with LATEST_PNL.open("w") as f:
+        for row in existing_rows:
+            f.write(json.dumps(row) + "\n")
+
     log(f"Account snapshot: bal={snapshot['balance']:.2f} {snapshot['currency']} "
         f"avail={snapshot['available']:.2f} pl={snapshot['profit_loss']:+.2f}")
+
+
+def write_account_state(client: CapitalClient, market_open: bool,
+                          market_reason: str, executed: bool) -> None:
+    """Write rich live/account_state.json snapshot for Telegram/dashboard consumers.
+
+    Includes full balance, currency, environment, open positions with pricing,
+    market schedule info, run context.
+    """
+    acc = client.account_summary()
+    bal = acc.get("balance", {})
+
+    positions_raw = []
+    try:
+        positions_raw = client.get_positions()
+    except Exception as exc:
+        log(f"WARN: positions fetch for state file failed: {exc}")
+
+    positions: list[dict] = []
+    for entry in positions_raw:
+        pos = entry.get("position", {})
+        market = entry.get("market", {})
+        positions.append({
+            "deal_id": pos.get("dealId"),
+            "epic": market.get("epic"),
+            "instrument": market.get("instrumentName"),
+            "direction": pos.get("direction"),
+            "size": float(pos.get("size", 0) or 0),
+            "open_level": float(pos.get("level", 0) or 0),
+            "current_bid": float(market.get("bid", 0) or 0),
+            "current_offer": float(market.get("offer", 0) or 0),
+            "profit_loss": float(pos.get("profit", 0) or 0),
+            "currency": pos.get("currency"),
+            "created": pos.get("createdDate"),
+        })
+
+    env = os.environ.get("CAPITAL_ENVIRONMENT", "demo")
+    state = {
+        "ts": datetime.now(UTC).isoformat(timespec="seconds"),
+        "environment": env,
+        "broker": "Capital.com",
+        "account_id": acc.get("accountId"),
+        "account_name": acc.get("accountName"),
+        "currency": acc.get("currency"),
+        "balance": float(bal.get("balance", 0) or 0),
+        "available": float(bal.get("available", 0) or 0),
+        "deposit": float(bal.get("deposit", 0) or 0),
+        "profit_loss": float(bal.get("profitLoss", 0) or 0),
+        "margin_used": float(bal.get("balance", 0) or 0) - float(bal.get("available", 0) or 0),
+        "positions": positions,
+        "positions_count": len(positions),
+        "market_open": market_open,
+        "market_reason": market_reason,
+        "executed_this_run": executed,
+    }
+    LIVE_DIR.mkdir(exist_ok=True)
+    ACCOUNT_STATE.write_text(json.dumps(state, indent=2, default=str), encoding="utf-8")
+    log(f"Wrote {ACCOUNT_STATE.name}: positions={len(positions)} "
+        f"bal={state['balance']:.2f} env={env}")
 
 
 
@@ -218,6 +297,7 @@ def main() -> None:
     delta_csv = LIVE_DIR / "prop_delta_orders_latest.csv"
     execution_allowed, execution_reason = market_execution_allowed()
     log(f"Market execution check: {execution_reason}")
+    executed = False
     if not delta_csv.exists():
         log(f"WARN: {delta_csv} not found, skipping execution")
     elif not execution_allowed:
@@ -231,6 +311,7 @@ def main() -> None:
         if rc != 0:
             log("FATAL: capital_connector failed; execution state uncertain")
             sys.exit(rc)
+        executed = True
 
     rc = run_step("live_tracker_refresh", [py, "live_tracker.py"])
     if rc != 0:
@@ -240,6 +321,11 @@ def main() -> None:
         log_account_snapshot(client)
     except Exception as e:
         log(f"WARN: final snapshot failed: {e}")
+
+    try:
+        write_account_state(client, execution_allowed, execution_reason, executed)
+    except Exception as e:
+        log(f"WARN: account_state write failed: {e}")
 
     # Generate static HTML dashboard from latest state files
     rc = run_step("dashboard_generator", [py, "dashboard_generator.py"])

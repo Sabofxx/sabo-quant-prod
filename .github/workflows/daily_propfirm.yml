@@ -2,8 +2,8 @@ name: Daily Prop Firm Signal
 
 on:
   schedule:
-    # 22:05 UTC Sun-Thu only (Fri 20:59 → Sun 21:00 UTC: FX closed → skip Fri+Sat runs)
-    - cron: '5 22 * * 0-4'
+    # 22:05 UTC every day — Mon-Fri trade, Sat-Sun weekend status report (no orders)
+    - cron: '5 22 * * *'
   workflow_dispatch:        # manual trigger button
 
 permissions:
@@ -46,7 +46,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install pandas plotly quantstats requests numpy
+          pip install -r sabo_lit/sandbox/requirements.txt
 
       - name: Run daily automation
         env:
