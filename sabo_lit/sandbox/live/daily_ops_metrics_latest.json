@@ -1,0 +1,73 @@
+{
+  "generated_at": "2026-05-22T15:36:16+00:00",
+  "as_of": "2025-12-30",
+  "broker": "default_mt5",
+  "decision": "DEMO_OK_LIVE_NO_GO",
+  "steps": [
+    {
+      "name": "broker_selection",
+      "status": "OK",
+      "detail": "broker forced by CLI: default_mt5"
+    },
+    {
+      "name": "broker_map",
+      "status": "WARN",
+      "detail": "broker map default_mt5 is template-only; live not approved"
+    },
+    {
+      "name": "news",
+      "status": "OK",
+      "detail": "2025-12-30 no blackout source=cache"
+    },
+    {
+      "name": "positions",
+      "status": "OK",
+      "detail": "8 current positions loaded from /Users/oscarmischler/sabo-quant/sabo_lit/sandbox/propfirm_positions.example.json"
+    },
+    {
+      "name": "signal_generation",
+      "status": "OK",
+      "detail": "command completed"
+    },
+    {
+      "name": "delta_csv",
+      "status": "OK",
+      "detail": "39 rows, $5,990,925 gross delta, max lots 3.56"
+    },
+    {
+      "name": "mt5_dry_run",
+      "status": "OK",
+      "detail": "command completed"
+    },
+    {
+      "name": "live_tracker",
+      "status": "OK",
+      "detail": "command completed"
+    }
+  ],
+  "delta_summary": {
+    "rows": 39,
+    "accounts": [
+      "A1",
+      "A2",
+      "A3",
+      "A4",
+      "A5",
+      "A6",
+      "A7",
+      "A8"
+    ],
+    "symbols": [
+      "AUDUSD",
+      "EURUSD",
+      "GBPUSD",
+      "NZDUSD",
+      "USDCAD",
+      "USDJPY"
+    ],
+    "total_delta_notional_usd": 5990925.36,
+    "max_estimated_lots": 3.5619,
+    "path": "/Users/oscarmischler/sabo-quant/sabo_lit/sandbox/live/prop_delta_orders_latest.csv"
+  },
+  "report": "/Users/oscarmischler/sabo-quant/sabo_lit/sandbox/live/daily_ops_report_2025-12-30.md"
+}

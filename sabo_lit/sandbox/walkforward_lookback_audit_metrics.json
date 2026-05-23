@@ -1,0 +1,94 @@
+{
+  "walkforward": {
+    "2022": {
+      "sharpe": -0.6947382713228376,
+      "ann_ret": -0.043064742925416295,
+      "n": 365,
+      "best_lb_picks": {
+        "EURUSD": 10,
+        "GBPUSD": 10,
+        "USDJPY": 10,
+        "AUDUSD": 10,
+        "NZDUSD": 10,
+        "USDCAD": 10
+      }
+    },
+    "2023": {
+      "sharpe": 0.8749656484283383,
+      "ann_ret": 0.03773682435648337,
+      "n": 365,
+      "best_lb_picks": {
+        "EURUSD": 10,
+        "GBPUSD": 10,
+        "USDJPY": 3,
+        "AUDUSD": 5,
+        "NZDUSD": 5,
+        "USDCAD": 3
+      }
+    },
+    "2024": {
+      "sharpe": -0.5877823113437536,
+      "ann_ret": -0.02275445018440119,
+      "n": 366,
+      "best_lb_picks": {
+        "EURUSD": 10,
+        "GBPUSD": 10,
+        "USDJPY": 5,
+        "AUDUSD": 5,
+        "NZDUSD": 5,
+        "USDCAD": 3
+      }
+    },
+    "2025": {
+      "sharpe": 0.8898851761023828,
+      "ann_ret": 0.038492472262694796,
+      "n": 365,
+      "best_lb_picks": {
+        "EURUSD": 5,
+        "GBPUSD": 10,
+        "USDJPY": 5,
+        "AUDUSD": 3,
+        "NZDUSD": 5,
+        "USDCAD": 21
+      }
+    }
+  },
+  "frozen": {
+    "2022": {
+      "sharpe": -1.1291527124153105,
+      "ann_ret": -0.060397574765711934,
+      "n": 365
+    },
+    "2023": {
+      "sharpe": 1.1267759837081526,
+      "ann_ret": 0.041092566800325185,
+      "n": 365
+    },
+    "2024": {
+      "sharpe": 0.522075437823562,
+      "ann_ret": 0.018258667551586005,
+      "n": 366
+    },
+    "2025": {
+      "sharpe": 2.3711436549064278,
+      "ann_ret": 0.09704290978753163,
+      "n": 365
+    }
+  },
+  "avg_delta": -0.6021280305396755,
+  "verdict": "FROZEN WINS : frozen is more stable, do NOT refit",
+  "lookbacks_tested": [
+    3,
+    5,
+    10,
+    21
+  ],
+  "frozen_best_lb": {
+    "EURUSD": 5,
+    "GBPUSD": 3,
+    "USDJPY": 10,
+    "AUDUSD": 21,
+    "NZDUSD": 10,
+    "USDCAD": 3
+  }
+}

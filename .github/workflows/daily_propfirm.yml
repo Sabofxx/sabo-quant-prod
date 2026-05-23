@@ -1,0 +1,61 @@
+name: Daily Prop Firm Signal
+
+on:
+  schedule:
+    # 22:05 UTC every day (after FX session close at 22:00 UTC)
+    - cron: '5 22 * * *'
+  workflow_dispatch:        # manual trigger button
+
+permissions:
+  contents: write           # needed to commit state files back
+
+jobs:
+  run-strategy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pandas plotly quantstats requests numpy
+
+      - name: Run daily automation
+        env:
+          CAPITAL_API_KEY: ${{ secrets.CAPITAL_API_KEY }}
+          CAPITAL_IDENTIFIER: ${{ secrets.CAPITAL_IDENTIFIER }}
+          CAPITAL_API_PASSWORD: ${{ secrets.CAPITAL_API_PASSWORD }}
+          CAPITAL_ENVIRONMENT: ${{ secrets.CAPITAL_ENVIRONMENT || 'demo' }}
+        run: |
+          cd sabo_lit/sandbox
+          python automated_runner.py
+
+      - name: Commit state changes
+        run: |
+          git config user.email "automation@github.com"
+          git config user.name "GitHub Actions Bot"
+          git add sabo_lit/sandbox/live/ || true
+          git diff --staged --quiet || git commit -m "Daily run $(date -u +%Y-%m-%d)"
+          git push || echo "Nothing to push"
+
+      - name: Notify on failure
+        if: failure()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          if [ -n "$DISCORD_WEBHOOK" ]; then
+            curl -X POST "$DISCORD_WEBHOOK" \
+              -H "Content-Type: application/json" \
+              -d '{"content": "❌ Daily prop firm signal FAILED. Check GitHub Actions logs."}'
+          fi

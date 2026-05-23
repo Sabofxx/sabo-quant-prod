@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# Virtualenv
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Secrets / env
+.env
+.env.*
+*.key
+*.pem
+credentials.json
+secrets.json
+
+# Large data files (regenerate from sources, never commit)
+sabo_lit/sandbox/data/
+sabo_lit/sandbox/reports/
+*.csv
+*.parquet
+*.feather
+
+# Backtest outputs / logs (huge, regenerable)
+*.html
+*.png
+*.jpg
+
+# But KEEP live state files (small, needed across runs)
+!sabo_lit/sandbox/live/
+!sabo_lit/sandbox/live/**
+
+# Old / archived
+old/
+archive/
+backup/
+*.bak

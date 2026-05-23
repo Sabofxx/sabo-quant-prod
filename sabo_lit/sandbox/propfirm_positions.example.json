@@ -1,0 +1,13 @@
+{
+  "as_of": "2025-12-30",
+  "positions": [
+    {"account_id": "A1", "instrument": "EURUSD", "notional_usd": 50000, "side": "LONG"},
+    {"account_id": "A1", "instrument": "USTEC", "notional_usd": 100000, "side": "LONG"},
+    {"account_id": "A2", "instrument": "EURUSD", "notional_usd": 150000, "side": "LONG"},
+    {"account_id": "A2", "instrument": "GBPUSD", "notional_usd": 160000, "side": "LONG"},
+    {"account_id": "A3", "instrument": "EURUSD", "notional_usd": 600000, "side": "LONG"},
+    {"account_id": "A4", "instrument": "GBPUSD", "notional_usd": 175000, "side": "LONG"},
+    {"account_id": "A4", "instrument": "NZDUSD", "notional_usd": -175000, "side": "SHORT"},
+    {"account_id": "A5", "instrument": "AUDUSD", "notional_usd": 200000, "side": "LONG"}
+  ]
+}

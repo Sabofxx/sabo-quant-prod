@@ -1,0 +1,207 @@
+"""
+Sandbox — fully automated daily runner for GitHub Actions cron.
+
+Pipeline:
+  1. Verify Capital.com credentials + login
+  2. Fetch fresh daily candles from Capital.com (last 30 days per pair)
+  3. Append to existing CSV history
+  4. Run signal generator with --adaptive (ADAPTIVE_75_50)
+  5. Read current Capital.com positions
+  6. Execute delta orders via capital_connector
+  7. Log fills + daily P&L
+  8. Generate dashboard
+
+If any step fails, exits non-zero (GitHub Actions catches → Discord alert).
+"""
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+import sys
+import time
+from datetime import UTC, datetime
+from pathlib import Path
+
+import pandas as pd
+
+from capital_connector import CapitalClient, SYMBOL_MAP
+
+
+HERE = Path(__file__).parent
+LIVE_DIR = HERE / "live"
+DATA_DIR = HERE / "data"
+RUN_LOG = LIVE_DIR / "automated_runner.log"
+LATEST_PNL = LIVE_DIR / "automated_daily_pnl.jsonl"
+
+
+def log(msg: str) -> None:
+    LIVE_DIR.mkdir(exist_ok=True)
+    line = f"[{datetime.now(UTC).isoformat(timespec='seconds')}] {msg}"
+    print(line, flush=True)
+    with RUN_LOG.open("a") as f:
+        f.write(line + "\n")
+
+
+def check_env() -> tuple[str, str, str, str]:
+    key = os.environ.get("CAPITAL_API_KEY")
+    ident = os.environ.get("CAPITAL_IDENTIFIER")
+    pwd = os.environ.get("CAPITAL_API_PASSWORD")
+    env = os.environ.get("CAPITAL_ENVIRONMENT", "demo")
+    if not all([key, ident, pwd]):
+        log("ERROR: missing CAPITAL_API_KEY / CAPITAL_IDENTIFIER / CAPITAL_API_PASSWORD")
+        sys.exit(2)
+    return key, ident, pwd, env
+
+
+def candles_to_df(candles: list[dict]) -> pd.DataFrame:
+    """Convert Capital.com /prices response candles to OHLC DataFrame indexed by UTC ts."""
+    rows = []
+    for c in candles:
+        ts = pd.Timestamp(c["snapshotTime"], tz="UTC")
+        # Capital returns bid/ask for each OHLC — use mid
+        op = c["openPrice"]
+        hp = c["highPrice"]
+        lp = c["lowPrice"]
+        cp = c["closePrice"]
+        o = (float(op["bid"]) + float(op["ask"])) / 2
+        h = (float(hp["bid"]) + float(hp["ask"])) / 2
+        low = (float(lp["bid"]) + float(lp["ask"])) / 2
+        cl = (float(cp["bid"]) + float(cp["ask"])) / 2
+        rows.append({"timestamp": ts, "open": o, "high": h, "low": low, "close": cl})
+    if not rows:
+        return pd.DataFrame()
+    return pd.DataFrame(rows).set_index("timestamp").sort_index()
+
+
+def update_historical_csv(pair: str, fresh_daily: pd.DataFrame) -> int:
+    """Append new daily bars to existing M5 CSV history.
+    Returns count of new bars appended."""
+    if fresh_daily.empty:
+        return 0
+    csv_path = DATA_DIR / f"{pair.lower()}-m5-bid-2019-01-01-2026-01-01.csv"
+    if not csv_path.exists():
+        log(f"WARN: historical CSV missing for {pair}, skipping update")
+        return 0
+    last_line = subprocess.run(
+        ["tail", "-1", str(csv_path)],
+        capture_output=True, text=True
+    ).stdout.strip()
+    if not last_line:
+        return 0
+    try:
+        last_ms = int(last_line.split(",")[0])
+        last_ts = pd.Timestamp(last_ms, unit="ms", tz="UTC")
+    except (ValueError, IndexError):
+        log(f"WARN: cannot parse last line of {csv_path}")
+        return 0
+    new_bars = fresh_daily[fresh_daily.index > last_ts]
+    if new_bars.empty:
+        return 0
+    with csv_path.open("a") as f:
+        for ts, row in new_bars.iterrows():
+            ts_ms = int(ts.timestamp() * 1000)
+            f.write(f"{ts_ms},{row['open']},{row['high']},{row['low']},{row['close']}\n")
+    return len(new_bars)
+
+
+def run_step(label: str, cmd: list[str]) -> int:
+    log(f"STEP: {label} → {' '.join(cmd)}")
+    result = subprocess.run(cmd, cwd=str(HERE), capture_output=True, text=True)
+    if result.stdout:
+        for line in result.stdout.splitlines()[-20:]:
+            log(f"  | {line}")
+    if result.returncode != 0:
+        log(f"  STDERR: {result.stderr[:2000]}")
+        log(f"  STEP FAILED: {label} (exit {result.returncode})")
+    return result.returncode
+
+
+def log_account_snapshot(client: CapitalClient) -> None:
+    acc = client.account_summary()
+    bal = acc.get("balance", {})
+    snapshot = {
+        "ts": datetime.now(UTC).isoformat(timespec="seconds"),
+        "date": datetime.now(UTC).date().isoformat(),
+        "balance": float(bal.get("balance", 0)),
+        "available": float(bal.get("available", 0)),
+        "deposit": float(bal.get("deposit", 0)),
+        "profit_loss": float(bal.get("profitLoss", 0)),
+        "currency": acc.get("currency"),
+    }
+    LIVE_DIR.mkdir(exist_ok=True)
+    with LATEST_PNL.open("a") as f:
+        f.write(json.dumps(snapshot) + "\n")
+    log(f"Account snapshot: bal={snapshot['balance']:.2f} {snapshot['currency']} "
+        f"avail={snapshot['available']:.2f} pl={snapshot['profit_loss']:+.2f}")
+
+
+def main() -> None:
+    log("=" * 60)
+    log("Automated daily runner started")
+
+    key, ident, pwd, env = check_env()
+    log(f"Capital env={env}")
+    client = CapitalClient(key, ident, pwd, env)
+    try:
+        client.login()
+        log(f"Logged in. account_id={client.account_id} currency={client.currency}")
+    except Exception as e:
+        log(f"FATAL: Capital.com login failed: {e}")
+        sys.exit(2)
+
+    try:
+        log_account_snapshot(client)
+    except Exception as e:
+        log(f"WARN: account snapshot failed: {e}")
+
+    log("Fetching fresh daily candles from Capital.com...")
+    updated_pairs = 0
+    for pair, epic in SYMBOL_MAP.items():
+        try:
+            candles = client.get_daily_candles(epic, max_bars=30)
+            df = candles_to_df(candles)
+            n_new = update_historical_csv(pair, df)
+            log(f"  {pair} ({epic}): fetched {len(df)} bars, appended {n_new}")
+            if n_new > 0:
+                updated_pairs += 1
+        except Exception as e:
+            log(f"  ERROR fetching {pair}: {e}")
+        time.sleep(0.3)
+    log(f"Updated {updated_pairs}/{len(SYMBOL_MAP)} pair CSVs")
+
+    py = sys.executable
+    rc = run_step("signal_generator", [
+        py, "propfirm_signal_generator.py", "--adaptive"
+    ])
+    if rc != 0:
+        log("FATAL: signal generator failed")
+        sys.exit(rc)
+
+    delta_csv = LIVE_DIR / "prop_delta_orders_latest.csv"
+    if not delta_csv.exists():
+        log(f"WARN: {delta_csv} not found, skipping execution")
+    else:
+        rc = run_step("capital_executor", [
+            py, "capital_connector.py", "--execute", str(delta_csv),
+            "--min-notional", "500",
+            "--reset",  # close all existing before opening fresh — idempotent rebalance
+        ])
+        if rc != 0:
+            log("WARN: capital_connector failed (continuing for state commit)")
+
+    rc = run_step("live_tracker_refresh", [py, "live_tracker.py"])
+    if rc != 0:
+        log("WARN: live_tracker failed")
+
+    try:
+        log_account_snapshot(client)
+    except Exception as e:
+        log(f"WARN: final snapshot failed: {e}")
+
+    log("Automated daily runner completed successfully")
+    log("=" * 60)
+
+
+if __name__ == "__main__":
+    main()

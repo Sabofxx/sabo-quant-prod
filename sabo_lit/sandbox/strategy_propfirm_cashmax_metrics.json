@@ -1,0 +1,1103 @@
+{
+  "spec_metrics": {
+    "FX_MR_STACK": {
+      "n": 731,
+      "sharpe": 1.5110430198512064,
+      "ann_ret": 0.05759690067897336,
+      "ann_vol": 0.03811731361867181,
+      "max_dd": -0.03842155320729141,
+      "wr": 0.4582763337893297,
+      "worst_day": -0.010545353124279566,
+      "worst_intraday": -0.011428590229444998
+    },
+    "EURUSD_MR5": {
+      "n": 731,
+      "sharpe": 1.1585654153016198,
+      "ann_ret": 0.06867071669363226,
+      "ann_vol": 0.05927219627538648,
+      "max_dd": -0.05034879514191232,
+      "wr": 0.4322845417236662,
+      "worst_day": -0.016282583321195587,
+      "worst_intraday": -0.020542731633055533
+    },
+    "NO_EUR_STACK": {
+      "n": 731,
+      "sharpe": 1.3908589507424731,
+      "ann_ret": 0.05538213747604157,
+      "ann_vol": 0.03981865842433361,
+      "max_dd": -0.04291726856902558,
+      "wr": 0.4692202462380301,
+      "worst_day": -0.011305017487890433,
+      "worst_intraday": -0.013372323488938642
+    },
+    "COMDOLL_STACK": {
+      "n": 731,
+      "sharpe": 1.26886307800269,
+      "ann_ret": 0.06275720738627151,
+      "ann_vol": 0.04945940068258372,
+      "max_dd": -0.044226605340487966,
+      "wr": 0.47606019151846785,
+      "worst_day": -0.018797236444238436,
+      "worst_intraday": -0.01921719351808271
+    },
+    "FAST_STACK": {
+      "n": 731,
+      "sharpe": 0.8911886149748808,
+      "ann_ret": 0.03650720136692308,
+      "ann_vol": 0.040964618211546705,
+      "max_dd": -0.04698080276403887,
+      "wr": 0.44459644322845415,
+      "worst_day": -0.010688348708541628,
+      "worst_intraday": -0.015087979467018045
+    },
+    "SLOW_STACK": {
+      "n": 731,
+      "sharpe": 0.5494657542817416,
+      "ann_ret": 0.023459744742855494,
+      "ann_vol": 0.042695553926781,
+      "max_dd": -0.05187166802517014,
+      "wr": 0.4487004103967168,
+      "worst_day": -0.010545353124279566,
+      "worst_intraday": -0.013422865420808098
+    },
+    "MR5_ALL": {
+      "n": 731,
+      "sharpe": 0.4031505585334114,
+      "ann_ret": 0.017403370225583678,
+      "ann_vol": 0.04316841402600056,
+      "max_dd": -0.057717473356643345,
+      "wr": 0.43365253077975374,
+      "worst_day": -0.010545353124279566,
+      "worst_intraday": -0.014062713862587728
+    },
+    "ANTIPODEAN_LOW_VOL": {
+      "n": 731,
+      "sharpe": 1.383291573877246,
+      "ann_ret": 0.061732087779051294,
+      "ann_vol": 0.04462695280216421,
+      "max_dd": -0.045170455514244784,
+      "wr": 0.2777017783857729,
+      "worst_day": -0.01405889413992456,
+      "worst_intraday": -0.014472667911460735
+    },
+    "COMDOLL_LOW_VOL": {
+      "n": 731,
+      "sharpe": 1.1646893948918768,
+      "ann_ret": 0.03777437994877632,
+      "ann_vol": 0.032433007559309904,
+      "max_dd": -0.03918852496109644,
+      "wr": 0.25718194254445964,
+      "worst_day": -0.011749400443080038,
+      "worst_intraday": -0.012199221901254257
+    },
+    "NO_EUR_LOW_VOL": {
+      "n": 731,
+      "sharpe": 1.4027175019544762,
+      "ann_ret": 0.036822036779680954,
+      "ann_vol": 0.02625050070907006,
+      "max_dd": -0.04111930780818457,
+      "wr": 0.24897400820793433,
+      "worst_day": -0.011305017487890433,
+      "worst_intraday": -0.012206571679436196
+    }
+  },
+  "levered_metrics": {
+    "FX_MR_STACK_8": {
+      "n": 731,
+      "sharpe": 1.4407404611872687,
+      "ann_ret": 0.12165267761400565,
+      "ann_vol": 0.08443760752978058,
+      "max_dd": -0.1261364031525625,
+      "wr": 0.4582763337893297,
+      "worst_day": -0.02896223438737352,
+      "worst_intraday": -0.034372283721136286
+    },
+    "FX_MR_STACK_10": {
+      "n": 731,
+      "sharpe": 1.4407404611872687,
+      "ann_ret": 0.15206584701750703,
+      "ann_vol": 0.10554700941222571,
+      "max_dd": -0.15767050394070317,
+      "wr": 0.4582763337893297,
+      "worst_day": -0.0362027929842169,
+      "worst_intraday": -0.04296535465142036
+    },
+    "FX_MR_STACK_12": {
+      "n": 731,
+      "sharpe": 1.4407404611872687,
+      "ann_ret": 0.18247901642100844,
+      "ann_vol": 0.12665641129467084,
+      "max_dd": -0.18920460472884382,
+      "wr": 0.4582763337893297,
+      "worst_day": -0.043443351581060274,
+      "worst_intraday": -0.051558425581704426
+    },
+    "EURUSD_MR5_8": {
+      "n": 731,
+      "sharpe": 1.1189173383211257,
+      "ann_ret": 0.09105791064170513,
+      "ann_vol": 0.08138037326182875,
+      "max_dd": -0.05887344471662645,
+      "wr": 0.4322845417236662,
+      "worst_day": -0.018777097351197324,
+      "worst_intraday": -0.021477734560678533
+    },
+    "EURUSD_MR5_10": {
+      "n": 731,
+      "sharpe": 1.1189173383211255,
+      "ann_ret": 0.11382238830213139,
+      "ann_vol": 0.10172546657728594,
+      "max_dd": -0.07359180589578312,
+      "wr": 0.4322845417236662,
+      "worst_day": -0.023471371688996656,
+      "worst_intraday": -0.026847168200848166
+    },
+    "EURUSD_MR5_12": {
+      "n": 731,
+      "sharpe": 1.1189173383211255,
+      "ann_ret": 0.13658686596255765,
+      "ann_vol": 0.12207055989274311,
+      "max_dd": -0.08831016707493966,
+      "wr": 0.4322845417236662,
+      "worst_day": -0.028165646026795985,
+      "worst_intraday": -0.0322166018410178
+    },
+    "NO_EUR_STACK_8": {
+      "n": 731,
+      "sharpe": 1.356949746215782,
+      "ann_ret": 0.1149780739982699,
+      "ann_vol": 0.08473274291764825,
+      "max_dd": -0.13801247620583135,
+      "wr": 0.4692202462380301,
+      "worst_day": -0.028960804581615193,
+      "worst_intraday": -0.034472973060590724
+    },
+    "NO_EUR_STACK_10": {
+      "n": 731,
+      "sharpe": 1.3569497462157816,
+      "ann_ret": 0.1437225924978373,
+      "ann_vol": 0.10591592864706031,
+      "max_dd": -0.17251559525728916,
+      "wr": 0.4692202462380301,
+      "worst_day": -0.036201005727018995,
+      "worst_intraday": -0.0430912163257384
+    },
+    "NO_EUR_STACK_12": {
+      "n": 731,
+      "sharpe": 1.3569497462157818,
+      "ann_ret": 0.1724671109974048,
+      "ann_vol": 0.12709911437647237,
+      "max_dd": -0.207018714308747,
+      "wr": 0.4692202462380301,
+      "worst_day": -0.04344120687242278,
+      "worst_intraday": -0.051709459590886075
+    },
+    "COMDOLL_STACK_8": {
+      "n": 731,
+      "sharpe": 1.2503879701800324,
+      "ann_ret": 0.10935890584170999,
+      "ann_vol": 0.08745997918227282,
+      "max_dd": -0.09863108084646043,
+      "wr": 0.47606019151846785,
+      "worst_day": -0.030013241470442525,
+      "worst_intraday": -0.030683780094665235
+    },
+    "COMDOLL_STACK_10": {
+      "n": 731,
+      "sharpe": 1.2503879701800322,
+      "ann_ret": 0.13669863230213747,
+      "ann_vol": 0.10932497397784104,
+      "max_dd": -0.12328885105807551,
+      "wr": 0.47606019151846785,
+      "worst_day": -0.03751655183805316,
+      "worst_intraday": -0.038354725118331545
+    },
+    "COMDOLL_STACK_12": {
+      "n": 731,
+      "sharpe": 1.2503879701800322,
+      "ann_ret": 0.16403835876256498,
+      "ann_vol": 0.13118996877340924,
+      "max_dd": -0.14794662126969066,
+      "wr": 0.47606019151846785,
+      "worst_day": -0.04501986220566378,
+      "worst_intraday": -0.04602567014199785
+    },
+    "FAST_STACK_8": {
+      "n": 731,
+      "sharpe": 0.8686988131730656,
+      "ann_ret": 0.0725560639338664,
+      "ann_vol": 0.08352269259911087,
+      "max_dd": -0.12066620754437543,
+      "wr": 0.44459644322845415,
+      "worst_day": -0.020492912264471173,
+      "worst_intraday": -0.02281264961600465
+    },
+    "FAST_STACK_10": {
+      "n": 731,
+      "sharpe": 0.8686988131730655,
+      "ann_ret": 0.090695079917333,
+      "ann_vol": 0.1044033657488886,
+      "max_dd": -0.15083275943046937,
+      "wr": 0.44459644322845415,
+      "worst_day": -0.025616140330588965,
+      "worst_intraday": -0.028515812020005814
+    },
+    "FAST_STACK_12": {
+      "n": 731,
+      "sharpe": 0.8686988131730659,
+      "ann_ret": 0.10883409590079962,
+      "ann_vol": 0.1252840388986663,
+      "max_dd": -0.18099931131656333,
+      "wr": 0.44459644322845415,
+      "worst_day": -0.030739368396706757,
+      "worst_intraday": -0.034218974424006975
+    },
+    "SLOW_STACK_8": {
+      "n": 731,
+      "sharpe": 0.3186109777081222,
+      "ann_ret": 0.026923973908899675,
+      "ann_vol": 0.08450422550589134,
+      "max_dd": -0.13028993627880353,
+      "wr": 0.4487004103967168,
+      "worst_day": -0.023115804979872652,
+      "worst_intraday": -0.04303176621412694
+    },
+    "SLOW_STACK_10": {
+      "n": 731,
+      "sharpe": 0.318610977708122,
+      "ann_ret": 0.03365496738612457,
+      "ann_vol": 0.10563028188236417,
+      "max_dd": -0.16286242034850432,
+      "wr": 0.4487004103967168,
+      "worst_day": -0.028894756224840817,
+      "worst_intraday": -0.05378970776765868
+    },
+    "SLOW_STACK_12": {
+      "n": 731,
+      "sharpe": 0.3186109777081222,
+      "ann_ret": 0.0403859608633495,
+      "ann_vol": 0.126756338258837,
+      "max_dd": -0.19543490441820513,
+      "wr": 0.4487004103967168,
+      "worst_day": -0.034673707469808975,
+      "worst_intraday": -0.0645476493211904
+    },
+    "MR5_ALL_8": {
+      "n": 731,
+      "sharpe": 0.10719244091562527,
+      "ann_ret": 0.00900501377483113,
+      "ann_vol": 0.08400791788965116,
+      "max_dd": -0.14890695691916994,
+      "wr": 0.43365253077975374,
+      "worst_day": -0.029434711381383795,
+      "worst_intraday": -0.0319000464882771
+    },
+    "MR5_ALL_10": {
+      "n": 731,
+      "sharpe": 0.10719244091562515,
+      "ann_ret": 0.011256267218538897,
+      "ann_vol": 0.10500989736206393,
+      "max_dd": -0.18613369614896247,
+      "wr": 0.43365253077975374,
+      "worst_day": -0.03679338922672975,
+      "worst_intraday": -0.039875058110346376
+    },
+    "MR5_ALL_12": {
+      "n": 731,
+      "sharpe": 0.10719244091562503,
+      "ann_ret": 0.013507520662246662,
+      "ann_vol": 0.1260118768344767,
+      "max_dd": -0.22336043537875497,
+      "wr": 0.43365253077975374,
+      "worst_day": -0.044152067072075696,
+      "worst_intraday": -0.04785006973241565
+    },
+    "ANTIPODEAN_LOW_VOL_8": {
+      "n": 731,
+      "sharpe": 0.8431102413588433,
+      "ann_ret": 0.11047672445148415,
+      "ann_vol": 0.13103473191528134,
+      "max_dd": -0.15573690041139837,
+      "wr": 0.2777017783857729,
+      "worst_day": -0.10486692961663713,
+      "worst_intraday": -0.11520451607159754
+    },
+    "ANTIPODEAN_LOW_VOL_10": {
+      "n": 731,
+      "sharpe": 0.9977173344780205,
+      "ann_ret": 0.14884416270415474,
+      "ann_vol": 0.1491847014786268,
+      "max_dd": -0.17856639211427655,
+      "wr": 0.2777017783857729,
+      "worst_day": -0.10486692961663713,
+      "worst_intraday": -0.11520451607159754
+    },
+    "ANTIPODEAN_LOW_VOL_12": {
+      "n": 731,
+      "sharpe": 1.1074636631521795,
+      "ann_ret": 0.18606421515412924,
+      "ann_vol": 0.16800931835951508,
+      "max_dd": -0.2013958838171547,
+      "wr": 0.2777017783857729,
+      "worst_day": -0.10486692961663713,
+      "worst_intraday": -0.11520451607159754
+    },
+    "COMDOLL_LOW_VOL_8": {
+      "n": 731,
+      "sharpe": 0.7803743267025298,
+      "ann_ret": 0.09796232584610386,
+      "ann_vol": 0.12553248164895875,
+      "max_dd": -0.17177480387274477,
+      "wr": 0.25718194254445964,
+      "worst_day": -0.07202036052414404,
+      "worst_intraday": -0.08634106626701388
+    },
+    "COMDOLL_LOW_VOL_10": {
+      "n": 731,
+      "sharpe": 0.9353280167099274,
+      "ann_ret": 0.1380683500187707,
+      "ann_vol": 0.14761489825188223,
+      "max_dd": -0.1976022295125226,
+      "wr": 0.25718194254445964,
+      "worst_day": -0.07202036052414404,
+      "worst_intraday": -0.08634106626701388
+    },
+    "COMDOLL_LOW_VOL_12": {
+      "n": 731,
+      "sharpe": 1.0296352190696092,
+      "ann_ret": 0.17499373744420157,
+      "ann_vol": 0.16995702381113972,
+      "max_dd": -0.22342965515230023,
+      "wr": 0.25718194254445964,
+      "worst_day": -0.07202036052414404,
+      "worst_intraday": -0.08634106626701388
+    },
+    "NO_EUR_LOW_VOL_8": {
+      "n": 731,
+      "sharpe": 1.4047359661974435,
+      "ann_ret": 0.18360458171465235,
+      "ann_vol": 0.13070398005944253,
+      "max_dd": -0.14105045578829656,
+      "wr": 0.24897400820793433,
+      "worst_day": -0.04547674160721753,
+      "worst_intraday": -0.07940573834709319
+    },
+    "NO_EUR_LOW_VOL_10": {
+      "n": 731,
+      "sharpe": 1.4158564829264564,
+      "ann_ret": 0.21492113748912262,
+      "ann_vol": 0.15179584942458202,
+      "max_dd": -0.17631306973537075,
+      "wr": 0.24897400820793433,
+      "worst_day": -0.04547674160721753,
+      "worst_intraday": -0.07940573834709319
+    },
+    "NO_EUR_LOW_VOL_12": {
+      "n": 731,
+      "sharpe": 1.4014535812621889,
+      "ann_ret": 0.24230725601145434,
+      "ann_vol": 0.17289709716480625,
+      "max_dd": -0.21157568368244478,
+      "wr": 0.24897400820793433,
+      "worst_day": -0.04547674160721753,
+      "worst_intraday": -0.07940573834709319
+    }
+  },
+  "single_low_target_results": {
+    "FX_MR_STACK_8": {
+      "p_funded": 0.8886,
+      "p_dead": 0.1436,
+      "mean_payout": 23335.119409648763,
+      "median_payout": 22329.453821795116,
+      "p95_payout": 52973.70910774714,
+      "mean_net": 22135.119409648763,
+      "median_days_to_funded": 181.0
+    },
+    "FX_MR_STACK_10": {
+      "p_funded": 0.8386,
+      "p_dead": 0.335,
+      "mean_payout": 28641.467234698703,
+      "median_payout": 27331.876041403335,
+      "p95_payout": 68863.28044073732,
+      "mean_net": 27441.467234698703,
+      "median_days_to_funded": 147.0
+    },
+    "FX_MR_STACK_12": {
+      "p_funded": 0.645,
+      "p_dead": 0.756,
+      "mean_payout": 21697.29632536118,
+      "median_payout": 10082.671880210804,
+      "p95_payout": 74652.09256223407,
+      "mean_net": 20497.29632536118,
+      "median_days_to_funded": 112.0
+    },
+    "EURUSD_MR5_8": {
+      "p_funded": 0.8044,
+      "p_dead": 0.1632,
+      "mean_payout": 16023.727721016312,
+      "median_payout": 13711.713842498457,
+      "p95_payout": 43035.951512709085,
+      "mean_net": 14823.727721016312,
+      "median_days_to_funded": 206.0
+    },
+    "EURUSD_MR5_10": {
+      "p_funded": 0.7904,
+      "p_dead": 0.3392,
+      "mean_payout": 20996.454430251917,
+      "median_payout": 18030.999275090184,
+      "p95_payout": 56638.175769755355,
+      "mean_net": 19796.454430251917,
+      "median_days_to_funded": 169.0
+    },
+    "EURUSD_MR5_12": {
+      "p_funded": 0.7326,
+      "p_dead": 0.5386,
+      "mean_payout": 23850.51645113917,
+      "median_payout": 18023.578298629804,
+      "p95_payout": 69982.04434163029,
+      "mean_net": 22650.51645113917,
+      "median_days_to_funded": 134.0
+    },
+    "NO_EUR_STACK_8": {
+      "p_funded": 0.8654,
+      "p_dead": 0.1752,
+      "mean_payout": 21788.449297178904,
+      "median_payout": 20239.223590857837,
+      "p95_payout": 52078.58709209692,
+      "mean_net": 20588.449297178904,
+      "median_days_to_funded": 181.0
+    },
+    "NO_EUR_STACK_10": {
+      "p_funded": 0.8244,
+      "p_dead": 0.3748,
+      "mean_payout": 27080.027054640752,
+      "median_payout": 25648.51982606602,
+      "p95_payout": 67069.25886737331,
+      "mean_net": 25880.027054640752,
+      "median_days_to_funded": 148.0
+    },
+    "NO_EUR_STACK_12": {
+      "p_funded": 0.6072,
+      "p_dead": 0.7948,
+      "mean_payout": 18983.414480597614,
+      "median_payout": 5488.290247306165,
+      "p95_payout": 69498.71588184548,
+      "mean_net": 17783.414480597614,
+      "median_days_to_funded": 114.0
+    },
+    "COMDOLL_STACK_8": {
+      "p_funded": 0.8292,
+      "p_dead": 0.1922,
+      "mean_payout": 19831.81471226403,
+      "median_payout": 17588.004922196797,
+      "p95_payout": 50346.80369634272,
+      "mean_net": 18631.81471226403,
+      "median_days_to_funded": 187.0
+    },
+    "COMDOLL_STACK_10": {
+      "p_funded": 0.7892,
+      "p_dead": 0.3986,
+      "mean_payout": 24673.53260659562,
+      "median_payout": 21693.256555943917,
+      "p95_payout": 66237.26971273363,
+      "mean_net": 23473.53260659562,
+      "median_days_to_funded": 152.0
+    },
+    "COMDOLL_STACK_12": {
+      "p_funded": 0.7146,
+      "p_dead": 0.6098,
+      "mean_payout": 26444.242503472407,
+      "median_payout": 18890.188447880133,
+      "p95_payout": 80721.08010022945,
+      "mean_net": 25244.242503472407,
+      "median_days_to_funded": 125.0
+    },
+    "FAST_STACK_8": {
+      "p_funded": 0.7014,
+      "p_dead": 0.2636,
+      "mean_payout": 12129.890767510298,
+      "median_payout": 8297.580211798633,
+      "p95_payout": 38298.906065494826,
+      "mean_net": 10929.890767510298,
+      "median_days_to_funded": 215.0
+    },
+    "FAST_STACK_10": {
+      "p_funded": 0.6736,
+      "p_dead": 0.4726,
+      "mean_payout": 15589.272873508913,
+      "median_payout": 9911.029058607242,
+      "p95_payout": 50636.68834654964,
+      "mean_net": 14389.272873508913,
+      "median_days_to_funded": 175.0
+    },
+    "FAST_STACK_12": {
+      "p_funded": 0.6004,
+      "p_dead": 0.6876,
+      "mean_payout": 16469.40164297492,
+      "median_payout": 5590.289625795552,
+      "p95_payout": 59360.94702715994,
+      "mean_net": 15269.40164297492,
+      "median_days_to_funded": 140.0
+    },
+    "SLOW_STACK_8": {
+      "p_funded": 0.4582,
+      "p_dead": 0.5172,
+      "mean_payout": 5347.025457288604,
+      "median_payout": 0.0,
+      "p95_payout": 25757.24037097166,
+      "mean_net": 4147.025457288604,
+      "median_days_to_funded": 226.0
+    },
+    "SLOW_STACK_10": {
+      "p_funded": 0.3634,
+      "p_dead": 0.865,
+      "mean_payout": 4667.935047373594,
+      "median_payout": 0.0,
+      "p95_payout": 27342.63386526033,
+      "mean_net": 3467.935047373594,
+      "median_days_to_funded": 152.0
+    },
+    "SLOW_STACK_12": {
+      "p_funded": 0.3582,
+      "p_dead": 0.9452,
+      "mean_payout": 5006.797191334967,
+      "median_payout": 0.0,
+      "p95_payout": 30215.601190303358,
+      "mean_net": 3806.7971913349666,
+      "median_days_to_funded": 119.0
+    },
+    "MR5_ALL_8": {
+      "p_funded": 0.3352,
+      "p_dead": 0.6138,
+      "mean_payout": 3331.947229117315,
+      "median_payout": 0.0,
+      "p95_payout": 19362.443725164692,
+      "mean_net": 2131.947229117315,
+      "median_days_to_funded": 230.0
+    },
+    "MR5_ALL_10": {
+      "p_funded": 0.3524,
+      "p_dead": 0.795,
+      "mean_payout": 4478.910323630786,
+      "median_payout": 0.0,
+      "p95_payout": 25933.134942949742,
+      "mean_net": 3278.9103236307856,
+      "median_days_to_funded": 171.0
+    },
+    "MR5_ALL_12": {
+      "p_funded": 0.3258,
+      "p_dead": 0.9074,
+      "mean_payout": 4790.04121511342,
+      "median_payout": 0.0,
+      "p95_payout": 29574.754221020237,
+      "mean_net": 3590.0412151134196,
+      "median_days_to_funded": 138.0
+    },
+    "ANTIPODEAN_LOW_VOL_8": {
+      "p_funded": 0.3882,
+      "p_dead": 0.95,
+      "mean_payout": 7007.2619289337545,
+      "median_payout": 0.0,
+      "p95_payout": 40030.911131937326,
+      "mean_net": 5807.2619289337545,
+      "median_days_to_funded": 116.0
+    },
+    "ANTIPODEAN_LOW_VOL_10": {
+      "p_funded": 0.4148,
+      "p_dead": 0.9612,
+      "mean_payout": 9140.22273624738,
+      "median_payout": 0.0,
+      "p95_payout": 50917.839196154884,
+      "mean_net": 7940.22273624738,
+      "median_days_to_funded": 99.5
+    },
+    "ANTIPODEAN_LOW_VOL_12": {
+      "p_funded": 0.378,
+      "p_dead": 0.983,
+      "mean_payout": 8302.333458457155,
+      "median_payout": 0.0,
+      "p95_payout": 48885.052979758235,
+      "mean_net": 7102.333458457155,
+      "median_days_to_funded": 87.0
+    },
+    "COMDOLL_LOW_VOL_8": {
+      "p_funded": 0.3678,
+      "p_dead": 0.9154,
+      "mean_payout": 6618.045236667467,
+      "median_payout": 0.0,
+      "p95_payout": 38448.39238341253,
+      "mean_net": 5418.045236667467,
+      "median_days_to_funded": 146.0
+    },
+    "COMDOLL_LOW_VOL_10": {
+      "p_funded": 0.332,
+      "p_dead": 0.9664,
+      "mean_payout": 6776.55941857849,
+      "median_payout": 0.0,
+      "p95_payout": 41543.52422596336,
+      "mean_net": 5576.55941857849,
+      "median_days_to_funded": 108.0
+    },
+    "COMDOLL_LOW_VOL_12": {
+      "p_funded": 0.2916,
+      "p_dead": 0.9862,
+      "mean_payout": 6008.800772280307,
+      "median_payout": 0.0,
+      "p95_payout": 39625.789261607104,
+      "mean_net": 4808.800772280307,
+      "median_days_to_funded": 95.0
+    },
+    "NO_EUR_LOW_VOL_8": {
+      "p_funded": 0.3088,
+      "p_dead": 0.9548,
+      "mean_payout": 5999.84893762953,
+      "median_payout": 0.0,
+      "p95_payout": 38796.259999307746,
+      "mean_net": 4799.84893762953,
+      "median_days_to_funded": 136.0
+    },
+    "NO_EUR_LOW_VOL_10": {
+      "p_funded": 0.262,
+      "p_dead": 0.9842,
+      "mean_payout": 5166.142743183142,
+      "median_payout": 0.0,
+      "p95_payout": 36613.83799054262,
+      "mean_net": 3966.1427431831416,
+      "median_days_to_funded": 109.0
+    },
+    "NO_EUR_LOW_VOL_12": {
+      "p_funded": 0.2048,
+      "p_dead": 0.9972,
+      "mean_payout": 3600.1780431203865,
+      "median_payout": 0.0,
+      "p95_payout": 27191.21697460886,
+      "mean_net": 2400.1780431203865,
+      "median_days_to_funded": 90.0
+    }
+  },
+  "portfolio_results": {
+    "single_best_low_target": {
+      "fees": 1200,
+      "gross_mean": 29050.36011302432,
+      "gross_median": 28171.563835886354,
+      "gross_p05": 0.0,
+      "gross_p95": 68941.01498216072,
+      "net_mean": 27850.36011302432,
+      "net_median": 26971.563835886354,
+      "net_p05": -1200.0,
+      "net_p95": 67741.01498216072,
+      "p_net_positive": 0.8114,
+      "p_at_least_one_funded": 0.8438,
+      "avg_funded": 0.8438,
+      "avg_dead": 0.331
+    },
+    "cashmax_5x_200k_diversified": {
+      "fees": 6000,
+      "gross_mean": 117591.58456526558,
+      "gross_median": 105981.56157913741,
+      "gross_p05": 2520.080387234878,
+      "gross_p95": 276019.4251307347,
+      "net_mean": 111591.58456526558,
+      "net_median": 99981.56157913741,
+      "net_p05": -3479.919612765122,
+      "net_p95": 270019.4251307347,
+      "p_net_positive": 0.9342,
+      "p_at_least_one_funded": 0.967,
+      "avg_funded": 3.9236,
+      "avg_dead": 1.9128
+    },
+    "cashmax_5x_200k_aggressive": {
+      "fees": 6000,
+      "gross_mean": 108629.1777605726,
+      "gross_median": 86587.41623393193,
+      "gross_p05": 0.0,
+      "gross_p95": 293708.0247135879,
+      "net_mean": 102629.1777605726,
+      "net_median": 80587.41623393193,
+      "net_p05": -6000.0,
+      "net_p95": 287708.0247135879,
+      "p_net_positive": 0.8894,
+      "p_at_least_one_funded": 0.936,
+      "avg_funded": 3.3148,
+      "avg_dead": 3.3906
+    },
+    "classic_5x_200k_diversified": {
+      "fees": 5400,
+      "gross_mean": 102489.4465991046,
+      "gross_median": 79810.3118022759,
+      "gross_p05": 0.0,
+      "gross_p95": 271464.6631918686,
+      "net_mean": 97089.4465991046,
+      "net_median": 74410.3118022759,
+      "net_p05": -5400.0,
+      "net_p95": 266064.6631918686,
+      "p_net_positive": 0.9112,
+      "p_at_least_one_funded": 0.9562,
+      "avg_funded": 3.455,
+      "avg_dead": 3.072
+    },
+    "mixed_large_diversified": {
+      "fees": 7200,
+      "gross_mean": 127222.96622456443,
+      "gross_median": 117190.12737432649,
+      "gross_p05": 0.0,
+      "gross_p95": 297079.05572924874,
+      "net_mean": 120022.96622456443,
+      "net_median": 109990.12737432649,
+      "net_p05": -7200.0,
+      "net_p95": 289879.05572924874,
+      "p_net_positive": 0.918,
+      "p_at_least_one_funded": 0.9564,
+      "avg_funded": 3.1846,
+      "avg_dead": 1.697
+    },
+    "full_budget_mixed_2x500_4x200": {
+      "fees": 9600,
+      "gross_mean": 170417.60421800383,
+      "gross_median": 154586.25875389104,
+      "gross_p05": 1576.2372012142841,
+      "gross_p95": 401912.7154044497,
+      "net_mean": 160817.60421800383,
+      "net_median": 144986.25875389104,
+      "net_p05": -8023.762798785716,
+      "net_p95": 392312.7154044497,
+      "p_net_positive": 0.9246,
+      "p_at_least_one_funded": 0.9634,
+      "avg_funded": 4.6174,
+      "avg_dead": 2.6964
+    },
+    "improved_lowvol_2x500_4x200": {
+      "fees": 9600,
+      "gross_mean": 121423.79348085907,
+      "gross_median": 108459.93661259557,
+      "gross_p05": 0.0,
+      "gross_p95": 298884.91494550655,
+      "net_mean": 111823.79348085907,
+      "net_median": 98859.93661259557,
+      "net_p05": -9600.0,
+      "net_p95": 289284.91494550655,
+      "p_net_positive": 0.8852,
+      "p_at_least_one_funded": 0.9412,
+      "avg_funded": 3.2528,
+      "avg_dead": 4.2458
+    },
+    "improved_lowvol_6x200": {
+      "fees": 7200,
+      "gross_mean": 85995.7773836403,
+      "gross_median": 71975.42071230999,
+      "gross_p05": 0.0,
+      "gross_p95": 218394.86965973896,
+      "net_mean": 78795.7773836403,
+      "net_median": 64775.42071230999,
+      "net_p05": -7200.0,
+      "net_p95": 211194.86965973896,
+      "p_net_positive": 0.8918,
+      "p_at_least_one_funded": 0.939,
+      "avg_funded": 3.0286,
+      "avg_dead": 4.5392
+    },
+    "phased_eval10_funded8_2x500_4x200": {
+      "fees": 9600,
+      "gross_mean": 153560.58530940278,
+      "gross_median": 140999.63339831852,
+      "gross_p05": 0.0,
+      "gross_p95": 352813.0262320236,
+      "net_mean": 143960.58530940278,
+      "net_median": 131399.63339831852,
+      "net_p05": -9600.0,
+      "net_p95": 343213.0262320236,
+      "p_net_positive": 0.916,
+      "p_at_least_one_funded": 0.959,
+      "avg_funded": 4.5886,
+      "avg_dead": 2.206
+    },
+    "phased_fast_eval_safe_funded": {
+      "fees": 9600,
+      "gross_mean": 158773.7268688818,
+      "gross_median": 147708.72990645815,
+      "gross_p05": 0.0,
+      "gross_p95": 365678.7536849689,
+      "net_mean": 149173.7268688818,
+      "net_median": 138108.72990645815,
+      "net_p05": -9600.0,
+      "net_p95": 356078.7536849689,
+      "p_net_positive": 0.919,
+      "p_at_least_one_funded": 0.9586,
+      "avg_funded": 4.4586,
+      "avg_dead": 2.6352
+    },
+    "full_budget_8x200_diversified": {
+      "fees": 9600,
+      "gross_mean": 157143.06278294072,
+      "gross_median": 140121.96368691864,
+      "gross_p05": 2677.5208818997526,
+      "gross_p95": 381443.2421527637,
+      "net_mean": 147543.06278294072,
+      "net_median": 130521.96368691864,
+      "net_p05": -6922.479118100247,
+      "net_p95": 371843.2421527637,
+      "p_net_positive": 0.925,
+      "p_at_least_one_funded": 0.9654,
+      "avg_funded": 5.2734,
+      "avg_dead": 4.5144
+    },
+    "upper_bound_4x500_trail": {
+      "fees": 9600,
+      "gross_mean": 152395.78162411205,
+      "gross_median": 139572.08751717245,
+      "gross_p05": 0.0,
+      "gross_p95": 359158.2482114661,
+      "net_mean": 142795.78162411205,
+      "net_median": 129972.08751717245,
+      "net_p05": -9600.0,
+      "net_p95": 349558.2482114661,
+      "p_net_positive": 0.9038,
+      "p_at_least_one_funded": 0.9402,
+      "avg_funded": 3.124,
+      "avg_dead": 2.0312
+    },
+    "one_step_fast": {
+      "fees": 5400,
+      "gross_mean": 65692.1580189417,
+      "gross_median": 55063.80308921011,
+      "gross_p05": 0.0,
+      "gross_p95": 166505.38482424858,
+      "net_mean": 60292.1580189417,
+      "net_median": 49663.80308921011,
+      "net_p05": -5400.0,
+      "net_p95": 161105.38482424858,
+      "p_net_positive": 0.9126,
+      "p_at_least_one_funded": 0.9648,
+      "avg_funded": 3.399,
+      "avg_dead": 3.6526
+    }
+  },
+  "recommended": "full_budget_mixed_2x500_4x200",
+  "recommended_accounts": [
+    {
+      "name": "A1",
+      "firm": "LOW_TARGET_500K_TRAIL",
+      "spec": "FX_MR_STACK",
+      "vol_target": 0.08,
+      "funded_vol_target": null
+    },
+    {
+      "name": "A2",
+      "firm": "LOW_TARGET_500K_TRAIL",
+      "spec": "EURUSD_MR5",
+      "vol_target": 0.08,
+      "funded_vol_target": null
+    },
+    {
+      "name": "A3",
+      "firm": "LOW_TARGET_200K",
+      "spec": "NO_EUR_STACK",
+      "vol_target": 0.1,
+      "funded_vol_target": null
+    },
+    {
+      "name": "A4",
+      "firm": "LOW_TARGET_200K",
+      "spec": "COMDOLL_STACK",
+      "vol_target": 0.1,
+      "funded_vol_target": null
+    },
+    {
+      "name": "A5",
+      "firm": "LOW_TARGET_200K",
+      "spec": "FAST_STACK",
+      "vol_target": 0.12,
+      "funded_vol_target": null
+    },
+    {
+      "name": "A6",
+      "firm": "LOW_TARGET_200K",
+      "spec": "FX_MR_STACK",
+      "vol_target": 0.1,
+      "funded_vol_target": null
+    }
+  ],
+  "firm_plans": {
+    "LOW_TARGET_200K": {
+      "name": "LOW_TARGET_200K",
+      "account_size": 200000,
+      "fee": 1200,
+      "targets": [
+        0.05,
+        0.05
+      ],
+      "max_daily_loss": 0.05,
+      "max_overall_loss": 0.1,
+      "profit_share": 0.8,
+      "overall_mode": "static",
+      "daily_profit_cap_eval": 0.02,
+      "fee_refund_after_first_payout": true
+    },
+    "CLASSIC_200K": {
+      "name": "CLASSIC_200K",
+      "account_size": 200000,
+      "fee": 1080,
+      "targets": [
+        0.1,
+        0.05
+      ],
+      "max_daily_loss": 0.05,
+      "max_overall_loss": 0.1,
+      "profit_share": 0.8,
+      "overall_mode": "static",
+      "daily_profit_cap_eval": null,
+      "fee_refund_after_first_payout": false
+    },
+    "ONE_STEP_200K": {
+      "name": "ONE_STEP_200K",
+      "account_size": 200000,
+      "fee": 1080,
+      "targets": [
+        0.1
+      ],
+      "max_daily_loss": 0.03,
+      "max_overall_loss": 0.1,
+      "profit_share": 0.9,
+      "overall_mode": "eod_trailing",
+      "daily_profit_cap_eval": null,
+      "fee_refund_after_first_payout": false
+    },
+    "LOW_TARGET_500K_TRAIL": {
+      "name": "LOW_TARGET_500K_TRAIL",
+      "account_size": 500000,
+      "fee": 2400,
+      "targets": [
+        0.08,
+        0.05
+      ],
+      "max_daily_loss": 0.05,
+      "max_overall_loss": 0.1,
+      "profit_share": 0.8,
+      "overall_mode": "eod_trailing",
+      "daily_profit_cap_eval": 0.05,
+      "fee_refund_after_first_payout": true
+    }
+  },
+  "correlation_10pct": {
+    "FX_MR_STACK": {
+      "FX_MR_STACK": 1.0,
+      "EURUSD_MR5": 0.59,
+      "NO_EUR_STACK": 0.9717,
+      "COMDOLL_STACK": 0.7873,
+      "FAST_STACK": 0.6834,
+      "SLOW_STACK": 0.6292,
+      "MR5_ALL": 0.7313,
+      "ANTIPODEAN_LOW_VOL": 0.4954,
+      "COMDOLL_LOW_VOL": 0.5567,
+      "NO_EUR_LOW_VOL": 0.6828
+    },
+    "EURUSD_MR5": {
+      "FX_MR_STACK": 0.59,
+      "EURUSD_MR5": 1.0,
+      "NO_EUR_STACK": 0.3888,
+      "COMDOLL_STACK": 0.2698,
+      "FAST_STACK": 0.6207,
+      "SLOW_STACK": 0.2707,
+      "MR5_ALL": 0.6274,
+      "ANTIPODEAN_LOW_VOL": 0.1743,
+      "COMDOLL_LOW_VOL": 0.2037,
+      "NO_EUR_LOW_VOL": 0.2883
+    },
+    "NO_EUR_STACK": {
+      "FX_MR_STACK": 0.9717,
+      "EURUSD_MR5": 0.3888,
+      "NO_EUR_STACK": 1.0,
+      "COMDOLL_STACK": 0.8261,
+      "FAST_STACK": 0.5992,
+      "SLOW_STACK": 0.6379,
+      "MR5_ALL": 0.6567,
+      "ANTIPODEAN_LOW_VOL": 0.5238,
+      "COMDOLL_LOW_VOL": 0.5847,
+      "NO_EUR_LOW_VOL": 0.6968
+    },
+    "COMDOLL_STACK": {
+      "FX_MR_STACK": 0.7873,
+      "EURUSD_MR5": 0.2698,
+      "NO_EUR_STACK": 0.8261,
+      "COMDOLL_STACK": 1.0,
+      "FAST_STACK": 0.454,
+      "SLOW_STACK": 0.5752,
+      "MR5_ALL": 0.4883,
+      "ANTIPODEAN_LOW_VOL": 0.6278,
+      "COMDOLL_LOW_VOL": 0.6961,
+      "NO_EUR_LOW_VOL": 0.574
+    },
+    "FAST_STACK": {
+      "FX_MR_STACK": 0.6834,
+      "EURUSD_MR5": 0.6207,
+      "NO_EUR_STACK": 0.5992,
+      "COMDOLL_STACK": 0.454,
+      "FAST_STACK": 1.0,
+      "SLOW_STACK": 0.2659,
+      "MR5_ALL": 0.6667,
+      "ANTIPODEAN_LOW_VOL": 0.1807,
+      "COMDOLL_LOW_VOL": 0.3104,
+      "NO_EUR_LOW_VOL": 0.427
+    },
+    "SLOW_STACK": {
+      "FX_MR_STACK": 0.6292,
+      "EURUSD_MR5": 0.2707,
+      "NO_EUR_STACK": 0.6379,
+      "COMDOLL_STACK": 0.5752,
+      "FAST_STACK": 0.2659,
+      "SLOW_STACK": 1.0,
+      "MR5_ALL": 0.3468,
+      "ANTIPODEAN_LOW_VOL": 0.418,
+      "COMDOLL_LOW_VOL": 0.4041,
+      "NO_EUR_LOW_VOL": 0.4581
+    },
+    "MR5_ALL": {
+      "FX_MR_STACK": 0.7313,
+      "EURUSD_MR5": 0.6274,
+      "NO_EUR_STACK": 0.6567,
+      "COMDOLL_STACK": 0.4883,
+      "FAST_STACK": 0.6667,
+      "SLOW_STACK": 0.3468,
+      "MR5_ALL": 1.0,
+      "ANTIPODEAN_LOW_VOL": 0.2812,
+      "COMDOLL_LOW_VOL": 0.3719,
+      "NO_EUR_LOW_VOL": 0.4662
+    },
+    "ANTIPODEAN_LOW_VOL": {
+      "FX_MR_STACK": 0.4954,
+      "EURUSD_MR5": 0.1743,
+      "NO_EUR_STACK": 0.5238,
+      "COMDOLL_STACK": 0.6278,
+      "FAST_STACK": 0.1807,
+      "SLOW_STACK": 0.418,
+      "MR5_ALL": 0.2812,
+      "ANTIPODEAN_LOW_VOL": 1.0,
+      "COMDOLL_LOW_VOL": 0.7714,
+      "NO_EUR_LOW_VOL": 0.4498
+    },
+    "COMDOLL_LOW_VOL": {
+      "FX_MR_STACK": 0.5567,
+      "EURUSD_MR5": 0.2037,
+      "NO_EUR_STACK": 0.5847,
+      "COMDOLL_STACK": 0.6961,
+      "FAST_STACK": 0.3104,
+      "SLOW_STACK": 0.4041,
+      "MR5_ALL": 0.3719,
+      "ANTIPODEAN_LOW_VOL": 0.7714,
+      "COMDOLL_LOW_VOL": 1.0,
+      "NO_EUR_LOW_VOL": 0.657
+    },
+    "NO_EUR_LOW_VOL": {
+      "FX_MR_STACK": 0.6828,
+      "EURUSD_MR5": 0.2883,
+      "NO_EUR_STACK": 0.6968,
+      "COMDOLL_STACK": 0.574,
+      "FAST_STACK": 0.427,
+      "SLOW_STACK": 0.4581,
+      "MR5_ALL": 0.4662,
+      "ANTIPODEAN_LOW_VOL": 0.4498,
+      "COMDOLL_LOW_VOL": 0.657,
+      "NO_EUR_LOW_VOL": 1.0
+    }
+  }
+}

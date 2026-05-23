@@ -1,0 +1,80 @@
+{
+  "portfolio": "cashmax_5x_200k_diversified",
+  "currency": "USD",
+  "default_firm_rules": {
+    "max_daily_loss_pct": 0.05,
+    "max_overall_loss_pct": 0.10,
+    "daily_lockout_pct": -0.04,
+    "overall_lockout_pct": -0.08
+  },
+  "accounts": [
+    {
+      "account_id": "L1",
+      "firm": "LOW_TARGET_200K",
+      "broker": "TBD",
+      "platform": "MT5",
+      "login": "TBD",
+      "account_size": 200000,
+      "strategy": "FX_MR_STACK",
+      "target_vol": 0.10,
+      "magic": 2026052301,
+      "enabled": true
+    },
+    {
+      "account_id": "L2",
+      "firm": "LOW_TARGET_200K",
+      "broker": "TBD",
+      "platform": "MT5",
+      "login": "TBD",
+      "account_size": 200000,
+      "strategy": "EURUSD_MR5",
+      "target_vol": 0.10,
+      "magic": 2026052302,
+      "enabled": true
+    },
+    {
+      "account_id": "L3",
+      "firm": "LOW_TARGET_200K",
+      "broker": "TBD",
+      "platform": "MT5",
+      "login": "TBD",
+      "account_size": 200000,
+      "strategy": "NO_EUR_STACK",
+      "target_vol": 0.10,
+      "magic": 2026052303,
+      "enabled": true
+    },
+    {
+      "account_id": "L4",
+      "firm": "LOW_TARGET_200K",
+      "broker": "TBD",
+      "platform": "MT5",
+      "login": "TBD",
+      "account_size": 200000,
+      "strategy": "COMDOLL_STACK",
+      "target_vol": 0.10,
+      "magic": 2026052304,
+      "enabled": true
+    },
+    {
+      "account_id": "L5",
+      "firm": "LOW_TARGET_200K",
+      "broker": "TBD",
+      "platform": "MT5",
+      "login": "TBD",
+      "account_size": 200000,
+      "strategy": "FAST_STACK",
+      "target_vol": 0.10,
+      "magic": 2026052305,
+      "enabled": true
+    }
+  ],
+  "instrument_overrides": {
+    "EURUSD": "EURUSD",
+    "GBPUSD": "GBPUSD",
+    "USDJPY": "USDJPY",
+    "AUDUSD": "AUDUSD",
+    "NZDUSD": "NZDUSD",
+    "USDCAD": "USDCAD"
+  }
+}

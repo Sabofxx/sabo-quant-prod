@@ -1,0 +1,2098 @@
+{
+  "total_fees": 81000.0,
+  "total_payouts_gross": 256290.97868227412,
+  "total_payouts_net": 252446.61400204003,
+  "total_net_cash": 171446.61400204003,
+  "annualized_net": 24509.14902710181,
+  "total_blow_ups": 73,
+  "total_funded_periods": 26,
+  "n_years": 6.995208761122519,
+  "per_account": {
+    "A1": {
+      "fees_paid": 10000.0,
+      "payouts_gross": 32328.102364526698,
+      "payouts_net": 31843.180829058798,
+      "n_blow_ups": 9,
+      "n_funded_periods": 3,
+      "days_funded": 453,
+      "final_state": "FUNDED",
+      "ledger": [
+        {
+          "event": "INITIAL_BUY",
+          "date": "2019-01-02",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2019-06-25",
+          "state": "EVAL_1",
+          "cum_pct": -0.06149537442443802,
+          "peak_pct": 0.02934004032759541,
+          "intraday_equity_pct": -0.07572457002474395
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2019-07-02",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2019-12-31",
+          "state": "EVAL_1",
+          "cum_pct": -0.012293956038377869,
+          "peak_pct": 0.06596658042790224,
+          "intraday_equity_pct": -0.03800020139074024
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-01-07",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-02-28",
+          "state": "EVAL_1",
+          "cum_pct": -0.05385971996435934,
+          "peak_pct": 0.014400005856438153,
+          "intraday_equity_pct": -0.09828975955213679
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-03-06",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_DAILY",
+          "date": "2020-03-12",
+          "state": "EVAL_1",
+          "cum_pct": -0.01994620119803836,
+          "loss_pct": -0.050388182808641886
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-03-19",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-08-18",
+          "state": "EVAL_1",
+          "cum_pct": -0.023122508934502958,
+          "peak_pct": 0.0628165973923484,
+          "intraday_equity_pct": -0.03724924523418428
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-08-25",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2021-06-04",
+          "days_in_state": 283,
+          "cum_at_pass": 0.08187490830964149
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2022-04-26",
+          "state": "EVAL_2",
+          "cum_pct": -0.05081033282188828,
+          "peak_pct": 0.030197749309678,
+          "intraday_equity_pct": -0.07792445345789573
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2022-05-03",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2022-06-13",
+          "state": "EVAL_1",
+          "cum_pct": -0.07027308655741607,
+          "peak_pct": 0.020220334627323772,
+          "intraday_equity_pct": -0.09725418033088706
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2022-06-20",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2023-04-28",
+          "days_in_state": 312,
+          "cum_at_pass": 0.08562865067217765
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2023-07-26",
+          "days_in_state": 89,
+          "cum_at_pass": 0.05008343763508111
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2023-10-18",
+          "gross_payout_usd": 2315.8555482424795,
+          "net_payout_usd": 2281.1177150188423,
+          "since_last_pct": 0.014474097176515497
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2023-11-08",
+          "gross_payout_usd": 3487.359641167842,
+          "net_payout_usd": 3435.049246550324,
+          "since_last_pct": 0.021795997757299013
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2023-12-13",
+          "state": "FUNDED",
+          "cum_pct": -0.02938477968603927,
+          "peak_pct": 0.0485898310895829,
+          "intraday_equity_pct": -0.054356673368809456
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2023-12-20",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2024-04-03",
+          "days_in_state": 105,
+          "cum_at_pass": 0.08529940070591668
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2024-06-13",
+          "days_in_state": 71,
+          "cum_at_pass": 0.05148750505007246
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2024-08-02",
+          "state": "FUNDED",
+          "cum_pct": -0.0677217516185531,
+          "peak_pct": 0.020565526244014972,
+          "intraday_equity_pct": -0.0832250640441667
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2024-08-09",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2025-04-02",
+          "days_in_state": 236,
+          "cum_at_pass": 0.08202390195339733
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2025-04-10",
+          "days_in_state": 8,
+          "cum_at_pass": 0.06006799191066735
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-05-22",
+          "gross_payout_usd": 2054.279468174184,
+          "net_payout_usd": 2023.465276151571,
+          "since_last_pct": 0.012839246676088649
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-07-03",
+          "gross_payout_usd": 1945.5446360409446,
+          "net_payout_usd": 1916.3614665003304,
+          "since_last_pct": 0.012159653975255903
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-07-24",
+          "gross_payout_usd": 144.41788464192308,
+          "net_payout_usd": 142.25161637229422,
+          "since_last_pct": 0.0009026117790120192
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-08-14",
+          "gross_payout_usd": 7395.040291360758,
+          "net_payout_usd": 7284.114686990346,
+          "since_last_pct": 0.04621900182100473
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-09-04",
+          "gross_payout_usd": 6710.6794620320725,
+          "net_payout_usd": 6610.019270101591,
+          "since_last_pct": 0.04194174663770045
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-09-25",
+          "gross_payout_usd": 1392.7117002696534,
+          "net_payout_usd": 1371.8210247656086,
+          "since_last_pct": 0.008704448126685332
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-10-16",
+          "gross_payout_usd": 3659.5400256402027,
+          "net_payout_usd": 3604.6469252555994,
+          "since_last_pct": 0.022872125160251264
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-11-06",
+          "gross_payout_usd": 1560.9800751841797,
+          "net_payout_usd": 1537.5653740564169,
+          "since_last_pct": 0.009756125469901122
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-12-18",
+          "gross_payout_usd": 1661.6936317724605,
+          "net_payout_usd": 1636.7682272958737,
+          "since_last_pct": 0.010385585198577879
+        }
+      ],
+      "spec": "FX_MR_STACK",
+      "vol_target": 0.1
+    },
+    "A2": {
+      "fees_paid": 10000.0,
+      "payouts_gross": 32328.102364526698,
+      "payouts_net": 31843.180829058798,
+      "n_blow_ups": 9,
+      "n_funded_periods": 3,
+      "days_funded": 453,
+      "final_state": "FUNDED",
+      "ledger": [
+        {
+          "event": "INITIAL_BUY",
+          "date": "2019-01-02",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2019-06-25",
+          "state": "EVAL_1",
+          "cum_pct": -0.06149537442443802,
+          "peak_pct": 0.02934004032759541,
+          "intraday_equity_pct": -0.07572457002474395
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2019-07-02",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2019-12-31",
+          "state": "EVAL_1",
+          "cum_pct": -0.012293956038377869,
+          "peak_pct": 0.06596658042790224,
+          "intraday_equity_pct": -0.03800020139074024
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-01-07",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-02-28",
+          "state": "EVAL_1",
+          "cum_pct": -0.05385971996435934,
+          "peak_pct": 0.014400005856438153,
+          "intraday_equity_pct": -0.09828975955213679
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-03-06",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_DAILY",
+          "date": "2020-03-12",
+          "state": "EVAL_1",
+          "cum_pct": -0.01994620119803836,
+          "loss_pct": -0.050388182808641886
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-03-19",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-08-18",
+          "state": "EVAL_1",
+          "cum_pct": -0.023122508934502958,
+          "peak_pct": 0.0628165973923484,
+          "intraday_equity_pct": -0.03724924523418428
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-08-25",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2021-06-04",
+          "days_in_state": 283,
+          "cum_at_pass": 0.08187490830964149
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2022-04-26",
+          "state": "EVAL_2",
+          "cum_pct": -0.05081033282188828,
+          "peak_pct": 0.030197749309678,
+          "intraday_equity_pct": -0.07792445345789573
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2022-05-03",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2022-06-13",
+          "state": "EVAL_1",
+          "cum_pct": -0.07027308655741607,
+          "peak_pct": 0.020220334627323772,
+          "intraday_equity_pct": -0.09725418033088706
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2022-06-20",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2023-04-28",
+          "days_in_state": 312,
+          "cum_at_pass": 0.08562865067217765
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2023-07-26",
+          "days_in_state": 89,
+          "cum_at_pass": 0.05008343763508111
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2023-10-18",
+          "gross_payout_usd": 2315.8555482424795,
+          "net_payout_usd": 2281.1177150188423,
+          "since_last_pct": 0.014474097176515497
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2023-11-08",
+          "gross_payout_usd": 3487.359641167842,
+          "net_payout_usd": 3435.049246550324,
+          "since_last_pct": 0.021795997757299013
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2023-12-13",
+          "state": "FUNDED",
+          "cum_pct": -0.02938477968603927,
+          "peak_pct": 0.0485898310895829,
+          "intraday_equity_pct": -0.054356673368809456
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2023-12-20",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2024-04-03",
+          "days_in_state": 105,
+          "cum_at_pass": 0.08529940070591668
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2024-06-13",
+          "days_in_state": 71,
+          "cum_at_pass": 0.05148750505007246
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2024-08-02",
+          "state": "FUNDED",
+          "cum_pct": -0.0677217516185531,
+          "peak_pct": 0.020565526244014972,
+          "intraday_equity_pct": -0.0832250640441667
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2024-08-09",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2025-04-02",
+          "days_in_state": 236,
+          "cum_at_pass": 0.08202390195339733
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2025-04-10",
+          "days_in_state": 8,
+          "cum_at_pass": 0.06006799191066735
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-05-22",
+          "gross_payout_usd": 2054.279468174184,
+          "net_payout_usd": 2023.465276151571,
+          "since_last_pct": 0.012839246676088649
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-07-03",
+          "gross_payout_usd": 1945.5446360409446,
+          "net_payout_usd": 1916.3614665003304,
+          "since_last_pct": 0.012159653975255903
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-07-24",
+          "gross_payout_usd": 144.41788464192308,
+          "net_payout_usd": 142.25161637229422,
+          "since_last_pct": 0.0009026117790120192
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-08-14",
+          "gross_payout_usd": 7395.040291360758,
+          "net_payout_usd": 7284.114686990346,
+          "since_last_pct": 0.04621900182100473
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-09-04",
+          "gross_payout_usd": 6710.6794620320725,
+          "net_payout_usd": 6610.019270101591,
+          "since_last_pct": 0.04194174663770045
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-09-25",
+          "gross_payout_usd": 1392.7117002696534,
+          "net_payout_usd": 1371.8210247656086,
+          "since_last_pct": 0.008704448126685332
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-10-16",
+          "gross_payout_usd": 3659.5400256402027,
+          "net_payout_usd": 3604.6469252555994,
+          "since_last_pct": 0.022872125160251264
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-11-06",
+          "gross_payout_usd": 1560.9800751841797,
+          "net_payout_usd": 1537.5653740564169,
+          "since_last_pct": 0.009756125469901122
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-12-18",
+          "gross_payout_usd": 1661.6936317724605,
+          "net_payout_usd": 1636.7682272958737,
+          "since_last_pct": 0.010385585198577879
+        }
+      ],
+      "spec": "FX_MR_STACK",
+      "vol_target": 0.1
+    },
+    "A3": {
+      "fees_paid": 12000.0,
+      "payouts_gross": 24637.622675611066,
+      "payouts_net": 24268.0583354769,
+      "n_blow_ups": 11,
+      "n_funded_periods": 4,
+      "days_funded": 650,
+      "final_state": "EVAL_1",
+      "ledger": [
+        {
+          "event": "INITIAL_BUY",
+          "date": "2019-01-02",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2019-06-28",
+          "state": "EVAL_1",
+          "cum_pct": -0.03615677295841058,
+          "peak_pct": 0.05933129368546783,
+          "intraday_equity_pct": -0.043338295100465184
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2019-07-05",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2019-08-07",
+          "state": "EVAL_1",
+          "cum_pct": -0.05450624823642798,
+          "peak_pct": 0.0074603842600797065,
+          "intraday_equity_pct": -0.09274259363781819
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2019-08-14",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2019-10-04",
+          "days_in_state": 51,
+          "cum_at_pass": 0.08221282051007966
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2019-12-31",
+          "state": "EVAL_2",
+          "cum_pct": -0.05864340343302045,
+          "peak_pct": 0.017418605009000103,
+          "intraday_equity_pct": -0.0860620792817008
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-01-07",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-02-28",
+          "state": "EVAL_1",
+          "cum_pct": -0.04623149484246367,
+          "peak_pct": 0.01453748307346437,
+          "intraday_equity_pct": -0.09129900140858117
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-03-06",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_DAILY",
+          "date": "2020-03-18",
+          "state": "EVAL_1",
+          "cum_pct": -0.07061843568406587,
+          "loss_pct": -0.06598932919064826
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-03-25",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-09-18",
+          "state": "EVAL_1",
+          "cum_pct": -0.050457003753655326,
+          "peak_pct": 0.04462073881582339,
+          "intraday_equity_pct": -0.05689332017026894
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-09-25",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2021-02-05",
+          "days_in_state": 133,
+          "cum_at_pass": 0.0885140839285864
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2021-06-04",
+          "days_in_state": 119,
+          "cum_at_pass": 0.06587276649159712
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2022-04-22",
+          "state": "FUNDED",
+          "cum_pct": -0.07395563383112862,
+          "peak_pct": 0.010371758146028937,
+          "intraday_equity_pct": -0.09634923169090442
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2022-04-29",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2022-06-13",
+          "state": "EVAL_1",
+          "cum_pct": -0.058700031960349786,
+          "peak_pct": 0.03449172024915731,
+          "intraday_equity_pct": -0.08362943523003788
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2022-06-20",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2023-05-15",
+          "days_in_state": 329,
+          "cum_at_pass": 0.08671446974672228
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2023-08-01",
+          "days_in_state": 78,
+          "cum_at_pass": 0.0571228103548473
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2023-12-27",
+          "state": "FUNDED",
+          "cum_pct": -0.07084057642028706,
+          "peak_pct": 0.027055876878510902,
+          "intraday_equity_pct": -0.07777997238573141
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2024-01-03",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2024-04-03",
+          "days_in_state": 91,
+          "cum_at_pass": 0.08979951762417973
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2024-07-11",
+          "days_in_state": 99,
+          "cum_at_pass": 0.06316645240069654
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2024-07-31",
+          "state": "FUNDED",
+          "cum_pct": -0.0779067829916791,
+          "peak_pct": 0.0,
+          "intraday_equity_pct": -0.1050894462775514
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2024-08-07",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2025-04-04",
+          "days_in_state": 240,
+          "cum_at_pass": 0.1077261778951149
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2025-06-24",
+          "days_in_state": 81,
+          "cum_at_pass": 0.050613657322452085
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-08-05",
+          "gross_payout_usd": 6394.872984927935,
+          "net_payout_usd": 6298.949890154016,
+          "since_last_pct": 0.039967956155799594
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-08-26",
+          "gross_payout_usd": 6116.5190215803295,
+          "net_payout_usd": 6024.771236256624,
+          "since_last_pct": 0.038228243884877056
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-10-07",
+          "gross_payout_usd": 7880.212606572222,
+          "net_payout_usd": 7762.009417473639,
+          "since_last_pct": 0.04925132879107638
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-10-28",
+          "gross_payout_usd": 4246.018062530581,
+          "net_payout_usd": 4182.327791592622,
+          "since_last_pct": 0.02653761289081613
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2025-12-05",
+          "state": "FUNDED",
+          "cum_pct": -0.01945626511914484,
+          "peak_pct": 0.052301565316771784,
+          "intraday_equity_pct": -0.048984236895253275
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2025-12-12",
+          "fee": 1000.0
+        }
+      ],
+      "spec": "NO_EUR_STACK",
+      "vol_target": 0.1
+    },
+    "A4": {
+      "fees_paid": 12000.0,
+      "payouts_gross": 24637.622675611066,
+      "payouts_net": 24268.0583354769,
+      "n_blow_ups": 11,
+      "n_funded_periods": 4,
+      "days_funded": 650,
+      "final_state": "EVAL_1",
+      "ledger": [
+        {
+          "event": "INITIAL_BUY",
+          "date": "2019-01-02",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2019-06-28",
+          "state": "EVAL_1",
+          "cum_pct": -0.03615677295841058,
+          "peak_pct": 0.05933129368546783,
+          "intraday_equity_pct": -0.043338295100465184
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2019-07-05",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2019-08-07",
+          "state": "EVAL_1",
+          "cum_pct": -0.05450624823642798,
+          "peak_pct": 0.0074603842600797065,
+          "intraday_equity_pct": -0.09274259363781819
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2019-08-14",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2019-10-04",
+          "days_in_state": 51,
+          "cum_at_pass": 0.08221282051007966
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2019-12-31",
+          "state": "EVAL_2",
+          "cum_pct": -0.05864340343302045,
+          "peak_pct": 0.017418605009000103,
+          "intraday_equity_pct": -0.0860620792817008
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-01-07",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-02-28",
+          "state": "EVAL_1",
+          "cum_pct": -0.04623149484246367,
+          "peak_pct": 0.01453748307346437,
+          "intraday_equity_pct": -0.09129900140858117
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-03-06",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_DAILY",
+          "date": "2020-03-18",
+          "state": "EVAL_1",
+          "cum_pct": -0.07061843568406587,
+          "loss_pct": -0.06598932919064826
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-03-25",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-09-18",
+          "state": "EVAL_1",
+          "cum_pct": -0.050457003753655326,
+          "peak_pct": 0.04462073881582339,
+          "intraday_equity_pct": -0.05689332017026894
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-09-25",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2021-02-05",
+          "days_in_state": 133,
+          "cum_at_pass": 0.0885140839285864
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2021-06-04",
+          "days_in_state": 119,
+          "cum_at_pass": 0.06587276649159712
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2022-04-22",
+          "state": "FUNDED",
+          "cum_pct": -0.07395563383112862,
+          "peak_pct": 0.010371758146028937,
+          "intraday_equity_pct": -0.09634923169090442
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2022-04-29",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2022-06-13",
+          "state": "EVAL_1",
+          "cum_pct": -0.058700031960349786,
+          "peak_pct": 0.03449172024915731,
+          "intraday_equity_pct": -0.08362943523003788
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2022-06-20",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2023-05-15",
+          "days_in_state": 329,
+          "cum_at_pass": 0.08671446974672228
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2023-08-01",
+          "days_in_state": 78,
+          "cum_at_pass": 0.0571228103548473
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2023-12-27",
+          "state": "FUNDED",
+          "cum_pct": -0.07084057642028706,
+          "peak_pct": 0.027055876878510902,
+          "intraday_equity_pct": -0.07777997238573141
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2024-01-03",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2024-04-03",
+          "days_in_state": 91,
+          "cum_at_pass": 0.08979951762417973
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2024-07-11",
+          "days_in_state": 99,
+          "cum_at_pass": 0.06316645240069654
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2024-07-31",
+          "state": "FUNDED",
+          "cum_pct": -0.0779067829916791,
+          "peak_pct": 0.0,
+          "intraday_equity_pct": -0.1050894462775514
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2024-08-07",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2025-04-04",
+          "days_in_state": 240,
+          "cum_at_pass": 0.1077261778951149
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2025-06-24",
+          "days_in_state": 81,
+          "cum_at_pass": 0.050613657322452085
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-08-05",
+          "gross_payout_usd": 6394.872984927935,
+          "net_payout_usd": 6298.949890154016,
+          "since_last_pct": 0.039967956155799594
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-08-26",
+          "gross_payout_usd": 6116.5190215803295,
+          "net_payout_usd": 6024.771236256624,
+          "since_last_pct": 0.038228243884877056
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-10-07",
+          "gross_payout_usd": 7880.212606572222,
+          "net_payout_usd": 7762.009417473639,
+          "since_last_pct": 0.04925132879107638
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-10-28",
+          "gross_payout_usd": 4246.018062530581,
+          "net_payout_usd": 4182.327791592622,
+          "since_last_pct": 0.02653761289081613
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2025-12-05",
+          "state": "FUNDED",
+          "cum_pct": -0.01945626511914484,
+          "peak_pct": 0.052301565316771784,
+          "intraday_equity_pct": -0.048984236895253275
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2025-12-12",
+          "fee": 1000.0
+        }
+      ],
+      "spec": "NO_EUR_STACK",
+      "vol_target": 0.1
+    },
+    "A5": {
+      "fees_paid": 11000.0,
+      "payouts_gross": 42793.923501768106,
+      "payouts_net": 42152.01464924158,
+      "n_blow_ups": 10,
+      "n_funded_periods": 4,
+      "days_funded": 728,
+      "final_state": "FUNDED",
+      "ledger": [
+        {
+          "event": "INITIAL_BUY",
+          "date": "2019-01-02",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2019-04-26",
+          "days_in_state": 115,
+          "cum_at_pass": 0.0875461127220255
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2019-08-07",
+          "state": "EVAL_2",
+          "cum_pct": -0.05316124543433732,
+          "peak_pct": 0.01381882355825093,
+          "intraday_equity_pct": -0.09039380581671677
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2019-08-14",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2019-11-13",
+          "days_in_state": 91,
+          "cum_at_pass": 0.08092102780128874
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-02-07",
+          "state": "EVAL_2",
+          "cum_pct": -0.08067343671596887,
+          "peak_pct": 0.002356620571017865,
+          "intraday_equity_pct": -0.10037019361900776
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-02-14",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-03-17",
+          "state": "EVAL_1",
+          "cum_pct": -0.058067164119225835,
+          "peak_pct": 0.0057887960058265004,
+          "intraday_equity_pct": -0.10409266212633916
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-03-24",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-08-28",
+          "state": "EVAL_1",
+          "cum_pct": -0.01999971819639852,
+          "peak_pct": 0.06417901787716115,
+          "intraday_equity_pct": -0.04621287800844951
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-09-04",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-12-31",
+          "state": "EVAL_1",
+          "cum_pct": -0.03501471263003449,
+          "peak_pct": 0.057353399885649525,
+          "intraday_equity_pct": -0.04462015534960879
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2021-01-07",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2021-02-16",
+          "days_in_state": 40,
+          "cum_at_pass": 0.08177817762392028
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2021-06-07",
+          "days_in_state": 111,
+          "cum_at_pass": 0.05294007768814211
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2021-11-25",
+          "state": "FUNDED",
+          "cum_pct": -0.09420708424785129,
+          "peak_pct": 0.0,
+          "intraday_equity_pct": -0.10076386005703013
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2021-12-02",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2022-05-09",
+          "state": "EVAL_1",
+          "cum_pct": -0.03569523474014553,
+          "peak_pct": 0.04548729174189817,
+          "intraday_equity_pct": -0.054736606650464155
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2022-05-16",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2023-04-14",
+          "days_in_state": 333,
+          "cum_at_pass": 0.0978747172896355
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2023-07-03",
+          "days_in_state": 80,
+          "cum_at_pass": 0.05247739529932423
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2023-07-24",
+          "gross_payout_usd": 9872.428618821566,
+          "net_payout_usd": 9724.342189539242,
+          "since_last_pct": 0.061702678867634794
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2023-08-14",
+          "gross_payout_usd": 1580.5973307403854,
+          "net_payout_usd": 1556.8883707792795,
+          "since_last_pct": 0.009878733317127408
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2023-11-06",
+          "gross_payout_usd": 1279.4475669877236,
+          "net_payout_usd": 1260.2558534829077,
+          "since_last_pct": 0.007996547293673273
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2023-12-26",
+          "state": "FUNDED",
+          "cum_pct": -0.03391334300469931,
+          "peak_pct": 0.061702678867634794,
+          "intraday_equity_pct": -0.04167350739809404
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2024-01-02",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2024-03-15",
+          "days_in_state": 73,
+          "cum_at_pass": 0.08651588764945685
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2024-04-03",
+          "days_in_state": 19,
+          "cum_at_pass": 0.05189912196604704
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2024-04-24",
+          "gross_payout_usd": 4894.726331220503,
+          "net_payout_usd": 4821.305436252195,
+          "since_last_pct": 0.03059203957012814
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2024-06-26",
+          "gross_payout_usd": 2876.323326479781,
+          "net_payout_usd": 2833.178476582584,
+          "since_last_pct": 0.017977020790498628
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2024-07-17",
+          "gross_payout_usd": 2195.1198708223587,
+          "net_payout_usd": 2162.1930727600234,
+          "since_last_pct": 0.01371949919263974
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2024-07-25",
+          "state": "FUNDED",
+          "cum_pct": -0.04569535241033737,
+          "peak_pct": 0.03688072369856617,
+          "intraday_equity_pct": -0.06892041654432189
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2024-08-01",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2024-08-29",
+          "state": "EVAL_1",
+          "cum_pct": -0.05224820747053763,
+          "peak_pct": 0.038557514220037475,
+          "intraday_equity_pct": -0.06418816784636192
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2024-09-05",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2025-03-27",
+          "days_in_state": 203,
+          "cum_at_pass": 0.08009924718641569
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2025-04-04",
+          "days_in_state": 8,
+          "cum_at_pass": 0.053389105799459734
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-04-25",
+          "gross_payout_usd": 707.1458959429687,
+          "net_payout_usd": 696.5387075038241,
+          "since_last_pct": 0.0044196618496435535
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-05-16",
+          "gross_payout_usd": 5032.291732840835,
+          "net_payout_usd": 4956.807356848222,
+          "since_last_pct": 0.031451823330255216
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-06-27",
+          "gross_payout_usd": 532.2859947031822,
+          "net_payout_usd": 524.3017047826344,
+          "since_last_pct": 0.0033267874668948885
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-08-08",
+          "gross_payout_usd": 8678.15149854691,
+          "net_payout_usd": 8547.979226068706,
+          "since_last_pct": 0.05423844686591819
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-08-29",
+          "gross_payout_usd": 558.4756668416469,
+          "net_payout_usd": 550.0985318390221,
+          "since_last_pct": 0.0034904729177602928
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-10-31",
+          "gross_payout_usd": 3124.9092600625672,
+          "net_payout_usd": 3078.0356211616286,
+          "since_last_pct": 0.019530682875391045
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-11-21",
+          "gross_payout_usd": 1462.0204077576784,
+          "net_payout_usd": 1440.0901016413131,
+          "since_last_pct": 0.009137627548485489
+        }
+      ],
+      "spec": "COMDOLL_STACK",
+      "vol_target": 0.1
+    },
+    "A6": {
+      "fees_paid": 11000.0,
+      "payouts_gross": 42793.923501768106,
+      "payouts_net": 42152.01464924158,
+      "n_blow_ups": 10,
+      "n_funded_periods": 4,
+      "days_funded": 728,
+      "final_state": "FUNDED",
+      "ledger": [
+        {
+          "event": "INITIAL_BUY",
+          "date": "2019-01-02",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2019-04-26",
+          "days_in_state": 115,
+          "cum_at_pass": 0.0875461127220255
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2019-08-07",
+          "state": "EVAL_2",
+          "cum_pct": -0.05316124543433732,
+          "peak_pct": 0.01381882355825093,
+          "intraday_equity_pct": -0.09039380581671677
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2019-08-14",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2019-11-13",
+          "days_in_state": 91,
+          "cum_at_pass": 0.08092102780128874
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-02-07",
+          "state": "EVAL_2",
+          "cum_pct": -0.08067343671596887,
+          "peak_pct": 0.002356620571017865,
+          "intraday_equity_pct": -0.10037019361900776
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-02-14",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-03-17",
+          "state": "EVAL_1",
+          "cum_pct": -0.058067164119225835,
+          "peak_pct": 0.0057887960058265004,
+          "intraday_equity_pct": -0.10409266212633916
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-03-24",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-08-28",
+          "state": "EVAL_1",
+          "cum_pct": -0.01999971819639852,
+          "peak_pct": 0.06417901787716115,
+          "intraday_equity_pct": -0.04621287800844951
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-09-04",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-12-31",
+          "state": "EVAL_1",
+          "cum_pct": -0.03501471263003449,
+          "peak_pct": 0.057353399885649525,
+          "intraday_equity_pct": -0.04462015534960879
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2021-01-07",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2021-02-16",
+          "days_in_state": 40,
+          "cum_at_pass": 0.08177817762392028
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2021-06-07",
+          "days_in_state": 111,
+          "cum_at_pass": 0.05294007768814211
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2021-11-25",
+          "state": "FUNDED",
+          "cum_pct": -0.09420708424785129,
+          "peak_pct": 0.0,
+          "intraday_equity_pct": -0.10076386005703013
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2021-12-02",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2022-05-09",
+          "state": "EVAL_1",
+          "cum_pct": -0.03569523474014553,
+          "peak_pct": 0.04548729174189817,
+          "intraday_equity_pct": -0.054736606650464155
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2022-05-16",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2023-04-14",
+          "days_in_state": 333,
+          "cum_at_pass": 0.0978747172896355
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2023-07-03",
+          "days_in_state": 80,
+          "cum_at_pass": 0.05247739529932423
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2023-07-24",
+          "gross_payout_usd": 9872.428618821566,
+          "net_payout_usd": 9724.342189539242,
+          "since_last_pct": 0.061702678867634794
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2023-08-14",
+          "gross_payout_usd": 1580.5973307403854,
+          "net_payout_usd": 1556.8883707792795,
+          "since_last_pct": 0.009878733317127408
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2023-11-06",
+          "gross_payout_usd": 1279.4475669877236,
+          "net_payout_usd": 1260.2558534829077,
+          "since_last_pct": 0.007996547293673273
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2023-12-26",
+          "state": "FUNDED",
+          "cum_pct": -0.03391334300469931,
+          "peak_pct": 0.061702678867634794,
+          "intraday_equity_pct": -0.04167350739809404
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2024-01-02",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2024-03-15",
+          "days_in_state": 73,
+          "cum_at_pass": 0.08651588764945685
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2024-04-03",
+          "days_in_state": 19,
+          "cum_at_pass": 0.05189912196604704
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2024-04-24",
+          "gross_payout_usd": 4894.726331220503,
+          "net_payout_usd": 4821.305436252195,
+          "since_last_pct": 0.03059203957012814
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2024-06-26",
+          "gross_payout_usd": 2876.323326479781,
+          "net_payout_usd": 2833.178476582584,
+          "since_last_pct": 0.017977020790498628
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2024-07-17",
+          "gross_payout_usd": 2195.1198708223587,
+          "net_payout_usd": 2162.1930727600234,
+          "since_last_pct": 0.01371949919263974
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2024-07-25",
+          "state": "FUNDED",
+          "cum_pct": -0.04569535241033737,
+          "peak_pct": 0.03688072369856617,
+          "intraday_equity_pct": -0.06892041654432189
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2024-08-01",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2024-08-29",
+          "state": "EVAL_1",
+          "cum_pct": -0.05224820747053763,
+          "peak_pct": 0.038557514220037475,
+          "intraday_equity_pct": -0.06418816784636192
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2024-09-05",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2025-03-27",
+          "days_in_state": 203,
+          "cum_at_pass": 0.08009924718641569
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2025-04-04",
+          "days_in_state": 8,
+          "cum_at_pass": 0.053389105799459734
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-04-25",
+          "gross_payout_usd": 707.1458959429687,
+          "net_payout_usd": 696.5387075038241,
+          "since_last_pct": 0.0044196618496435535
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-05-16",
+          "gross_payout_usd": 5032.291732840835,
+          "net_payout_usd": 4956.807356848222,
+          "since_last_pct": 0.031451823330255216
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-06-27",
+          "gross_payout_usd": 532.2859947031822,
+          "net_payout_usd": 524.3017047826344,
+          "since_last_pct": 0.0033267874668948885
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-08-08",
+          "gross_payout_usd": 8678.15149854691,
+          "net_payout_usd": 8547.979226068706,
+          "since_last_pct": 0.05423844686591819
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-08-29",
+          "gross_payout_usd": 558.4756668416469,
+          "net_payout_usd": 550.0985318390221,
+          "since_last_pct": 0.0034904729177602928
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-10-31",
+          "gross_payout_usd": 3124.9092600625672,
+          "net_payout_usd": 3078.0356211616286,
+          "since_last_pct": 0.019530682875391045
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-11-21",
+          "gross_payout_usd": 1462.0204077576784,
+          "net_payout_usd": 1440.0901016413131,
+          "since_last_pct": 0.009137627548485489
+        }
+      ],
+      "spec": "COMDOLL_STACK",
+      "vol_target": 0.1
+    },
+    "A7": {
+      "fees_paid": 7000.0,
+      "payouts_gross": 29970.882739856967,
+      "payouts_net": 29521.319498759112,
+      "n_blow_ups": 6,
+      "n_funded_periods": 2,
+      "days_funded": 431,
+      "final_state": "FUNDED",
+      "ledger": [
+        {
+          "event": "INITIAL_BUY",
+          "date": "2019-01-02",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2019-07-30",
+          "state": "EVAL_1",
+          "cum_pct": -0.0679585837344489,
+          "peak_pct": 0.023617269139908203,
+          "intraday_equity_pct": -0.07904955753512911
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2019-08-06",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-02-20",
+          "state": "EVAL_1",
+          "cum_pct": -0.005338533631612184,
+          "peak_pct": 0.07902703429048301,
+          "intraday_equity_pct": -0.024552183373514717
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-02-27",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_DAILY",
+          "date": "2020-03-18",
+          "state": "EVAL_1",
+          "cum_pct": -0.08722012381558855,
+          "loss_pct": -0.051324512427777996
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-03-25",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2022-04-28",
+          "state": "EVAL_1",
+          "cum_pct": -0.02413064440687976,
+          "peak_pct": 0.06761916083751474,
+          "intraday_equity_pct": -0.05127937070102001
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2022-05-05",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2022-06-14",
+          "state": "EVAL_1",
+          "cum_pct": -0.08349309780366984,
+          "peak_pct": 0.0,
+          "intraday_equity_pct": -0.10302507936422332
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2022-06-21",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2023-05-03",
+          "days_in_state": 316,
+          "cum_at_pass": 0.08927987102427298
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2023-10-30",
+          "days_in_state": 180,
+          "cum_at_pass": 0.05046927387720013
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2024-03-25",
+          "gross_payout_usd": 2558.4572709327676,
+          "net_payout_usd": 2520.080411868776,
+          "since_last_pct": 0.015990357943329796
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2024-04-15",
+          "gross_payout_usd": 4045.094609386145,
+          "net_payout_usd": 3984.4181902453524,
+          "since_last_pct": 0.025281841308663403
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2024-05-06",
+          "gross_payout_usd": 3129.304920873469,
+          "net_payout_usd": 3082.365347060367,
+          "since_last_pct": 0.019558155755459182
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2024-06-17",
+          "gross_payout_usd": 2045.9266605223538,
+          "net_payout_usd": 2015.2377606145185,
+          "since_last_pct": 0.01278704162826471
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2024-07-08",
+          "gross_payout_usd": 159.9745680405329,
+          "net_payout_usd": 157.5749495199249,
+          "since_last_pct": 0.0009998410502533306
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2024-08-01",
+          "state": "FUNDED",
+          "cum_pct": -0.0412581297836349,
+          "peak_pct": 0.04230349075977492,
+          "intraday_equity_pct": -0.06160637459393254
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2024-08-08",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2025-04-04",
+          "days_in_state": 239,
+          "cum_at_pass": 0.09454201785305953
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2025-07-28",
+          "days_in_state": 115,
+          "cum_at_pass": 0.05391977747478439
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-08-18",
+          "gross_payout_usd": 2944.3457880626406,
+          "net_payout_usd": 2900.180601241701,
+          "since_last_pct": 0.018402161175391504
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-09-08",
+          "gross_payout_usd": 4215.407348814129,
+          "net_payout_usd": 4152.1762385819175,
+          "since_last_pct": 0.026346295930088307
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-09-29",
+          "gross_payout_usd": 3603.9609261670735,
+          "net_payout_usd": 3549.9015122745673,
+          "since_last_pct": 0.02252475578854421
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-10-20",
+          "gross_payout_usd": 3068.219842672848,
+          "net_payout_usd": 3022.1965450327552,
+          "since_last_pct": 0.0191763740167053
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-12-22",
+          "gross_payout_usd": 4200.19080438501,
+          "net_payout_usd": 4137.187942319235,
+          "since_last_pct": 0.026251192527406306
+        }
+      ],
+      "spec": "FX_MR_STACK",
+      "vol_target": 0.08
+    },
+    "A8": {
+      "fees_paid": 8000.0,
+      "payouts_gross": 26800.798858605434,
+      "payouts_net": 26398.786875726353,
+      "n_blow_ups": 7,
+      "n_funded_periods": 2,
+      "days_funded": 431,
+      "final_state": "FUNDED",
+      "ledger": [
+        {
+          "event": "INITIAL_BUY",
+          "date": "2019-01-02",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2019-08-01",
+          "state": "EVAL_1",
+          "cum_pct": -0.04549943256871601,
+          "peak_pct": 0.04796356215622806,
+          "intraday_equity_pct": -0.0590072536315996
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2019-08-08",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2019-10-15",
+          "days_in_state": 68,
+          "cum_at_pass": 0.08028353734307757
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-02-21",
+          "state": "EVAL_2",
+          "cum_pct": -0.09323664698761935,
+          "peak_pct": 0.0016627647538777221,
+          "intraday_equity_pct": -0.09881407147466185
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-02-28",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_DAILY",
+          "date": "2020-03-18",
+          "state": "EVAL_1",
+          "cum_pct": -0.05464519335158796,
+          "loss_pct": -0.05279146335251861
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-03-25",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2020-12-17",
+          "state": "EVAL_1",
+          "cum_pct": -0.05088605648158302,
+          "peak_pct": 0.0356965910526587,
+          "intraday_equity_pct": -0.06643190799744064
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2020-12-24",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2021-05-31",
+          "days_in_state": 158,
+          "cum_at_pass": 0.08236189609879395
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2022-04-27",
+          "state": "EVAL_2",
+          "cum_pct": -0.05585104715680238,
+          "peak_pct": 0.035099764128564685,
+          "intraday_equity_pct": -0.07147899511416822
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2022-05-04",
+          "fee": 1000.0
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2022-06-14",
+          "state": "EVAL_1",
+          "cum_pct": -0.08791328169543915,
+          "peak_pct": 0.0,
+          "intraday_equity_pct": -0.10857933269804146
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2022-06-21",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2023-05-23",
+          "days_in_state": 336,
+          "cum_at_pass": 0.08160713390375651
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2023-11-01",
+          "days_in_state": 162,
+          "cum_at_pass": 0.06052349069402018
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2024-04-17",
+          "gross_payout_usd": 3355.727541794339,
+          "net_payout_usd": 3305.3916286674234,
+          "since_last_pct": 0.020973297136214614
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2024-05-08",
+          "gross_payout_usd": 4276.697336503189,
+          "net_payout_usd": 4212.546876455641,
+          "since_last_pct": 0.026729358353144928
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2024-07-10",
+          "gross_payout_usd": 254.4504499551448,
+          "net_payout_usd": 250.63369320581762,
+          "since_last_pct": 0.0015903153122196548
+        },
+        {
+          "event": "BLOW_UP_TRAIL_DD_INTRADAY",
+          "date": "2024-07-31",
+          "state": "FUNDED",
+          "cum_pct": -0.05125380177684827,
+          "peak_pct": 0.03606705225181506,
+          "intraday_equity_pct": -0.07299993240554611
+        },
+        {
+          "event": "REPLACEMENT_BUY",
+          "date": "2024-08-07",
+          "fee": 1000.0
+        },
+        {
+          "event": "PHASE_1_PASS",
+          "date": "2025-04-04",
+          "days_in_state": 240,
+          "cum_at_pass": 0.0861809423160919
+        },
+        {
+          "event": "PHASE_2_PASS_FUNDED",
+          "date": "2025-07-25",
+          "days_in_state": 112,
+          "cum_at_pass": 0.058893252877645755
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-08-15",
+          "gross_payout_usd": 4469.826914652378,
+          "net_payout_usd": 4402.7795109325925,
+          "since_last_pct": 0.027936418216577358
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-09-05",
+          "gross_payout_usd": 4924.870910481578,
+          "net_payout_usd": 4850.997846824354,
+          "since_last_pct": 0.030780443190509862
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-09-26",
+          "gross_payout_usd": 342.2433282894255,
+          "net_payout_usd": 337.1096783650841,
+          "since_last_pct": 0.0021390208018089094
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-10-17",
+          "gross_payout_usd": 4574.762708315171,
+          "net_payout_usd": 4506.141267690444,
+          "since_last_pct": 0.02859226692696982
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-11-07",
+          "gross_payout_usd": 496.9572786329324,
+          "net_payout_usd": 489.5029194534384,
+          "since_last_pct": 0.0031059829914558273
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-11-28",
+          "gross_payout_usd": 375.2833635850928,
+          "net_payout_usd": 369.65411313131636,
+          "since_last_pct": 0.0023455210224068296
+        },
+        {
+          "event": "PAYOUT",
+          "date": "2025-12-19",
+          "gross_payout_usd": 3729.9790263961795,
+          "net_payout_usd": 3674.029341000237,
+          "since_last_pct": 0.023312368914976123
+        }
+      ],
+      "spec": "NO_EUR_STACK",
+      "vol_target": 0.08
+    }
+  },
+  "per_year": {
+    "2019": {
+      "fees": 18000.0,
+      "payouts_net": 0.0,
+      "blowups": 14,
+      "phase_passes": 7
+    },
+    "2020": {
+      "fees": 27000.0,
+      "payouts_net": 0.0,
+      "blowups": 25,
+      "phase_passes": 0
+    },
+    "2021": {
+      "fees": 4000.0,
+      "payouts_net": 0.0,
+      "blowups": 2,
+      "phase_passes": 11
+    },
+    "2022": {
+      "fees": 14000.0,
+      "payouts_net": 0.0,
+      "blowups": 14,
+      "phase_passes": 0
+    },
+    "2023": {
+      "fees": 2000.0,
+      "payouts_net": 36515.30675074119,
+      "blowups": 6,
+      "phase_passes": 16
+    },
+    "2024": {
+      "fees": 14000.0,
+      "payouts_net": 39161.60282882743,
+      "blowups": 10,
+      "phase_passes": 12
+    },
+    "2025": {
+      "fees": 2000.0,
+      "payouts_net": 176769.70442247143,
+      "blowups": 2,
+      "phase_passes": 16
+    }
+  },
+  "allocation": [
+    {
+      "name": "A1",
+      "spec": "FX_MR_STACK",
+      "vol_target": 0.1
+    },
+    {
+      "name": "A2",
+      "spec": "FX_MR_STACK",
+      "vol_target": 0.1
+    },
+    {
+      "name": "A3",
+      "spec": "NO_EUR_STACK",
+      "vol_target": 0.1
+    },
+    {
+      "name": "A4",
+      "spec": "NO_EUR_STACK",
+      "vol_target": 0.1
+    },
+    {
+      "name": "A5",
+      "spec": "COMDOLL_STACK",
+      "vol_target": 0.1
+    },
+    {
+      "name": "A6",
+      "spec": "COMDOLL_STACK",
+      "vol_target": 0.1
+    },
+    {
+      "name": "A7",
+      "spec": "FX_MR_STACK",
+      "vol_target": 0.08
+    },
+    {
+      "name": "A8",
+      "spec": "NO_EUR_STACK",
+      "vol_target": 0.08
+    }
+  ],
+  "rules": {
+    "phase1_target": 0.08,
+    "phase2_target": 0.05,
+    "max_daily_loss": 0.05,
+    "max_overall_dd": 0.1,
+    "profit_share": 0.8,
+    "fee": 1000.0,
+    "slippage_haircut": 0.015
+  }
+}

@@ -1,0 +1,114 @@
+# sabo_lit — PAPER environment.
+# Real broker connection, simulated fills. Risk limits are tighter than dev.
+
+environment: paper
+
+device:
+  type: cuda
+  fallback: cpu
+
+execution:
+  mode: paper
+  broker: ${BROKER_NAME}   # e.g. mt5_paper, ibkr_paper
+
+data:
+  provider: live_feed
+  symbols: [EURUSD, GBPUSD, XAUUSD]
+  timeframes: [M1, M5, H1]
+  history_lookback: 1000
+
+microstructure:
+  enabled: true
+  provider: live_feed
+
+lit:
+  liquidity_mapper:
+    equal_level_tolerance_pips: 1.0
+    min_zone_strength: 0.5
+  inducement_detector:
+    min_confidence: 0.7
+    confirmation_lookback_candles: 5
+  phase_classifier:
+    require_sweep_for_phase2: true
+  structure_validator:
+    require_phase2: true
+
+filters:
+  enabled:
+    - order_block
+    - fair_value_gap
+    - liquidity_void
+    - displacement
+  score_clamp: [-0.2, 0.2]
+
+regime:
+  classifier: composite
+  volatility_window: 120
+  liquidity_window: 120
+
+meta_strategy:
+  enabled_sub_strategies:
+    - lit_trend_continuation
+    - lit_reversal
+    - sweep_continuation
+    - mean_reversion_post_inducement
+    - liquidity_exhaustion
+    - session_manipulation
+  selector: meta_model
+
+adaptive:
+  confidence:
+    rolling_window: 100
+    decay_half_life_trades: 40
+    min_sample_size: 25
+    initial_weight: 0.4
+
+features:
+  pipeline: baseline
+models:
+  signal:
+    type: lightgbm
+    artifact_path: experiments/candidates/paper_lgbm.txt
+    fail_open: false
+
+arbiter:
+  acceptance_threshold: 0.6
+
+risk:
+  max_risk_per_trade_pct: 0.3
+  max_daily_loss_pct: 1.5
+  max_weekly_loss_pct: 3.0
+  max_open_positions: 2
+  global_stop_loss_pct: 5.0
+  correlated_symbols:
+    - [EURUSD, GBPUSD]
+
+persistence:
+  postgres_url: ${DATABASE_URL}
+  redis_url: ${REDIS_URL}
+
+event_bus:
+  transport: redis_streams
+
+backtest:
+  default_engine: vectorized
+
+validation:
+  min_oos_sharpe: 1.0
+  max_degradation_ratio: 0.4
+  min_regime_stability: 0.6
+  max_overfitting_pvalue: 0.05
+
+governance:
+  enforce_dependency_policy: true
+  fail_ci_on_violation: true
+  require_manifest_for_register: true
+
+api:
+  host: 0.0.0.0
+  port: 8000
+  cors_allow_origins: ["https://dashboard.internal"]
+
+logging:
+  level: INFO
+  json: true

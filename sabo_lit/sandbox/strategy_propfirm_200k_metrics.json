@@ -1,0 +1,263 @@
+{
+  "account_size": 200000.0,
+  "rules": {
+    "max_daily_loss": 0.05,
+    "max_overall_dd": 0.1,
+    "phase1_target": 0.1,
+    "phase2_target": 0.05,
+    "profit_share": 0.8
+  },
+  "base_strategy": {
+    "is": {
+      "n": 1824,
+      "sharpe": -0.2910385886310714,
+      "ann_ret": -0.01195102551668739,
+      "ann_vol": 0.04106337091895688,
+      "max_dd": -0.17616770095500156,
+      "wr": 42.32456140350877,
+      "calmar": -0.0678389140114852,
+      "best_day": 0.012866024923323326,
+      "worst_day": -0.024396765326159864
+    },
+    "oos": {
+      "n": 731,
+      "sharpe": 1.5110430198512064,
+      "ann_ret": 0.05759690067897336,
+      "ann_vol": 0.03811731361867181,
+      "max_dd": -0.03842155320729141,
+      "wr": 45.82763337893297,
+      "calmar": 1.4990778839217507,
+      "best_day": 0.019312533963927566,
+      "worst_day": -0.010545353124279566
+    },
+    "best_lookback": {
+      "EURUSD": 5,
+      "GBPUSD": 3,
+      "USDJPY": 10,
+      "AUDUSD": 21,
+      "NZDUSD": 10,
+      "USDCAD": 3
+    }
+  },
+  "vol_targets": {
+    "3%": {
+      "oos": {
+        "n": 731,
+        "sharpe": 1.4407404611872687,
+        "ann_ret": 0.04561975410525211,
+        "ann_vol": 0.03166410282366771,
+        "max_dd": -0.047301151182210954,
+        "wr": 45.82763337893297,
+        "calmar": 0.964453358217819,
+        "best_day": 0.014475214584953666,
+        "worst_day": -0.010860837895265069
+      },
+      "phase1": {
+        "pass_rate": 0.0,
+        "daily_breach_rate": 0.0,
+        "dd_breach_rate": 0.0,
+        "timeout_rate": 1.0,
+        "avg_days_to_pass": 0.0,
+        "median_days_to_pass": 0.0
+      },
+      "phase2": {
+        "pass_rate": 0.055,
+        "daily_breach_rate": 0.0,
+        "dd_breach_rate": 0.0,
+        "timeout_rate": 0.945,
+        "avg_days_to_pass": 73.39636363636363,
+        "median_days_to_pass": 77
+      },
+      "funded": {
+        "survival_rate": 1.0,
+        "avg_monthly_profit_pct": 0.003761770612505626,
+        "avg_payouts_collected": 0.040845273880610405,
+        "avg_n_payouts": 6.1342
+      },
+      "avg_lev": 0.8883745680109771
+    },
+    "5%": {
+      "oos": {
+        "n": 731,
+        "sharpe": 1.4407404611872687,
+        "ann_ret": 0.07603292350875351,
+        "ann_vol": 0.052773504706112855,
+        "max_dd": -0.07883525197035159,
+        "wr": 45.82763337893297,
+        "calmar": 0.964453358217819,
+        "best_day": 0.024125357641589445,
+        "worst_day": -0.01810139649210845
+      },
+      "phase1": {
+        "pass_rate": 0.0198,
+        "daily_breach_rate": 0.0,
+        "dd_breach_rate": 0.0002,
+        "timeout_rate": 0.98,
+        "avg_days_to_pass": 76.44444444444444,
+        "median_days_to_pass": 79
+      },
+      "phase2": {
+        "pass_rate": 0.3026,
+        "daily_breach_rate": 0.0,
+        "dd_breach_rate": 0.0002,
+        "timeout_rate": 0.6972,
+        "avg_days_to_pass": 60.99801718440185,
+        "median_days_to_pass": 63
+      },
+      "funded": {
+        "survival_rate": 0.9964,
+        "avg_monthly_profit_pct": 0.0062471216117110945,
+        "avg_payouts_collected": 0.06796935993440287,
+        "avg_n_payouts": 6.0982
+      },
+      "avg_lev": 1.4806242800182956
+    },
+    "7%": {
+      "oos": {
+        "n": 731,
+        "sharpe": 1.440740461187269,
+        "ann_ret": 0.10644609291225494,
+        "ann_vol": 0.073882906588558,
+        "max_dd": -0.11036935275849219,
+        "wr": 45.82763337893297,
+        "calmar": 0.9644533582178194,
+        "best_day": 0.03377550069822523,
+        "worst_day": -0.02534195508895183
+      },
+      "phase1": {
+        "pass_rate": 0.1106,
+        "daily_breach_rate": 0.0,
+        "dd_breach_rate": 0.0032,
+        "timeout_rate": 0.8862,
+        "avg_days_to_pass": 68.47197106690777,
+        "median_days_to_pass": 71
+      },
+      "phase2": {
+        "pass_rate": 0.4948,
+        "daily_breach_rate": 0.0,
+        "dd_breach_rate": 0.0024,
+        "timeout_rate": 0.5028,
+        "avg_days_to_pass": 51.22554567502021,
+        "median_days_to_pass": 51
+      },
+      "funded": {
+        "survival_rate": 0.9656,
+        "avg_monthly_profit_pct": 0.008540391625276603,
+        "avg_payouts_collected": 0.09500291412857599,
+        "avg_n_payouts": 6.1098
+      },
+      "avg_lev": 2.0728739920256136
+    },
+    "10%": {
+      "oos": {
+        "n": 731,
+        "sharpe": 1.4407404611872687,
+        "ann_ret": 0.15206584701750703,
+        "ann_vol": 0.10554700941222571,
+        "max_dd": -0.15767050394070317,
+        "wr": 45.82763337893297,
+        "calmar": 0.964453358217819,
+        "best_day": 0.04825071528317889,
+        "worst_day": -0.0362027929842169
+      },
+      "phase1": {
+        "pass_rate": 0.308,
+        "daily_breach_rate": 0.0,
+        "dd_breach_rate": 0.0338,
+        "timeout_rate": 0.6582,
+        "avg_days_to_pass": 59.914935064935065,
+        "median_days_to_pass": 61
+      },
+      "phase2": {
+        "pass_rate": 0.6718,
+        "daily_breach_rate": 0.0,
+        "dd_breach_rate": 0.0296,
+        "timeout_rate": 0.2986,
+        "avg_days_to_pass": 42.41917237272998,
+        "median_days_to_pass": 40
+      },
+      "funded": {
+        "survival_rate": 0.8266,
+        "avg_monthly_profit_pct": 0.010674201902159845,
+        "avg_payouts_collected": 0.1330594901319627,
+        "avg_n_payouts": 5.9444
+      },
+      "avg_lev": 2.961248560036591
+    },
+    "12%": {
+      "oos": {
+        "n": 731,
+        "sharpe": 1.4407404611872687,
+        "ann_ret": 0.18247901642100844,
+        "ann_vol": 0.12665641129467084,
+        "max_dd": -0.18920460472884382,
+        "wr": 45.82763337893297,
+        "calmar": 0.964453358217819,
+        "best_day": 0.05790085833981466,
+        "worst_day": -0.043443351581060274
+      },
+      "phase1": {
+        "pass_rate": 0.4202,
+        "daily_breach_rate": 0.0,
+        "dd_breach_rate": 0.0818,
+        "timeout_rate": 0.498,
+        "avg_days_to_pass": 55.93479295573536,
+        "median_days_to_pass": 57
+      },
+      "phase2": {
+        "pass_rate": 0.7224,
+        "daily_breach_rate": 0.0,
+        "dd_breach_rate": 0.0598,
+        "timeout_rate": 0.2178,
+        "avg_days_to_pass": 37.307862679955704,
+        "median_days_to_pass": 33
+      },
+      "funded": {
+        "survival_rate": 0.6912,
+        "avg_monthly_profit_pct": 0.010851641185685655,
+        "avg_payouts_collected": 0.15340080767336775,
+        "avg_n_payouts": 5.7208
+      },
+      "avg_lev": 3.5534982720439086
+    },
+    "15%": {
+      "oos": {
+        "n": 731,
+        "sharpe": 1.440740461187269,
+        "ann_ret": 0.22809877052626057,
+        "ann_vol": 0.15832051411833856,
+        "max_dd": -0.23650575591105472,
+        "wr": 45.82763337893297,
+        "calmar": 0.9644533582178192,
+        "best_day": 0.07237607292476833,
+        "worst_day": -0.05430418947632534
+      },
+      "phase1": {
+        "pass_rate": 0.5178,
+        "daily_breach_rate": 0.0828,
+        "dd_breach_rate": 0.1146,
+        "timeout_rate": 0.2848,
+        "avg_days_to_pass": 48.75434530706837,
+        "median_days_to_pass": 47
+      },
+      "phase2": {
+        "pass_rate": 0.7604,
+        "daily_breach_rate": 0.0484,
+        "dd_breach_rate": 0.0744,
+        "timeout_rate": 0.1168,
+        "avg_days_to_pass": 31.479747501315096,
+        "median_days_to_pass": 26
+      },
+      "funded": {
+        "survival_rate": 0.392,
+        "avg_monthly_profit_pct": 0.015010669390443843,
+        "avg_payouts_collected": 0.16227944427213775,
+        "avg_n_payouts": 4.7642
+      },
+      "avg_lev": 4.441872840054885
+    }
+  },
+  "recommended_target_vol": "10%",
+  "expected_first_year_income": 4551.577769079349,
+  "verdict": "NOT_PROP_SUITABLE"
+}

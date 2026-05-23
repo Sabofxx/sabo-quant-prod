@@ -1,0 +1,46 @@
+# Phase 0 — pinned versions. Bump deliberately.
+# Python 3.12+.
+
+# --- Core typing / validation -------------------------------------------------
+pydantic==2.9.2
+pydantic-settings==2.6.0
+
+# --- Configuration ------------------------------------------------------------
+PyYAML==6.0.2
+
+# --- API / serving ------------------------------------------------------------
+fastapi==0.115.4
+uvicorn[standard]==0.32.0
+
+# --- Persistence --------------------------------------------------------------
+asyncpg==0.30.0
+SQLAlchemy==2.0.36
+alembic==1.13.3
+redis==5.1.1
+
+# --- Numerical / data ---------------------------------------------------------
+numpy==2.1.3
+pandas==2.2.3
+scipy==1.14.1
+scikit-learn==1.5.2
+
+# --- ML — gradient boosting ---------------------------------------------------
+xgboost==2.1.2
+lightgbm==4.5.0
+
+# --- ML — deep learning (portable mps / cuda / cpu) ---------------------------
+torch==2.5.1
+
+# --- Reinforcement learning (strategy selector) -------------------------------
+gymnasium==1.0.0
+
+# --- Backtesting helpers ------------------------------------------------------
+pyarrow==18.0.0
+
+# --- Tooling ------------------------------------------------------------------
+ruff==0.7.4
+mypy==1.13.0
+pytest==8.3.3
+pytest-asyncio==0.24.0
+pytest-cov==6.0.0
+hypothesis==6.119.0

@@ -1,0 +1,132 @@
+# sabo_lit — DEV environment.
+# Permissive risk, paper execution, synthetic data. Never used in live.
+
+environment: dev
+
+# Device portability — `type` is read from config, never hard-coded.
+# Fallback applies if the requested device is unavailable at runtime.
+device:
+  type: mps              # one of: mps | cuda | cpu
+  fallback: cpu
+
+# Execution mode is frozen at startup. ExecutionBroker.mode reflects this.
+execution:
+  mode: paper            # one of: paper | live
+  broker: paper_sim
+
+# Market data
+data:
+  provider: synthetic
+  symbols: [EURUSD, GBPUSD, XAUUSD]
+  timeframes: [M1, M5, H1]
+  history_lookback: 500
+
+# Microstructure
+microstructure:
+  enabled: true
+  provider: synthetic
+
+# LIT gate parameters
+lit:
+  liquidity_mapper:
+    equal_level_tolerance_pips: 1.5
+    min_zone_strength: 0.4
+  inducement_detector:
+    min_confidence: 0.6
+    confirmation_lookback_candles: 5
+  phase_classifier:
+    require_sweep_for_phase2: true
+  structure_validator:
+    require_phase2: false   # dev: relaxed; live: stricter
+
+# Secondary filters
+filters:
+  enabled:
+    - order_block
+    - fair_value_gap
+    - liquidity_void
+    - displacement
+  score_clamp: [-0.3, 0.3]
+
+# Regime classification
+regime:
+  classifier: composite
+  volatility_window: 96
+  liquidity_window: 96
+
+# Meta strategy
+meta_strategy:
+  enabled_sub_strategies:
+    - lit_trend_continuation
+    - lit_reversal
+    - sweep_continuation
+    - mean_reversion_post_inducement
+  selector: rule_based     # one of: rule_based | meta_model | rl_policy
+
+# Adaptive confidence
+adaptive:
+  confidence:
+    rolling_window: 50
+    decay_half_life_trades: 25
+    min_sample_size: 10
+    initial_weight: 0.5
+
+# Features and models
+features:
+  pipeline: baseline
+models:
+  signal:
+    type: xgboost
+    artifact_path: experiments/candidates/baseline_xgb.json
+    fail_open: false       # if the model file is missing, refuse to start
+
+# Probabilistic arbiter (downstream of the gate)
+arbiter:
+  acceptance_threshold: 0.55
+
+# Risk — conservative by default; dev is still real money mentally.
+risk:
+  max_risk_per_trade_pct: 0.5
+  max_daily_loss_pct: 2.0
+  max_weekly_loss_pct: 4.0
+  max_open_positions: 2
+  global_stop_loss_pct: 8.0
+  correlated_symbols:
+    - [EURUSD, GBPUSD]
+
+# Persistence — URLs come from environment, never hard-coded.
+persistence:
+  postgres_url: ${DATABASE_URL}
+  redis_url: ${REDIS_URL}
+
+# Event bus
+event_bus:
+  transport: in_memory     # dev: in_memory; paper/live: redis_streams
+
+# Backtesting
+backtest:
+  default_engine: vectorized
+
+# Validation thresholds — used by ComponentRegistry to accept a manifest.
+validation:
+  min_oos_sharpe: 0.7
+  max_degradation_ratio: 0.5
+  min_regime_stability: 0.5
+  max_overfitting_pvalue: 0.05
+
+# Governance
+governance:
+  enforce_dependency_policy: true
+  fail_ci_on_violation: true
+  require_manifest_for_register: true
+
+# API / dashboard
+api:
+  host: 0.0.0.0
+  port: 8000
+  cors_allow_origins: ["*"]
+
+# Logging
+logging:
+  level: DEBUG
+  json: false

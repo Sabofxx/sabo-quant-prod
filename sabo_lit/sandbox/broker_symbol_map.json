@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "last_updated": "2026-05-22",
+  "critical_note": "These mappings are execution templates, not broker-certified contract specs. Confirm symbols, lot sizes, tick values, swaps, and suffixes inside the exact account platform before live trading.",
+  "brokers": {
+    "default_mt5": {
+      "verified": false,
+      "platforms": ["MetaTrader 5"],
+      "source": "Generic MT5 naming convention. Verify in Market Watch.",
+      "symbols": {
+        "EURUSD": "EURUSD",
+        "GBPUSD": "GBPUSD",
+        "USDJPY": "USDJPY",
+        "USDCHF": "USDCHF",
+        "AUDUSD": "AUDUSD",
+        "USDCAD": "USDCAD",
+        "NZDUSD": "NZDUSD",
+        "GBPJPY": "GBPJPY",
+        "EURJPY": "EURJPY",
+        "AUDJPY": "AUDJPY",
+        "CADJPY": "CADJPY",
+        "CHFJPY": "CHFJPY",
+        "EURGBP": "EURGBP",
+        "EURCAD": "EURCAD",
+        "EURAUD": "EURAUD",
+        "XAUUSD": "XAUUSD",
+        "XAGUSD": "XAGUSD",
+        "usa100idxusd": "USTEC",
+        "usatechidxusd": "USTEC",
+        "us30idxusd": "US30",
+        "usa30idxusd": "US30",
+        "usa500idxusd": "US500",
+        "deuidxeur": "GER40",
+        "usoilusd": "USOIL"
+      },
+      "contract_specs": {
+        "fx_standard_lot_units": 100000,
+        "metals": "MUST_EXPORT_FROM_PLATFORM",
+        "indices": "MUST_EXPORT_FROM_PLATFORM",
+        "oil": "MUST_EXPORT_FROM_PLATFORM",
+        "swap_rates": "MUST_EXPORT_FROM_PLATFORM_DAILY"
+      }
+    },
+    "ftmo_mt5": {
+      "verified": false,
+      "platforms": ["MetaTrader 4", "MetaTrader 5", "cTrader"],
+      "source": "https://ftmo.com/en/ftmo-trading-platforms/",
+      "symbols": {
+        "EURUSD": "EURUSD",
+        "GBPUSD": "GBPUSD",
+        "USDJPY": "USDJPY",
+        "USDCHF": "USDCHF",
+        "AUDUSD": "AUDUSD",
+        "USDCAD": "USDCAD",
+        "NZDUSD": "NZDUSD",
+        "XAUUSD": "XAUUSD",
+        "XAGUSD": "XAGUSD",
+        "usa100idxusd": "USTEC",
+        "usatechidxusd": "USTEC",
+        "us30idxusd": "US30",
+        "usa30idxusd": "US30",
+        "usa500idxusd": "US500",
+        "deuidxeur": "GER40",
+        "usoilusd": "USOIL"
+      },
+      "contract_specs": {
+        "fx_standard_lot_units": 100000,
+        "indices": "MUST_VERIFY_FTMO_SYMBOLS_PAGE_OR_MT5_SYMBOL_SPEC",
+        "swap_rates": "MUST_EXPORT_FROM_ACCOUNT"
+      }
+    },
+    "fundingpips_mt5": {
+      "verified": false,
+      "platforms": ["MetaTrader 5", "cTrader", "MatchTrader"],
+      "source": "https://help.fundingpips.com/hc/en-us/articles/43468639481105",
+      "symbols": {
+        "EURUSD": "EURUSD",
+        "GBPUSD": "GBPUSD",
+        "USDJPY": "USDJPY",
+        "USDCHF": "USDCHF",
+        "AUDUSD": "AUDUSD",
+        "USDCAD": "USDCAD",
+        "NZDUSD": "NZDUSD",
+        "XAUUSD": "XAUUSD",
+        "XAGUSD": "XAGUSD",
+        "usa100idxusd": "USTEC",
+        "usatechidxusd": "USTEC",
+        "us30idxusd": "US30",
+        "usa30idxusd": "US30",
+        "usa500idxusd": "US500",
+        "deuidxeur": "GER40",
+        "usoilusd": "USOIL"
+      },
+      "contract_specs": {
+        "fx_standard_lot_units": 100000,
+        "indices": "MUST_VERIFY_IN_PLATFORM",
+        "swap_rates": "MUST_EXPORT_FROM_ACCOUNT"
+      }
+    },
+    "fundednext_mt5": {
+      "verified": false,
+      "platforms": ["MetaTrader 4", "MetaTrader 5", "Match-Trader", "cTrader"],
+      "source": "https://help.fundednext.com/en/articles/8224149-which-broker-does-fundednext-associate-with",
+      "symbols": {
+        "EURUSD": "EURUSD",
+        "GBPUSD": "GBPUSD",
+        "USDJPY": "USDJPY",
+        "USDCHF": "USDCHF",
+        "AUDUSD": "AUDUSD",
+        "USDCAD": "USDCAD",
+        "NZDUSD": "NZDUSD",
+        "XAUUSD": "XAUUSD",
+        "XAGUSD": "XAGUSD",
+        "usa100idxusd": "USTEC",
+        "usatechidxusd": "USTEC",
+        "us30idxusd": "US30",
+        "usa30idxusd": "US30",
+        "usa500idxusd": "US500",
+        "deuidxeur": "GER40",
+        "usoilusd": "USOIL"
+      },
+      "contract_specs": {
+        "fx_standard_lot_units": 100000,
+        "indices": "MUST_VERIFY_IN_PLATFORM",
+        "swap_rates": "MUST_EXPORT_FROM_ACCOUNT"
+      }
+    },
+    "e8_mt5": {
+      "verified": false,
+      "platforms": ["TradeLocker", "MatchTrader", "cTrader", "MetaTrader 5"],
+      "source": "https://help.e8markets.com/en/articles/9799834-available-trading-platforms",
+      "symbols": {
+        "EURUSD": "EURUSD",
+        "GBPUSD": "GBPUSD",
+        "USDJPY": "USDJPY",
+        "USDCHF": "USDCHF",
+        "AUDUSD": "AUDUSD",
+        "USDCAD": "USDCAD",
+        "NZDUSD": "NZDUSD",
+        "XAUUSD": "XAUUSD",
+        "XAGUSD": "XAGUSD",
+        "usa100idxusd": "USTEC",
+        "usatechidxusd": "USTEC",
+        "us30idxusd": "US30",
+        "usa30idxusd": "US30",
+        "usa500idxusd": "US500",
+        "deuidxeur": "GER40",
+        "usoilusd": "USOIL"
+      },
+      "contract_specs": {
+        "fx_standard_lot_units": 100000,
+        "indices": "MUST_VERIFY_IN_PLATFORM",
+        "swap_rates": "MUST_EXPORT_FROM_ACCOUNT"
+      }
+    }
+  }
+}

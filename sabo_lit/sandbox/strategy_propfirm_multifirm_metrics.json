@@ -1,0 +1,410 @@
+{
+  "firm_plans": {
+    "FTMO_SWING_200K": {
+      "name": "FTMO_SWING_200K",
+      "account_size": 200000,
+      "fee": 1080,
+      "targets": [
+        0.1,
+        0.05
+      ],
+      "max_daily_loss": 0.05,
+      "max_overall_loss": 0.1,
+      "profit_share": 0.8,
+      "overall_mode": "eod_trailing",
+      "daily_profit_cap_eval": null,
+      "fee_refund_after_first_payout": false,
+      "max_accounts_per_trader": 2
+    },
+    "MFF_LIKE_STATIC_200K": {
+      "name": "MFF_LIKE_STATIC_200K",
+      "account_size": 200000,
+      "fee": 900,
+      "targets": [
+        0.05,
+        0.05
+      ],
+      "max_daily_loss": 0.05,
+      "max_overall_loss": 0.1,
+      "profit_share": 0.8,
+      "overall_mode": "static",
+      "daily_profit_cap_eval": 0.02,
+      "fee_refund_after_first_payout": true,
+      "max_accounts_per_trader": 2
+    },
+    "FUNDED_NEXT_TRAIL_200K": {
+      "name": "FUNDED_NEXT_TRAIL_200K",
+      "account_size": 200000,
+      "fee": 1000,
+      "targets": [
+        0.08,
+        0.05
+      ],
+      "max_daily_loss": 0.05,
+      "max_overall_loss": 0.1,
+      "profit_share": 0.85,
+      "overall_mode": "eod_trailing",
+      "daily_profit_cap_eval": null,
+      "fee_refund_after_first_payout": true,
+      "max_accounts_per_trader": 2
+    },
+    "FUNDINGPIPS_FAST_200K": {
+      "name": "FUNDINGPIPS_FAST_200K",
+      "account_size": 200000,
+      "fee": 850,
+      "targets": [
+        0.08,
+        0.05
+      ],
+      "max_daily_loss": 0.05,
+      "max_overall_loss": 0.1,
+      "profit_share": 0.8,
+      "overall_mode": "static",
+      "daily_profit_cap_eval": null,
+      "fee_refund_after_first_payout": false,
+      "max_accounts_per_trader": 2
+    }
+  },
+  "validated_specs": [
+    "FX_MR_STACK",
+    "NO_EUR_STACK",
+    "COMDOLL_STACK",
+    "EURUSD_MR5"
+  ],
+  "levered_metrics": {
+    "FX_MR_STACK_4": {
+      "n": 731,
+      "sharpe": 1.4407404611872687,
+      "ann_ret": 0.060826338807002826,
+      "ann_vol": 0.04221880376489029,
+      "max_dd": -0.06306820157628125,
+      "wr": 0.4582763337893297,
+      "worst_day": -0.01448111719368676,
+      "worst_intraday": -0.017186141860568143
+    },
+    "FX_MR_STACK_5": {
+      "n": 731,
+      "sharpe": 1.4407404611872687,
+      "ann_ret": 0.07603292350875351,
+      "ann_vol": 0.052773504706112855,
+      "max_dd": -0.07883525197035159,
+      "wr": 0.4582763337893297,
+      "worst_day": -0.01810139649210845,
+      "worst_intraday": -0.02148267732571018
+    },
+    "FX_MR_STACK_8": {
+      "n": 731,
+      "sharpe": 1.4407404611872687,
+      "ann_ret": 0.12165267761400565,
+      "ann_vol": 0.08443760752978058,
+      "max_dd": -0.1261364031525625,
+      "wr": 0.4582763337893297,
+      "worst_day": -0.02896223438737352,
+      "worst_intraday": -0.034372283721136286
+    },
+    "FX_MR_STACK_10": {
+      "n": 731,
+      "sharpe": 1.4407404611872687,
+      "ann_ret": 0.15206584701750703,
+      "ann_vol": 0.10554700941222571,
+      "max_dd": -0.15767050394070317,
+      "wr": 0.4582763337893297,
+      "worst_day": -0.0362027929842169,
+      "worst_intraday": -0.04296535465142036
+    },
+    "FX_MR_STACK_12": {
+      "n": 731,
+      "sharpe": 1.4407404611872687,
+      "ann_ret": 0.18247901642100844,
+      "ann_vol": 0.12665641129467084,
+      "max_dd": -0.18920460472884382,
+      "wr": 0.4582763337893297,
+      "worst_day": -0.043443351581060274,
+      "worst_intraday": -0.051558425581704426
+    },
+    "NO_EUR_STACK_4": {
+      "n": 731,
+      "sharpe": 1.356949746215782,
+      "ann_ret": 0.05748903699913495,
+      "ann_vol": 0.042366371458824124,
+      "max_dd": -0.06900623810291567,
+      "wr": 0.4692202462380301,
+      "worst_day": -0.014480402290807597,
+      "worst_intraday": -0.017236486530295362
+    },
+    "NO_EUR_STACK_5": {
+      "n": 731,
+      "sharpe": 1.3569497462157816,
+      "ann_ret": 0.07186129624891865,
+      "ann_vol": 0.05295796432353016,
+      "max_dd": -0.08625779762864458,
+      "wr": 0.4692202462380301,
+      "worst_day": -0.018100502863509497,
+      "worst_intraday": -0.0215456081628692
+    },
+    "NO_EUR_STACK_8": {
+      "n": 731,
+      "sharpe": 1.356949746215782,
+      "ann_ret": 0.1149780739982699,
+      "ann_vol": 0.08473274291764825,
+      "max_dd": -0.13801247620583135,
+      "wr": 0.4692202462380301,
+      "worst_day": -0.028960804581615193,
+      "worst_intraday": -0.034472973060590724
+    },
+    "NO_EUR_STACK_10": {
+      "n": 731,
+      "sharpe": 1.3569497462157816,
+      "ann_ret": 0.1437225924978373,
+      "ann_vol": 0.10591592864706031,
+      "max_dd": -0.17251559525728916,
+      "wr": 0.4692202462380301,
+      "worst_day": -0.036201005727018995,
+      "worst_intraday": -0.0430912163257384
+    },
+    "NO_EUR_STACK_12": {
+      "n": 731,
+      "sharpe": 1.3569497462157818,
+      "ann_ret": 0.1724671109974048,
+      "ann_vol": 0.12709911437647237,
+      "max_dd": -0.207018714308747,
+      "wr": 0.4692202462380301,
+      "worst_day": -0.04344120687242278,
+      "worst_intraday": -0.051709459590886075
+    },
+    "COMDOLL_STACK_4": {
+      "n": 731,
+      "sharpe": 1.2503879701800324,
+      "ann_ret": 0.05467945292085499,
+      "ann_vol": 0.04372998959113641,
+      "max_dd": -0.04931554042323021,
+      "wr": 0.47606019151846785,
+      "worst_day": -0.015006620735221262,
+      "worst_intraday": -0.015341890047332617
+    },
+    "COMDOLL_STACK_5": {
+      "n": 731,
+      "sharpe": 1.2503879701800322,
+      "ann_ret": 0.06834931615106873,
+      "ann_vol": 0.05466248698892052,
+      "max_dd": -0.061644425529037754,
+      "wr": 0.47606019151846785,
+      "worst_day": -0.01875827591902658,
+      "worst_intraday": -0.019177362559165773
+    },
+    "COMDOLL_STACK_8": {
+      "n": 731,
+      "sharpe": 1.2503879701800324,
+      "ann_ret": 0.10935890584170999,
+      "ann_vol": 0.08745997918227282,
+      "max_dd": -0.09863108084646043,
+      "wr": 0.47606019151846785,
+      "worst_day": -0.030013241470442525,
+      "worst_intraday": -0.030683780094665235
+    },
+    "COMDOLL_STACK_10": {
+      "n": 731,
+      "sharpe": 1.2503879701800322,
+      "ann_ret": 0.13669863230213747,
+      "ann_vol": 0.10932497397784104,
+      "max_dd": -0.12328885105807551,
+      "wr": 0.47606019151846785,
+      "worst_day": -0.03751655183805316,
+      "worst_intraday": -0.038354725118331545
+    },
+    "COMDOLL_STACK_12": {
+      "n": 731,
+      "sharpe": 1.2503879701800322,
+      "ann_ret": 0.16403835876256498,
+      "ann_vol": 0.13118996877340924,
+      "max_dd": -0.14794662126969066,
+      "wr": 0.47606019151846785,
+      "worst_day": -0.04501986220566378,
+      "worst_intraday": -0.04602567014199785
+    },
+    "EURUSD_MR5_4": {
+      "n": 731,
+      "sharpe": 1.1189173383211257,
+      "ann_ret": 0.04552895532085256,
+      "ann_vol": 0.04069018663091437,
+      "max_dd": -0.029436722358313225,
+      "wr": 0.4322845417236662,
+      "worst_day": -0.009388548675598662,
+      "worst_intraday": -0.010738867280339267
+    },
+    "EURUSD_MR5_5": {
+      "n": 731,
+      "sharpe": 1.1189173383211255,
+      "ann_ret": 0.05691119415106569,
+      "ann_vol": 0.05086273328864297,
+      "max_dd": -0.03679590294789156,
+      "wr": 0.4322845417236662,
+      "worst_day": -0.011735685844498328,
+      "worst_intraday": -0.013423584100424083
+    },
+    "EURUSD_MR5_8": {
+      "n": 731,
+      "sharpe": 1.1189173383211257,
+      "ann_ret": 0.09105791064170513,
+      "ann_vol": 0.08138037326182875,
+      "max_dd": -0.05887344471662645,
+      "wr": 0.4322845417236662,
+      "worst_day": -0.018777097351197324,
+      "worst_intraday": -0.021477734560678533
+    },
+    "EURUSD_MR5_10": {
+      "n": 731,
+      "sharpe": 1.1189173383211255,
+      "ann_ret": 0.11382238830213139,
+      "ann_vol": 0.10172546657728594,
+      "max_dd": -0.07359180589578312,
+      "wr": 0.4322845417236662,
+      "worst_day": -0.023471371688996656,
+      "worst_intraday": -0.026847168200848166
+    },
+    "EURUSD_MR5_12": {
+      "n": 731,
+      "sharpe": 1.1189173383211255,
+      "ann_ret": 0.13658686596255765,
+      "ann_vol": 0.12207055989274311,
+      "max_dd": -0.08831016707493966,
+      "wr": 0.4322845417236662,
+      "worst_day": -0.028165646026795985,
+      "worst_intraday": -0.0322166018410178
+    }
+  },
+  "portfolio_results": {
+    "concentrated_safe_4x200_2firms_robust_only": {
+      "fees": 3500,
+      "gross_mean": 104886.64511876872,
+      "gross_median": 95228.5026734483,
+      "gross_p05": 0.0,
+      "gross_p95": 259095.4525909981,
+      "net_mean": 101386.64511876872,
+      "net_median": 91728.5026734483,
+      "net_p05": -3500.0,
+      "net_p95": 255595.4525909981,
+      "p_net_positive": 0.8884,
+      "p_at_least_one_funded": 0.925,
+      "avg_funded": 3.3356,
+      "avg_dead": 1.349
+    },
+    "diversified_8x200_4firms_robust_only": {
+      "fees": 7660,
+      "gross_mean": 160482.36214378205,
+      "gross_median": 145087.54086599924,
+      "gross_p05": 0.0,
+      "gross_p95": 396682.2378003626,
+      "net_mean": 152822.36214378205,
+      "net_median": 137427.54086599924,
+      "net_p05": -7660.0,
+      "net_p95": 389022.2378003626,
+      "p_net_positive": 0.8872,
+      "p_at_least_one_funded": 0.939,
+      "avg_funded": 6.3844,
+      "avg_dead": 3.551
+    },
+    "diversified_8x200_4firms_with_eurusd_legacy": {
+      "fees": 7660,
+      "gross_mean": 128653.77405085696,
+      "gross_median": 114078.43294587849,
+      "gross_p05": 0.0,
+      "gross_p95": 312871.49738306244,
+      "net_mean": 120993.77405085696,
+      "net_median": 106418.43294587849,
+      "net_p05": -7660.0,
+      "net_p95": 305211.49738306244,
+      "p_net_positive": 0.891,
+      "p_at_least_one_funded": 0.953,
+      "avg_funded": 5.7366,
+      "avg_dead": 2.6414
+    },
+    "minimal_test_2x200_2firms": {
+      "fees": 1750,
+      "gross_mean": 53536.28383719959,
+      "gross_median": 48857.01871076163,
+      "gross_p05": 0.0,
+      "gross_p95": 129017.49218537912,
+      "net_mean": 51786.28383719959,
+      "net_median": 47107.01871076163,
+      "net_p05": -1750.0,
+      "net_p95": 127267.49218537912,
+      "p_net_positive": 0.8512,
+      "p_at_least_one_funded": 0.8864,
+      "avg_funded": 1.6864,
+      "avg_dead": 0.661
+    },
+    "fast_eval_6x200_3firms_robust_only": {
+      "fees": 5500,
+      "gross_mean": 137325.99642820095,
+      "gross_median": 124575.32853574032,
+      "gross_p05": 0.0,
+      "gross_p95": 329215.4304133901,
+      "net_mean": 131825.99642820095,
+      "net_median": 119075.32853574032,
+      "net_p05": -5500.0,
+      "net_p95": 323715.4304133901,
+      "p_net_positive": 0.897,
+      "p_at_least_one_funded": 0.9416,
+      "avg_funded": 4.929,
+      "avg_dead": 2.4508
+    }
+  },
+  "best": "diversified_8x200_4firms_robust_only",
+  "best_composition": [
+    {
+      "name": "A1",
+      "firm_template": "MFF_LIKE_STATIC_200K",
+      "spec": "FX_MR_STACK",
+      "vol_target": 0.1
+    },
+    {
+      "name": "A2",
+      "firm_template": "MFF_LIKE_STATIC_200K",
+      "spec": "NO_EUR_STACK",
+      "vol_target": 0.1
+    },
+    {
+      "name": "A3",
+      "firm_template": "FUNDINGPIPS_FAST_200K",
+      "spec": "NO_EUR_STACK",
+      "vol_target": 0.1
+    },
+    {
+      "name": "A4",
+      "firm_template": "FUNDINGPIPS_FAST_200K",
+      "spec": "COMDOLL_STACK",
+      "vol_target": 0.1
+    },
+    {
+      "name": "A5",
+      "firm_template": "FUNDED_NEXT_TRAIL_200K",
+      "spec": "FX_MR_STACK",
+      "vol_target": 0.08
+    },
+    {
+      "name": "A6",
+      "firm_template": "FUNDED_NEXT_TRAIL_200K",
+      "spec": "COMDOLL_STACK",
+      "vol_target": 0.08
+    },
+    {
+      "name": "A7",
+      "firm_template": "FTMO_SWING_200K",
+      "spec": "NO_EUR_STACK",
+      "vol_target": 0.08
+    },
+    {
+      "name": "A8",
+      "firm_template": "FTMO_SWING_200K",
+      "spec": "COMDOLL_STACK",
+      "vol_target": 0.08
+    }
+  ],
+  "slippage_haircut": 0.015,
+  "compared_to_codex_hybrid_8x200": {
+    "codex_net_mean": 186194.8744588791,
+    "realistic_net_mean": 152822.36214378205,
+    "delta": -33372.51231509703
+  }
+}

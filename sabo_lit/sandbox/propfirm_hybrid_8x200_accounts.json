@@ -1,0 +1,109 @@
+{
+  "portfolio": "adaptive_75_50_fx_core_8x200",
+  "currency": "USD",
+  "default_firm_rules": {
+    "max_daily_loss_pct": 0.05,
+    "max_overall_loss_pct": 0.10,
+    "daily_lockout_pct": -0.04,
+    "overall_lockout_pct": -0.08
+  },
+  "accounts": [
+    {
+      "account_id": "A1",
+      "firm": "FTMO_2STEP_NORMAL",
+      "broker": "ftmo_mt5",
+      "platform": "MT5",
+      "login": "TBD",
+      "account_size": 200000,
+      "strategy": "FX_MR_STACK",
+      "target_vol": 0.10,
+      "magic": 2026052201,
+      "enabled": true
+    },
+    {
+      "account_id": "A2",
+      "firm": "FTMO_2STEP_NORMAL",
+      "broker": "ftmo_mt5",
+      "platform": "MT5",
+      "login": "TBD",
+      "account_size": 200000,
+      "strategy": "FX_MR_STACK",
+      "target_vol": 0.10,
+      "magic": 2026052202,
+      "enabled": true
+    },
+    {
+      "account_id": "A3",
+      "firm": "FUNDEDNEXT_CFD",
+      "broker": "fundednext_mt5",
+      "platform": "MT5",
+      "login": "TBD",
+      "account_size": 200000,
+      "strategy": "NO_EUR_STACK",
+      "target_vol": 0.10,
+      "magic": 2026052203,
+      "enabled": true
+    },
+    {
+      "account_id": "A4",
+      "firm": "FUNDEDNEXT_CFD",
+      "broker": "fundednext_mt5",
+      "platform": "MT5",
+      "login": "TBD",
+      "account_size": 200000,
+      "strategy": "NO_EUR_STACK",
+      "target_vol": 0.10,
+      "magic": 2026052204,
+      "enabled": true
+    },
+    {
+      "account_id": "A5",
+      "firm": "FTMO_2STEP_NORMAL",
+      "broker": "ftmo_mt5",
+      "platform": "MT5",
+      "login": "TBD",
+      "account_size": 200000,
+      "strategy": "COMDOLL_STACK",
+      "target_vol": 0.10,
+      "magic": 2026052205,
+      "enabled": true
+    },
+    {
+      "account_id": "A6",
+      "firm": "FUNDEDNEXT_CFD",
+      "broker": "fundednext_mt5",
+      "platform": "MT5",
+      "login": "TBD",
+      "account_size": 200000,
+      "strategy": "COMDOLL_STACK",
+      "target_vol": 0.10,
+      "magic": 2026052206,
+      "enabled": true
+    },
+    {
+      "account_id": "A7",
+      "firm": "FTMO_2STEP_NORMAL",
+      "broker": "ftmo_mt5",
+      "platform": "MT5",
+      "login": "TBD",
+      "account_size": 200000,
+      "strategy": "FX_MR_STACK",
+      "target_vol": 0.08,
+      "magic": 2026052207,
+      "enabled": true
+    },
+    {
+      "account_id": "A8",
+      "firm": "FUNDEDNEXT_CFD",
+      "broker": "fundednext_mt5",
+      "platform": "MT5",
+      "login": "TBD",
+      "account_size": 200000,
+      "strategy": "NO_EUR_STACK",
+      "target_vol": 0.08,
+      "magic": 2026052208,
+      "enabled": true
+    }
+  ],
+  "instrument_overrides": {}
+}

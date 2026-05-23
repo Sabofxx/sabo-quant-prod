@@ -1,0 +1,71 @@
+# CI for sabo_lit.
+#
+# Why GitHub Actions: the project has no other CI infrastructure declared in
+# the contract phases; GHA is the lowest-friction default (zero infra, runs
+# on every PR, free for the relevant tier). If a different system is later
+# adopted, replace this file — the same three jobs (lint, tests, governance
+# scan) translate directly.
+#
+# Assumed repo layout: the git root IS the `sabo_lit/` directory itself.
+# That is, the file at `.github/workflows/ci.yml` lives at the same level
+# as `core/`, `governance/`, `tests/`, `requirements.txt`, etc.
+# Because `import sabo_lit` then needs the PARENT of the repo on
+# `sys.path`, we check out into a `sabo_lit/` subfolder and run from one
+# level above it. This mirrors what the tests/governance/conftest.py does
+# locally.
+
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out into ./sabo_lit so 'import sabo_lit' works
+        uses: actions/checkout@v4
+        with:
+          path: sabo_lit
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: sabo_lit/requirements.txt
+
+      - name: Install dependencies
+        working-directory: sabo_lit
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint with ruff
+        working-directory: sabo_lit
+        run: ruff check .
+
+      - name: Run tests (pytest discovers under sabo_lit/tests/)
+        # PYTHONPATH points at the workspace root, which contains the
+        # sabo_lit/ package directory. This mirrors what conftest.py does
+        # locally — keep both paths in sync.
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: pytest sabo_lit/tests/ -v
+
+      - name: Run governance scan (single source of truth for the verdict)
+        # This step is the CI verdict. It calls THE SAME function
+        # (`sabo_lit.governance.scan_runner.main`) that the pytest suite
+        # exercises via `test_main_exits_one_on_violations` and
+        # `test_main_exits_zero_on_clean_tree`. The YAML contains NO
+        # logic that decides green / red — that logic lives in
+        # `scan_runner.py` and is fully tested.
+        #
+        # If you ever feel like inlining `python -c "..."` here again,
+        # don't: any code in the YAML becomes untested code that decides
+        # the build status. Add a flag to `scan_runner` instead.
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: python -m sabo_lit.governance.scan_runner ${{ github.workspace }}

@@ -1,0 +1,76 @@
+# sabo_lit — local development stack.
+# Three services: the Python app, Postgres for persistence, Redis for cache
+# and as the event-bus transport in dev. Every line is annotated so it is
+# obvious what is dev-only and what must change in paper/live.
+
+version: "3.9"
+
+services:
+
+  app:
+    # The trading application itself. Image is built from the repo root.
+    build: .
+    # Mount source read-only in dev for hot reload; in live this is replaced
+    # by an immutable image built in CI.
+    volumes:
+      - ./sabo_lit:/app/sabo_lit:ro
+    # SABO_LIT_ENV selects the YAML config (dev / paper / live) that drives
+    # device, execution mode, broker, risk limits and persistence URLs.
+    environment:
+      - SABO_LIT_ENV=dev
+      - DATABASE_URL=postgresql://sabo:sabo@postgres:5432/sabo_lit
+      - REDIS_URL=redis://redis:6379/0
+    # The app must not start before storage is ready; healthchecks below
+    # gate dependency readiness.
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # Restart on crash in dev; in live this is handled by the orchestrator.
+    restart: unless-stopped
+
+  postgres:
+    # Stores trades, signals, manifests, validation reports, promotion
+    # requests and the experiment registry. Use a stable major version.
+    image: postgres:16-alpine
+    # Credentials are stub values for dev only. Paper and live MUST override
+    # these from the host environment — never commit real credentials.
+    environment:
+      - POSTGRES_USER=sabo
+      - POSTGRES_PASSWORD=sabo
+      - POSTGRES_DB=sabo_lit
+    # Named volume so database files survive container removal in dev.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # Local-only port. Production deployments MUST NOT expose 5432 publicly.
+    ports:
+      - "5432:5432"
+    # Readiness probe — used by the app's depends_on condition above.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sabo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    # Used as a cache and as the dev event-bus transport (Redis Streams).
+    image: redis:7-alpine
+    # Append-only file so the bus state survives a crash during dev.
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    # Local-only port. Production deployments MUST NOT expose 6379 publicly.
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  # Named volumes survive container removal. Delete them explicitly to wipe
+  # local state (e.g. `docker compose down -v` to reset).
+  postgres_data:
+  redis_data:

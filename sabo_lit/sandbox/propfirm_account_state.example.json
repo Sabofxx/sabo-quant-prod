@@ -1,0 +1,12 @@
+{
+  "updated_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "accounts": [
+    {
+      "account_id": "A1",
+      "manual_lock": false,
+      "daily_pnl_pct": 0.0,
+      "overall_pnl_pct": 0.0,
+      "notes": "Update these values from firm dashboard before generating live orders."
+    }
+  ]
+}

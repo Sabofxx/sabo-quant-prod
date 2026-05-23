@@ -1,0 +1,117 @@
+# sabo_lit — LIVE environment.
+# Real broker, real fills, real money. Every threshold is tighter; every
+# tolerance is lower. `execution.mode: live` is the ONLY place this is set;
+# changing it requires changing config and restarting the process.
+
+environment: live
+
+device:
+  type: cuda
+  fallback: cpu
+
+execution:
+  mode: live
+  broker: ${BROKER_NAME}
+  # Live broker credentials never live in YAML; they are read from env vars
+  # by the broker adapter.
+
+data:
+  provider: live_feed
+  symbols: [EURUSD, GBPUSD, XAUUSD]
+  timeframes: [M1, M5, H1]
+  history_lookback: 2000
+
+microstructure:
+  enabled: true
+  provider: live_feed
+
+lit:
+  liquidity_mapper:
+    equal_level_tolerance_pips: 0.8
+    min_zone_strength: 0.6
+  inducement_detector:
+    min_confidence: 0.75
+    confirmation_lookback_candles: 5
+  phase_classifier:
+    require_sweep_for_phase2: true
+  structure_validator:
+    require_phase2: true
+
+filters:
+  enabled:
+    - order_block
+    - fair_value_gap
+    - liquidity_void
+    - displacement
+  score_clamp: [-0.15, 0.15]
+
+regime:
+  classifier: composite
+  volatility_window: 144
+  liquidity_window: 144
+
+meta_strategy:
+  enabled_sub_strategies:
+    - lit_trend_continuation
+    - lit_reversal
+    - sweep_continuation
+  selector: meta_model
+
+adaptive:
+  confidence:
+    rolling_window: 200
+    decay_half_life_trades: 60
+    min_sample_size: 50
+    initial_weight: 0.3
+
+features:
+  pipeline: baseline
+models:
+  signal:
+    type: lightgbm
+    # Promoted models live in a stable path enforced by model_registry.
+    artifact_path: models/promoted/${SIGNAL_MODEL_VERSION}.txt
+    fail_open: false
+
+arbiter:
+  acceptance_threshold: 0.65
+
+# Risk — non-negotiable in live. RiskManager exposes these via current_limits.
+risk:
+  max_risk_per_trade_pct: 0.2
+  max_daily_loss_pct: 1.0
+  max_weekly_loss_pct: 2.0
+  max_open_positions: 2
+  global_stop_loss_pct: 3.0
+  correlated_symbols:
+    - [EURUSD, GBPUSD]
+
+persistence:
+  postgres_url: ${DATABASE_URL}
+  redis_url: ${REDIS_URL}
+
+event_bus:
+  transport: redis_streams
+
+backtest:
+  default_engine: vectorized
+
+validation:
+  min_oos_sharpe: 1.3
+  max_degradation_ratio: 0.3
+  min_regime_stability: 0.7
+  max_overfitting_pvalue: 0.01
+
+governance:
+  enforce_dependency_policy: true
+  fail_ci_on_violation: true
+  require_manifest_for_register: true
+
+api:
+  host: 0.0.0.0
+  port: 8000
+  cors_allow_origins: ["https://dashboard.internal"]
+
+logging:
+  level: INFO
+  json: true
