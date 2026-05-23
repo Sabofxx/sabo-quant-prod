@@ -427,6 +427,33 @@ def section_next_run() -> list[str]:
             f"(dans {hours}h{minutes:02d}m)", ""]
 
 
+def section_reconcile_circuit() -> list[str]:
+    """Pull reconciliation / circuit breaker results from the log."""
+    log_file = LIVE_DIR / "automated_runner.log"
+    if not log_file.exists():
+        return []
+    log_lines = log_file.read_text(encoding="utf-8").splitlines()
+    marker_idx = None
+    for index in range(len(log_lines) - 1, -1, -1):
+        if "Automated daily runner started" in log_lines[index]:
+            marker_idx = index
+            break
+    if marker_idx is None:
+        return []
+    run_lines = log_lines[marker_idx:]
+    lines: list[str] = []
+    for line in run_lines:
+        if "Position reconciliation FAILED" in line:
+            msg = line.split("] ", 1)[-1] if "]" in line else line
+            lines.append(f"🔧 <b>Reconciliation</b> : <code>{html_escape(msg[:240])}</code>")
+        elif "DAILY DD BREAKER" in line:
+            msg = line.split("] ", 1)[-1] if "]" in line else line
+            lines.append(f"🛑 <b>Circuit breaker activé</b> : <code>{html_escape(msg[:240])}</code>")
+    if lines:
+        lines.append("")
+    return lines
+
+
 def section_errors_warnings() -> list[str]:
     log_file = LIVE_DIR / "automated_runner.log"
     if not log_file.exists():
@@ -465,6 +492,49 @@ def section_tracker_alerts() -> list[str]:
             f"   • {html_escape(alert.get('account', '?'))}: "
             f"<code>{html_escape(alert.get('message', '?'))[:180]}</code>"
         )
+    return lines + [""]
+
+
+def section_weekly_digest(now: datetime, snapshots: list[dict], currency: str) -> list[str]:
+    """Sunday only — week-in-review: PnL, trade count, hit rate, best/worst day."""
+    if now.weekday() != 6:
+        return []
+    cutoff_date = (now - timedelta(days=7)).date().isoformat()
+    week_snaps = [s for s in snapshots if s.get("date", "") >= cutoff_date]
+    executions = load_jsonl(LIVE_DIR / "capital_executions.jsonl")
+    week_execs = [e for e in executions if e.get("ts", "")[:10] >= cutoff_date]
+    slippage_rows = load_jsonl(LIVE_DIR / "slippage.jsonl")
+    week_slip = [s for s in slippage_rows if s.get("ts", "")[:10] >= cutoff_date]
+
+    lines = ["", "🗓️ <b>BILAN HEBDO (7 derniers jours)</b>"]
+    if len(week_snaps) >= 2:
+        start_bal = float(week_snaps[0].get("balance", 0))
+        end_bal = float(week_snaps[-1].get("balance", 0))
+        delta = end_bal - start_bal
+        delta_pct = (delta / start_bal * 100) if start_bal else 0.0
+        emoji = "🟢" if delta >= 0 else "🔴"
+        lines.append(f"   {emoji} PnL semaine : {fmt_money(delta, currency)} ({fmt_pct(delta_pct)})")
+        # Best / worst day
+        daily_deltas = []
+        for i in range(1, len(week_snaps)):
+            prev = float(week_snaps[i-1].get("balance", 0))
+            curr = float(week_snaps[i].get("balance", 0))
+            daily_deltas.append((week_snaps[i].get("date", "?"), curr - prev))
+        if daily_deltas:
+            best = max(daily_deltas, key=lambda x: x[1])
+            worst = min(daily_deltas, key=lambda x: x[1])
+            lines.append(f"   📈 Meilleur jour : {best[0]} {fmt_money(best[1], currency)}")
+            lines.append(f"   📉 Pire jour    : {worst[0]} {fmt_money(worst[1], currency)}")
+    n_opens = sum(1 for e in week_execs
+                   if e.get("status") in {"submitted", "filled"}
+                   and e.get("action") != "close_all")
+    n_errs = sum(1 for e in week_execs if e.get("status") == "error")
+    if week_execs:
+        lines.append(f"   Trades exécutés : {n_opens} (erreurs broker : {n_errs})")
+    if week_slip:
+        avg_slip = sum(float(s.get("slippage_pips", 0)) for s in week_slip) / len(week_slip)
+        max_slip = max(float(s.get("slippage_pips", 0)) for s in week_slip)
+        lines.append(f"   Slippage : {avg_slip:.2f} pips moyen · {max_slip:.2f} pips max ({len(week_slip)} fills)")
     return lines + [""]
 
 
@@ -511,6 +581,8 @@ def build_summary(status: str = "success",
     else:
         lines.extend(section_weekly_exec_summary())
     lines.extend(section_pl_trend(snapshots, str(currency)))
+    lines.extend(section_weekly_digest(now, snapshots, str(currency)))
+    lines.extend(section_reconcile_circuit())
     lines.extend(section_tracker_alerts())
     lines.extend(section_errors_warnings())
     lines.extend(section_next_run())

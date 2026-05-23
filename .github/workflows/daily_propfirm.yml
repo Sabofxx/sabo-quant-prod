@@ -59,6 +59,7 @@ jobs:
           # Tunable thresholds via repo variables (Settings → Variables → Actions)
           EXEC_MIN_NOTIONAL_USD: ${{ vars.EXEC_MIN_NOTIONAL_USD || '500' }}
           MAX_NOTIONAL_PER_ORDER_USD: ${{ vars.MAX_NOTIONAL_PER_ORDER_USD || '250000' }}
+          DAILY_DD_BREAKER_PCT: ${{ vars.DAILY_DD_BREAKER_PCT || '-2.0' }}
         run: |
           cd sabo_lit/sandbox
           python automated_runner.py

@@ -39,6 +39,7 @@ import requests
 HERE = Path(__file__).parent
 LIVE_DIR = HERE / "live"
 TRADE_LOG = LIVE_DIR / "capital_executions.jsonl"
+SLIPPAGE_LOG = LIVE_DIR / "slippage.jsonl"
 
 DEMO_BASE = "https://demo-api-capital.backend-capital.com/api/v1"
 LIVE_BASE = "https://api-capital.backend-capital.com/api/v1"
@@ -117,6 +118,18 @@ class CapitalClient:
         r = requests.get(url, headers=self._headers(), params=params, timeout=15)
         r.raise_for_status()
         return r.json().get("prices", [])
+
+    def get_deal_confirm_price(self, deal_reference: str | None) -> float | None:
+        """Fetch executed fill price via /confirms/{dealReference}. Returns None on miss."""
+        if not deal_reference:
+            return None
+        url = f"{self.base}/confirms/{deal_reference}"
+        r = requests.get(url, headers=self._headers(), timeout=10)
+        if not r.ok:
+            return None
+        body = r.json()
+        lvl = body.get("level") or body.get("affectedDeals", [{}])[0].get("level")
+        return float(lvl) if lvl else None
 
     def open_position(self, epic: str, direction: str, size: float) -> dict:
         url = f"{self.base}/positions"
@@ -327,6 +340,23 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
                     resp = client.open_position(epic, direction, size)
                     record["status"] = "submitted"
                     record["deal_reference"] = resp.get("dealReference")
+                    # Slippage measurement : fetch executed price from /confirms
+                    try:
+                        time.sleep(0.5)  # broker propagation
+                        fill_price = client.get_deal_confirm_price(resp.get("dealReference"))
+                        if fill_price:
+                            slip_pips = abs(fill_price - price) * (100 if "JPY" in epic else 10000)
+                            slip_record = {
+                                "ts": record["ts"], "epic": epic, "direction": direction,
+                                "expected_price": price, "fill_price": fill_price,
+                                "slippage_pips": round(slip_pips, 2), "size": size,
+                            }
+                            with SLIPPAGE_LOG.open("a") as sf:
+                                sf.write(json.dumps(slip_record) + "\n")
+                            record["fill_price"] = fill_price
+                            record["slippage_pips"] = round(slip_pips, 2)
+                    except Exception as slip_exc:
+                        record["slippage_error"] = str(slip_exc)[:100]
                 except requests.HTTPError as e:
                     record["status"] = "error"
                     record["error"] = f"{e.response.status_code}: {e.response.text[:300]}"

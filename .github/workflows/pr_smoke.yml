@@ -1,0 +1,80 @@
+name: PR Smoke Test
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'sabo_lit/sandbox/**.py'
+      - '.github/workflows/**.yml'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: pr-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install
+        run: |
+          pip install --upgrade pip
+          pip install -r sabo_lit/sandbox/requirements.txt
+
+      - name: Syntax check all sandbox Python files
+        run: |
+          python -m compileall -q sabo_lit/sandbox
+
+      - name: Import smoke test
+        run: |
+          cd sabo_lit/sandbox
+          python -c "import automated_runner, capital_connector, telegram_notifier, dashboard_generator, intraday_risk_check; print('All imports OK')"
+
+      - name: Telegram message render (offline)
+        run: |
+          cd sabo_lit/sandbox
+          python telegram_notifier.py --run-summary --print-only --repo "smoke-test/sabo-quant" > /tmp/msg.html
+          test -s /tmp/msg.html || (echo "Empty render"; exit 1)
+          echo "Telegram render OK ($(wc -l < /tmp/msg.html) lines)"
+
+      - name: Dashboard render (offline)
+        run: |
+          cd sabo_lit/sandbox
+          python dashboard_generator.py
+          test -s live/dashboard.html || (echo "Dashboard not generated"; exit 1)
+          echo "Dashboard render OK ($(wc -c < live/dashboard.html) bytes)"
+
+      - name: Intraday alert render (offline)
+        run: |
+          cd sabo_lit/sandbox
+          python -c "
+          from intraday_risk_check import build_alert_html
+          state = {'environment':'demo','currency':'EUR','balance':91000.0,
+                   'unrealized_pl':-2800.0,'margin_used':65000.0,'available':26000.0,
+                   'positions':[{'epic':'EURUSD','direction':'SELL','size':67000,
+                                  'open_level':1.084,'profit_loss':-1200.0}],
+                   'worst_position':{'epic':'EURUSD','profit_loss':-1200.0},
+                   'worst_pl':-1200.0}
+          breaches = [{'kind':'drawdown','severity':'high','message':'test'}]
+          out = build_alert_html(state, breaches)
+          assert 'SABO QUANT' in out and 'ALERTE' in out, 'render missing markers'
+          print('Intraday render OK')
+          "

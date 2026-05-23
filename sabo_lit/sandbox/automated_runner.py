@@ -228,6 +228,75 @@ def write_account_state(client: CapitalClient, market_open: bool,
 
 
 
+def reconcile_positions(client: CapitalClient) -> tuple[bool, str]:
+    """Compare current Capital positions to last run's account_state.json snapshot.
+
+    Returns (matches, detail). Drift = positions opened/closed between runs by
+    something other than our pipeline (manual intervention, broker auto-stop,
+    margin call). Non-fatal — surface in Telegram but don't block execution.
+    """
+    if not ACCOUNT_STATE.exists():
+        return True, "no prior state file (first run)"
+    try:
+        last = json.loads(ACCOUNT_STATE.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return True, "prior state file unparseable"
+    prior_deals = {p.get("deal_id") for p in last.get("positions", []) if p.get("deal_id")}
+    try:
+        live_positions = client.get_positions()
+    except Exception as exc:
+        return False, f"reconcile fetch failed: {exc}"
+    live_deals = {p.get("position", {}).get("dealId") for p in live_positions
+                   if p.get("position", {}).get("dealId")}
+    missing = prior_deals - live_deals
+    added = live_deals - prior_deals
+    if not missing and not added:
+        return True, f"OK ({len(prior_deals)} deals match)"
+    parts = []
+    if missing:
+        parts.append(f"{len(missing)} deals disappeared since last run")
+    if added:
+        parts.append(f"{len(added)} unexpected new deals")
+    return False, "; ".join(parts)
+
+
+def circuit_breaker_check(client: CapitalClient,
+                            max_daily_dd_pct: float) -> tuple[bool, str]:
+    """Check if today's PnL vs today's first snapshot triggers circuit breaker.
+
+    Returns (allowed_to_trade, reason). True = OK to execute; False = skip
+    today's execution. Threshold default -2% (env DAILY_DD_BREAKER_PCT).
+    """
+    snapshots = []
+    if LATEST_PNL.exists():
+        for line in LATEST_PNL.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                snapshots.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+    today = datetime.now(UTC).date().isoformat()
+    today_snaps = [s for s in snapshots if s.get("date") == today]
+    if not today_snaps:
+        return True, "no today snapshot yet (first of day)"
+    first_today = today_snaps[0]
+    try:
+        acc = client.account_summary()
+        bal = float(acc.get("balance", {}).get("balance", 0))
+    except Exception as exc:
+        return True, f"balance fetch failed ({exc}); skip breaker check"
+    open_bal = float(first_today.get("balance", bal))
+    if open_bal <= 0:
+        return True, "open_bal zero; skip breaker"
+    dd_pct = (bal - open_bal) / open_bal * 100
+    if dd_pct < max_daily_dd_pct:
+        return False, (f"DAILY DD BREAKER: {dd_pct:+.2f}% < {max_daily_dd_pct:+.2f}% "
+                        f"(open {open_bal:,.2f} → now {bal:,.2f})")
+    return True, f"DD {dd_pct:+.2f}% within budget"
+
+
 def market_execution_allowed(now: datetime | None = None) -> tuple[bool, str]:
     """Return whether FX execution is allowed on Capital.com at current UTC time.
 
@@ -294,14 +363,31 @@ def main() -> None:
         log("FATAL: signal generator failed")
         sys.exit(rc)
 
+    # Position reconciliation : detect broker-side drift since last run
+    rec_ok, rec_msg = reconcile_positions(client)
+    if rec_ok:
+        log(f"Position reconciliation: {rec_msg}")
+    else:
+        log(f"WARN: Position reconciliation FAILED: {rec_msg}")
+
     delta_csv = LIVE_DIR / "prop_delta_orders_latest.csv"
     execution_allowed, execution_reason = market_execution_allowed()
     log(f"Market execution check: {execution_reason}")
+
+    # Circuit breaker : skip execute if intraday DD exceeds budget
+    breaker_pct = float(os.environ.get("DAILY_DD_BREAKER_PCT", "-2.0"))
+    breaker_allowed, breaker_msg = circuit_breaker_check(client, breaker_pct)
+    log(f"Circuit breaker: {breaker_msg}")
+
     executed = False
     if not delta_csv.exists():
         log(f"WARN: {delta_csv} not found, skipping execution")
     elif not execution_allowed:
         log(f"INFO: skipping Capital execution: {execution_reason}")
+    elif not breaker_allowed:
+        log(f"INFO: skipping Capital execution: {breaker_msg}")
+        execution_reason = breaker_msg
+        execution_allowed = False
     else:
         min_notional = os.environ.get("EXEC_MIN_NOTIONAL_USD", "500")
         max_per_order = os.environ.get("MAX_NOTIONAL_PER_ORDER_USD", "250000")
