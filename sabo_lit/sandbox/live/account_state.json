@@ -1,0 +1,18 @@
+{
+  "ts": "2026-05-23T17:06:05+00:00",
+  "environment": "demo",
+  "broker": "Capital.com",
+  "account_id": "321896722115941534",
+  "account_name": "Account 1",
+  "currency": "EURd",
+  "balance": 91000.0,
+  "available": 91000.0,
+  "deposit": 91000.0,
+  "profit_loss": 0.0,
+  "margin_used": 0.0,
+  "positions": [],
+  "positions_count": 0,
+  "market_open": false,
+  "market_reason": "Saturday FX market closed",
+  "executed_this_run": false
+}
