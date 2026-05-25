@@ -1,5 +1,5 @@
 {
-  "portfolio": "adaptive_75_50_fx_core_8x200",
+  "portfolio": "adaptive_75_50_fx_core_8x100",
   "currency": "USD",
   "default_firm_rules": {
     "max_daily_loss_pct": 0.05,
@@ -14,9 +14,9 @@
       "broker": "ftmo_mt5",
       "platform": "MT5",
       "login": "TBD",
-      "account_size": 200000,
+      "account_size": 100000,
       "strategy": "FX_MR_STACK",
-      "target_vol": 0.10,
+      "target_vol": 0.05,
       "magic": 2026052201,
       "enabled": true
     },
@@ -26,9 +26,9 @@
       "broker": "ftmo_mt5",
       "platform": "MT5",
       "login": "TBD",
-      "account_size": 200000,
+      "account_size": 100000,
       "strategy": "FX_MR_STACK",
-      "target_vol": 0.10,
+      "target_vol": 0.05,
       "magic": 2026052202,
       "enabled": true
     },
@@ -38,9 +38,9 @@
       "broker": "fundednext_mt5",
       "platform": "MT5",
       "login": "TBD",
-      "account_size": 200000,
+      "account_size": 100000,
       "strategy": "NO_EUR_STACK",
-      "target_vol": 0.10,
+      "target_vol": 0.05,
       "magic": 2026052203,
       "enabled": true
     },
@@ -50,9 +50,9 @@
       "broker": "fundednext_mt5",
       "platform": "MT5",
       "login": "TBD",
-      "account_size": 200000,
+      "account_size": 100000,
       "strategy": "NO_EUR_STACK",
-      "target_vol": 0.10,
+      "target_vol": 0.05,
       "magic": 2026052204,
       "enabled": true
     },
@@ -62,9 +62,9 @@
       "broker": "ftmo_mt5",
       "platform": "MT5",
       "login": "TBD",
-      "account_size": 200000,
+      "account_size": 100000,
       "strategy": "COMDOLL_STACK",
-      "target_vol": 0.10,
+      "target_vol": 0.05,
       "magic": 2026052205,
       "enabled": true
     },
@@ -74,9 +74,9 @@
       "broker": "fundednext_mt5",
       "platform": "MT5",
       "login": "TBD",
-      "account_size": 200000,
+      "account_size": 100000,
       "strategy": "COMDOLL_STACK",
-      "target_vol": 0.10,
+      "target_vol": 0.05,
       "magic": 2026052206,
       "enabled": true
     },
@@ -86,9 +86,9 @@
       "broker": "ftmo_mt5",
       "platform": "MT5",
       "login": "TBD",
-      "account_size": 200000,
+      "account_size": 100000,
       "strategy": "FX_MR_STACK",
-      "target_vol": 0.08,
+      "target_vol": 0.04,
       "magic": 2026052207,
       "enabled": true
     },
@@ -98,9 +98,9 @@
       "broker": "fundednext_mt5",
       "platform": "MT5",
       "login": "TBD",
-      "account_size": 200000,
+      "account_size": 100000,
       "strategy": "NO_EUR_STACK",
-      "target_vol": 0.08,
+      "target_vol": 0.04,
       "magic": 2026052208,
       "enabled": true
     }
