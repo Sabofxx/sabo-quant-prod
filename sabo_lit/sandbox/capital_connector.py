@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import os
 import sys
 import time
@@ -40,6 +41,10 @@ HERE = Path(__file__).parent
 LIVE_DIR = HERE / "live"
 TRADE_LOG = LIVE_DIR / "capital_executions.jsonl"
 SLIPPAGE_LOG = LIVE_DIR / "slippage.jsonl"
+GSL_REQUIRED_ERROR_CODE = "error.vallidation.guaranteed-stop-loss.required"
+GSL_MODE_DEFAULT = "auto"  # off | auto | on
+GSL_DISTANCE_BUFFER_DEFAULT = 1.25
+GSL_FALLBACK_DISTANCE_PCT_DEFAULT = 5.0
 
 DEMO_BASE = "https://demo-api-capital.backend-capital.com/api/v1"
 LIVE_BASE = "https://api-capital.backend-capital.com/api/v1"
@@ -94,6 +99,11 @@ class CapitalClient:
                 return a
         return accs[0] if accs else {}
 
+    def account_preferences(self) -> dict:
+        r = requests.get(f"{self.base}/accounts/preferences", headers=self._headers(), timeout=15)
+        r.raise_for_status()
+        return r.json()
+
     def get_positions(self) -> list[dict]:
         r = requests.get(f"{self.base}/positions", headers=self._headers(), timeout=15)
         r.raise_for_status()
@@ -106,10 +116,7 @@ class CapitalClient:
 
     def get_price(self, epic: str) -> float:
         m = self.get_market(epic)
-        snap = m["snapshot"]
-        bid = float(snap["bid"])
-        ofr = float(snap["offer"])
-        return (bid + ofr) / 2.0
+        return market_mid_price(m)
 
     def get_daily_candles(self, epic: str, max_bars: int = 30) -> list[dict]:
         """Returns list of {snapshotTime, openPrice{bid,ask}, closePrice{}, ...}."""
@@ -131,15 +138,20 @@ class CapitalClient:
         lvl = body.get("level") or body.get("affectedDeals", [{}])[0].get("level")
         return float(lvl) if lvl else None
 
-    def open_position(self, epic: str, direction: str, size: float) -> dict:
+    def open_position(self, epic: str, direction: str, size: float,
+                      guaranteed_stop: bool = False,
+                      stop_distance: float | None = None) -> dict:
         url = f"{self.base}/positions"
         payload = {
             "epic": epic,
             "direction": direction,  # BUY | SELL
             "size": size,
-            "guaranteedStop": False,
-            "forceOpen": True,
+            "guaranteedStop": guaranteed_stop,
         }
+        if guaranteed_stop:
+            if stop_distance is None or stop_distance <= 0:
+                raise ValueError("guaranteed_stop requires positive stop_distance")
+            payload["stopDistance"] = stop_distance
         r = requests.post(url, json=payload, headers=self._headers(), timeout=15)
         r.raise_for_status()
         return r.json()
@@ -216,6 +228,95 @@ def usd_notional_to_size(epic: str, notional_usd: float, price: float) -> float:
     return round(size, 2)
 
 
+def market_mid_price(market: dict) -> float:
+    snap = market["snapshot"]
+    bid = float(snap["bid"])
+    ofr = float(snap["offer"])
+    return (bid + ofr) / 2.0
+
+
+def _rule_value_and_unit(rule: object) -> tuple[float | None, str]:
+    if isinstance(rule, dict):
+        raw_value = rule.get("value")
+        unit = str(rule.get("unit") or "POINTS").upper()
+    else:
+        raw_value = rule
+        unit = "POINTS"
+    try:
+        value = float(raw_value)
+    except (TypeError, ValueError):
+        return None, unit
+    if value <= 0:
+        return None, unit
+    return value, unit
+
+
+def _distance_from_rule_value(value: float, unit: str, price: float, epic: str) -> float:
+    if unit in {"PERCENTAGE", "PERCENT"}:
+        return price * value / 100.0
+    if unit in {"PIPS", "PIP"}:
+        return value * (0.01 if "JPY" in epic else 0.0001)
+    return value
+
+
+def ceil_price_distance(distance: float, epic: str) -> float:
+    decimals = 3 if "JPY" in epic else 5
+    factor = 10 ** decimals
+    return math.ceil(distance * factor) / factor
+
+
+def guaranteed_stop_distance(epic: str, market: dict, price: float,
+                             buffer: float = GSL_DISTANCE_BUFFER_DEFAULT,
+                             fallback_pct: float = GSL_FALLBACK_DISTANCE_PCT_DEFAULT) -> float:
+    rules = market.get("dealingRules") if isinstance(market, dict) else {}
+    if not isinstance(rules, dict):
+        rules = {}
+    for key in (
+        "minGuaranteedStopDistance",
+        "minGuaranteedStopOrLimitDistance",
+        "minStopOrLimitDistance",
+        "minNormalStopOrLimitDistance",
+    ):
+        value, unit = _rule_value_and_unit(rules.get(key))
+        if value is None:
+            continue
+        distance = _distance_from_rule_value(value, unit, price, epic) * max(buffer, 1.0)
+        return ceil_price_distance(distance, epic)
+    fallback_distance = price * max(fallback_pct, 0.1) / 100.0
+    return ceil_price_distance(fallback_distance, epic)
+
+
+def configured_gsl_mode() -> str:
+    mode = os.environ.get("CAPITAL_GSL_MODE", GSL_MODE_DEFAULT).strip().lower()
+    if mode not in {"off", "auto", "on"}:
+        print(f"WARN: invalid CAPITAL_GSL_MODE={mode!r}; using {GSL_MODE_DEFAULT}", file=sys.stderr)
+        return GSL_MODE_DEFAULT
+    return mode
+
+
+def configured_float_env(name: str, default: float) -> float:
+    raw = os.environ.get(name)
+    if raw is None or raw.strip() == "":
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        print(f"WARN: invalid {name}={raw!r}; using {default}", file=sys.stderr)
+        return default
+
+
+def is_guaranteed_stop_required_error(exc: BaseException) -> bool:
+    response = getattr(exc, "response", None)
+    text = getattr(response, "text", "") or str(exc)
+    if GSL_REQUIRED_ERROR_CODE in text:
+        return True
+    try:
+        body = json.loads(text)
+    except (TypeError, json.JSONDecodeError):
+        return False
+    return body.get("errorCode") == GSL_REQUIRED_ERROR_CODE
+
+
 def append_log(record: dict) -> None:
     LIVE_DIR.mkdir(exist_ok=True)
     with TRADE_LOG.open("a") as f:
@@ -268,6 +369,22 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
                 max_delta = max(max_delta, abs(float(row.get("delta_notional_usd", 0) or 0)))
         assert_live_safety(client, max_delta, live_max_notional, allow_live)
 
+    gsl_mode = configured_gsl_mode()
+    gsl_buffer = configured_float_env("CAPITAL_GSL_DISTANCE_BUFFER", GSL_DISTANCE_BUFFER_DEFAULT)
+    gsl_fallback_pct = configured_float_env(
+        "CAPITAL_GSL_FALLBACK_DISTANCE_PCT",
+        GSL_FALLBACK_DISTANCE_PCT_DEFAULT,
+    )
+    hedging_mode: bool | None = None
+    if not dry_run and gsl_mode in {"auto", "on"}:
+        try:
+            prefs = client.account_preferences()
+            if isinstance(prefs.get("hedgingMode"), bool):
+                hedging_mode = prefs["hedgingMode"]
+            print(f"Capital account preferences: hedgingMode={hedging_mode}")
+        except Exception as e:
+            print(f"WARN: could not fetch Capital account preferences: {e}")
+
     if reset and not dry_run:
         print("RESET mode: closing all existing positions first...")
         closes = client.close_all_positions()
@@ -298,7 +415,8 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
                 continue
 
             try:
-                price = client.get_price(epic)
+                market = client.get_market(epic)
+                price = market_mid_price(market)
             except Exception as e:
                 record = {
                     "ts": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -337,7 +455,48 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
                 record["status"] = "dry_run_only"
             else:
                 try:
-                    resp = client.open_position(epic, direction, size)
+                    requested_gsl = gsl_mode == "on"
+                    requested_stop_distance = None
+                    if requested_gsl:
+                        requested_stop_distance = guaranteed_stop_distance(
+                            epic, market, price, gsl_buffer, gsl_fallback_pct
+                        )
+                        record["guaranteed_stop"] = True
+                        record["stop_distance"] = requested_stop_distance
+                    try:
+                        resp = client.open_position(
+                            epic,
+                            direction,
+                            size,
+                            guaranteed_stop=requested_gsl,
+                            stop_distance=requested_stop_distance,
+                        )
+                    except requests.HTTPError as first_error:
+                        if (
+                            gsl_mode == "auto"
+                            and not requested_gsl
+                            and is_guaranteed_stop_required_error(first_error)
+                            and hedging_mode is not True
+                        ):
+                            requested_stop_distance = guaranteed_stop_distance(
+                                epic, market, price, gsl_buffer, gsl_fallback_pct
+                            )
+                            print(
+                                f"    RETRY {epic} with guaranteed stop "
+                                f"distance={requested_stop_distance}"
+                            )
+                            resp = client.open_position(
+                                epic,
+                                direction,
+                                size,
+                                guaranteed_stop=True,
+                                stop_distance=requested_stop_distance,
+                            )
+                            record["gsl_retry"] = True
+                            record["guaranteed_stop"] = True
+                            record["stop_distance"] = requested_stop_distance
+                        else:
+                            raise
                     record["status"] = "submitted"
                     record["deal_reference"] = resp.get("dealReference")
                     # Slippage measurement : fetch executed price from /confirms
@@ -360,6 +519,13 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
                 except requests.HTTPError as e:
                     record["status"] = "error"
                     record["error"] = f"{e.response.status_code}: {e.response.text[:300]}"
+                    if is_guaranteed_stop_required_error(e):
+                        if gsl_mode == "off":
+                            record["error"] += " | CAPITAL_GSL_MODE=off blocks required guaranteed stop"
+                            record["abort_execution"] = True
+                        elif hedging_mode is True:
+                            record["error"] += " | hedgingMode=true blocks guaranteedStop per Capital API"
+                            record["abort_execution"] = True
                     print(f"    ERROR: {record['error']}")
                 except Exception as e:
                     record["status"] = "error"
@@ -367,6 +533,9 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
                     print(f"    ERROR: {e}")
             executions.append(record)
             append_log(record)
+            if record.get("abort_execution"):
+                print("  ABORT: broker policy error applies to every remaining order")
+                break
             time.sleep(0.3)
 
     return executions

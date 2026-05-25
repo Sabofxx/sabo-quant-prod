@@ -42,6 +42,12 @@ MAX_MSG_LEN = 3800
 
 WEEKDAY_FR = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
 WEEKDAY_SHORT_FR = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"]
+STALE_MARKET_REASONS = {
+    "Saturday FX market closed",
+    "Sunday pre-open FX market closed",
+    "Friday post-close FX market closed",
+    "Daily maintenance break 20:55-21:10 UTC",
+}
 
 
 def html_escape(value: object) -> str:
@@ -137,35 +143,51 @@ def next_market_open_utc(now: datetime) -> datetime:
     """Return next FX market open UTC after `now`.
 
     Capital FX schedule:
-      Mon-Thu 21:05 reopen, 20:59:50 close
+      Mon-Thu 21:10 guarded reopen, 20:59:50 close
       Fri 20:59:50 close
-      Sun 21:00 open
+      Sun 21:10 guarded open
     """
     weekday = now.weekday()  # Mon=0 ... Sun=6
-    # Saturday → next open Sun 21:00
+    # Saturday → next open Sun 21:10
     if weekday == 5:
         sunday = now + timedelta(days=1)
-        return sunday.replace(hour=21, minute=0, second=0, microsecond=0)
-    # Sunday before 21:00
-    if weekday == 6 and now.hour < 21:
-        return now.replace(hour=21, minute=0, second=0, microsecond=0)
+        return sunday.replace(hour=21, minute=10, second=0, microsecond=0)
+    # Sunday before guarded open
+    if weekday == 6 and (now.hour * 60 + now.minute) < (21 * 60 + 10):
+        return now.replace(hour=21, minute=10, second=0, microsecond=0)
     # Friday after 20:59:50
     if weekday == 4 and (now.hour, now.minute) >= (20, 59):
         sunday = now + timedelta(days=2)
-        return sunday.replace(hour=21, minute=0, second=0, microsecond=0)
+        return sunday.replace(hour=21, minute=10, second=0, microsecond=0)
     # Weekday 20:55 - 21:10 maintenance break
     if weekday in {0, 1, 2, 3} and (20 * 60 + 55) <= (now.hour * 60 + now.minute) < (21 * 60 + 10):
-        return now.replace(hour=21, minute=5, second=0, microsecond=0)
+        return now.replace(hour=21, minute=10, second=0, microsecond=0)
     return now  # market already open
+
+
+def is_fx_market_open_time(now: datetime) -> bool:
+    weekday = now.weekday()
+    minutes = now.hour * 60 + now.minute
+    if weekday == 5:
+        return False
+    if weekday == 4 and minutes >= 20 * 60 + 55:
+        return False
+    if weekday == 6 and minutes < 21 * 60 + 10:
+        return False
+    if weekday in {0, 1, 2, 3} and (20 * 60 + 55) <= minutes < (21 * 60 + 10):
+        return False
+    return True
 
 
 def is_weekend_mode(state: dict, now: datetime | None = None) -> bool:
     """Return True if message should use weekend / market-closed layout."""
     current = now or datetime.now(UTC)
-    weekday = current.weekday()
     if not state.get("market_open", True):
+        reason = state.get("market_reason", "FX closed")
+        if is_fx_market_open_time(current) and reason in STALE_MARKET_REASONS:
+            return False
         return True
-    return weekday in {5, 6}
+    return not is_fx_market_open_time(current)
 
 
 def fmt_market_status(state: dict, now: datetime) -> tuple[str, str]:
@@ -173,6 +195,8 @@ def fmt_market_status(state: dict, now: datetime) -> tuple[str, str]:
     if state.get("market_open"):
         return "🟢", "Marché FX : <b>OUVERT</b>"
     reason = state.get("market_reason", "FX closed")
+    if is_fx_market_open_time(now) and reason in STALE_MARKET_REASONS:
+        return "🟢", "Marché FX : <b>OUVERT</b> (état marché précédent ignoré)"
     next_open = next_market_open_utc(now)
     delta = next_open - now
     hours = int(delta.total_seconds() // 3600)

@@ -399,6 +399,19 @@ def main() -> None:
         ])
         if rc != 0:
             log("FATAL: capital_connector failed; execution state uncertain")
+            try:
+                log_account_snapshot(client)
+            except Exception as e:
+                log(f"WARN: failure snapshot failed: {e}")
+            try:
+                write_account_state(
+                    client,
+                    execution_allowed,
+                    f"capital_connector failed after market check: {execution_reason}",
+                    executed=False,
+                )
+            except Exception as e:
+                log(f"WARN: failure account_state write failed: {e}")
             sys.exit(rc)
         executed = True
 
