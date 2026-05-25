@@ -43,8 +43,9 @@ TRADE_LOG = LIVE_DIR / "capital_executions.jsonl"
 SLIPPAGE_LOG = LIVE_DIR / "slippage.jsonl"
 GSL_REQUIRED_ERROR_CODE = "error.vallidation.guaranteed-stop-loss.required"
 GSL_MODE_DEFAULT = "auto"  # off | auto | on
-GSL_DISTANCE_BUFFER_DEFAULT = 1.25
+GSL_DISTANCE_BUFFER_DEFAULT = 2.0
 GSL_FALLBACK_DISTANCE_PCT_DEFAULT = 5.0
+GSL_STOPLOSS_RETRY_MULTIPLIER_DEFAULT = 2.0
 
 DEMO_BASE = "https://demo-api-capital.backend-capital.com/api/v1"
 LIVE_BASE = "https://api-capital.backend-capital.com/api/v1"
@@ -317,6 +318,12 @@ def is_guaranteed_stop_required_error(exc: BaseException) -> bool:
     return body.get("errorCode") == GSL_REQUIRED_ERROR_CODE
 
 
+def is_stoploss_distance_error(exc: BaseException) -> bool:
+    response = getattr(exc, "response", None)
+    text = getattr(response, "text", "") or str(exc)
+    return "error.invalid.stoploss." in text
+
+
 def append_log(record: dict) -> None:
     LIVE_DIR.mkdir(exist_ok=True)
     with TRADE_LOG.open("a") as f:
@@ -374,6 +381,10 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
     gsl_fallback_pct = configured_float_env(
         "CAPITAL_GSL_FALLBACK_DISTANCE_PCT",
         GSL_FALLBACK_DISTANCE_PCT_DEFAULT,
+    )
+    gsl_stoploss_retry_multiplier = configured_float_env(
+        "CAPITAL_GSL_STOPLOSS_RETRY_MULTIPLIER",
+        GSL_STOPLOSS_RETRY_MULTIPLIER_DEFAULT,
     )
     hedging_mode: bool | None = None
     if not dry_run and gsl_mode in {"auto", "on"}:
@@ -483,6 +494,44 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
                             )
                             print(
                                 f"    RETRY {epic} with guaranteed stop "
+                                f"distance={requested_stop_distance}"
+                            )
+                            try:
+                                resp = client.open_position(
+                                    epic,
+                                    direction,
+                                    size,
+                                    guaranteed_stop=True,
+                                    stop_distance=requested_stop_distance,
+                                )
+                            except requests.HTTPError as gsl_error:
+                                if not is_stoploss_distance_error(gsl_error):
+                                    raise
+                                requested_stop_distance = ceil_price_distance(
+                                    requested_stop_distance * max(gsl_stoploss_retry_multiplier, 1.1),
+                                    epic,
+                                )
+                                print(
+                                    f"    RETRY {epic} with wider guaranteed stop "
+                                    f"distance={requested_stop_distance}"
+                                )
+                                resp = client.open_position(
+                                    epic,
+                                    direction,
+                                    size,
+                                    guaranteed_stop=True,
+                                    stop_distance=requested_stop_distance,
+                                )
+                            record["gsl_retry"] = True
+                            record["guaranteed_stop"] = True
+                            record["stop_distance"] = requested_stop_distance
+                        elif requested_gsl and is_stoploss_distance_error(first_error):
+                            requested_stop_distance = ceil_price_distance(
+                                (requested_stop_distance or 0) * max(gsl_stoploss_retry_multiplier, 1.1),
+                                epic,
+                            )
+                            print(
+                                f"    RETRY {epic} with wider guaranteed stop "
                                 f"distance={requested_stop_distance}"
                             )
                             resp = client.open_position(

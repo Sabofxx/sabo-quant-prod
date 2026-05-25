@@ -28,6 +28,12 @@ def test_detects_guaranteed_stop_required_error() -> None:
     assert cc.is_guaranteed_stop_required_error(err)
 
 
+def test_detects_stoploss_distance_error() -> None:
+    err = http_error('{"errorCode":"error.invalid.stoploss.maxvalue: 0.58683"}')
+
+    assert cc.is_stoploss_distance_error(err)
+
+
 def test_guaranteed_stop_distance_uses_market_rule_with_buffer() -> None:
     market = {
         "dealingRules": {

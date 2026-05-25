@@ -61,8 +61,9 @@ jobs:
           MAX_NOTIONAL_PER_ORDER_USD: ${{ vars.MAX_NOTIONAL_PER_ORDER_USD || '250000' }}
           DAILY_DD_BREAKER_PCT: ${{ vars.DAILY_DD_BREAKER_PCT || '-2.0' }}
           CAPITAL_GSL_MODE: ${{ vars.CAPITAL_GSL_MODE || 'auto' }}
-          CAPITAL_GSL_DISTANCE_BUFFER: ${{ vars.CAPITAL_GSL_DISTANCE_BUFFER || '1.25' }}
+          CAPITAL_GSL_DISTANCE_BUFFER: ${{ vars.CAPITAL_GSL_DISTANCE_BUFFER || '2.0' }}
           CAPITAL_GSL_FALLBACK_DISTANCE_PCT: ${{ vars.CAPITAL_GSL_FALLBACK_DISTANCE_PCT || '5.0' }}
+          CAPITAL_GSL_STOPLOSS_RETRY_MULTIPLIER: ${{ vars.CAPITAL_GSL_STOPLOSS_RETRY_MULTIPLIER || '2.0' }}
         run: |
           cd sabo_lit/sandbox
           python automated_runner.py
