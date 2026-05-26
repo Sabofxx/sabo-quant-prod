@@ -690,3 +690,71 @@
 [2026-05-25T23:20:47+00:00]   | Sent. message_id=12
 [2026-05-25T23:20:47+00:00] Automated daily runner completed successfully
 [2026-05-25T23:20:47+00:00] ============================================================
+[2026-05-26T23:20:15+00:00] ============================================================
+[2026-05-26T23:20:15+00:00] Automated daily runner started
+[2026-05-26T23:20:15+00:00] Capital env=demo
+[2026-05-26T23:20:16+00:00] Logged in. account_id=321896722115941534 currency=EUR
+[2026-05-26T23:20:16+00:00] Account snapshot: bal=99091.87 EURd avail=89313.18 pl=+344.44
+[2026-05-26T23:20:16+00:00] Fetching fresh daily candles from Capital.com...
+[2026-05-26T23:20:17+00:00]   EURUSD (EURUSD): fetched 200 bars, appended 3
+[2026-05-26T23:20:18+00:00]   GBPUSD (GBPUSD): fetched 200 bars, appended 3
+[2026-05-26T23:20:19+00:00]   USDJPY (USDJPY): fetched 200 bars, appended 3
+[2026-05-26T23:20:19+00:00]   AUDUSD (AUDUSD): fetched 200 bars, appended 3
+[2026-05-26T23:20:20+00:00]   NZDUSD (NZDUSD): fetched 200 bars, appended 3
+[2026-05-26T23:20:21+00:00]   USDCAD (USDCAD): fetched 200 bars, appended 3
+[2026-05-26T23:20:21+00:00] Updated 6/6 pair CSVs
+[2026-05-26T23:20:21+00:00] STEP: signal_generator → /opt/hostedtoolcache/Python/3.12.13/x64/bin/python propfirm_signal_generator.py --adaptive
+[2026-05-26T23:20:22+00:00]   | WARN: H1 spec H1_NASDAQ_TREND unavailable (empty H1 prices for usatechidxusd); skipping
+[2026-05-26T23:20:22+00:00]   | WARN: H1 spec H1_CHFJPY_BREAK unavailable (empty H1 prices for chfjpy); skipping
+[2026-05-26T23:20:22+00:00]   | WARN: H1 spec H1_DOW_TSM unavailable (empty H1 prices for usa30idxusd); skipping
+[2026-05-26T23:20:22+00:00]   | WARN: composite H1_MULTI missing members ['H1_NASDAQ_TREND', 'H1_CHFJPY_BREAK', 'H1_DOW_TSM']; skipping
+[2026-05-26T23:20:22+00:00]   | WARN: composite HYBRID_FX_H1 missing members ['H1_MULTI']; skipping
+[2026-05-26T23:20:22+00:00]   | As of: 2026-05-26
+[2026-05-26T23:20:22+00:00]   | Accounts: 8
+[2026-05-26T23:20:22+00:00]   | Orders (target): 39
+[2026-05-26T23:20:22+00:00]   | Delta orders (execute): 39
+[2026-05-26T23:20:22+00:00]   | Total target gross: $766572
+[2026-05-26T23:20:22+00:00]   | Total delta gross : $766572
+[2026-05-26T23:20:22+00:00]   | Wrote: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/prop_signals_2026-05-26.json
+[2026-05-26T23:20:22+00:00]   | Wrote: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/prop_orders_2026-05-26.csv
+[2026-05-26T23:20:22+00:00]   | Wrote: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/prop_signals_2026-05-26.md
+[2026-05-26T23:20:22+00:00]   | Wrote: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/prop_delta_orders_2026-05-26.csv
+[2026-05-26T23:20:22+00:00] WARN: Position reconciliation FAILED: 22 deals disappeared since last run
+[2026-05-26T23:20:22+00:00] Market execution check: FX execution window open
+[2026-05-26T23:20:23+00:00] Circuit breaker: DD +0.00% within budget
+[2026-05-26T23:20:23+00:00] STEP: capital_executor → /opt/hostedtoolcache/Python/3.12.13/x64/bin/python capital_connector.py --execute /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/prop_delta_orders_latest.csv --min-notional 500 --live-max-notional 250000 --reset
+[2026-05-26T23:22:02+00:00]   |   ORDER USDJPY SELL size=13651.13 (delta_usd $-13651 @ 159.25300)
+[2026-05-26T23:22:02+00:00]   |     RETRY USDJPY with guaranteed stop distance=0.319
+[2026-05-26T23:22:02+00:00]   |   ORDER AUDUSD BUY size=19042.95 (delta_usd $+13651 @ 0.71686)
+[2026-05-26T23:22:02+00:00]   |     RETRY AUDUSD with guaranteed stop distance=0.00144
+[2026-05-26T23:22:02+00:00]   |   ORDER NZDUSD BUY size=23379.43 (delta_usd $+13651 @ 0.58390)
+[2026-05-26T23:22:02+00:00]   |     RETRY NZDUSD with guaranteed stop distance=0.00117
+[2026-05-26T23:22:02+00:00]   |   ORDER USDCAD BUY size=13651.13 (delta_usd $+13651 @ 1.38089)
+[2026-05-26T23:22:02+00:00]   |     RETRY USDCAD with guaranteed stop distance=0.00277
+[2026-05-26T23:22:02+00:00]   |   ORDER GBPUSD SELL size=16251.08 (delta_usd $-21862 @ 1.34529)
+[2026-05-26T23:22:02+00:00]   |     RETRY GBPUSD with guaranteed stop distance=0.0027
+[2026-05-26T23:22:02+00:00]   |   ORDER USDJPY SELL size=21862.5 (delta_usd $-21862 @ 159.25400)
+[2026-05-26T23:22:02+00:00]   |     RETRY USDJPY with guaranteed stop distance=0.319
+[2026-05-26T23:22:02+00:00]   |   ORDER AUDUSD BUY size=30495.89 (delta_usd $+21862 @ 0.71690)
+[2026-05-26T23:22:02+00:00]   |     RETRY AUDUSD with guaranteed stop distance=0.00144
+[2026-05-26T23:22:02+00:00]   |   ORDER NZDUSD BUY size=37442.84 (delta_usd $+21862 @ 0.58389)
+[2026-05-26T23:22:02+00:00]   |     RETRY NZDUSD with guaranteed stop distance=0.00117
+[2026-05-26T23:22:02+00:00]   |   ORDER USDCAD BUY size=21862.5 (delta_usd $+21862 @ 1.38088)
+[2026-05-26T23:22:02+00:00]   |     RETRY USDCAD with guaranteed stop distance=0.00277
+[2026-05-26T23:22:02+00:00]   | 
+[2026-05-26T23:22:02+00:00]   | Executed 39 orders (0 errors). Log: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/capital_executions.jsonl
+[2026-05-26T23:22:02+00:00] STEP: live_tracker_refresh → /opt/hostedtoolcache/Python/3.12.13/x64/bin/python live_tracker.py
+[2026-05-26T23:22:02+00:00]   | Trades logged so far: 1
+[2026-05-26T23:22:02+00:00]   | Daily P&L logged so far: 2
+[2026-05-26T23:22:02+00:00]   | Active alerts: 0
+[2026-05-26T23:22:02+00:00]   | Dashboard: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/tracker_dashboard.md
+[2026-05-26T23:22:02+00:00]   | Alerts JSON: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/tracker_alerts.json
+[2026-05-26T23:22:02+00:00] Account snapshot: bal=99003.87 EURd avail=72625.57 pl=-88.00
+[2026-05-26T23:22:03+00:00] Wrote account_state.json: positions=39 bal=99003.87 env=demo
+[2026-05-26T23:22:03+00:00] STEP: dashboard_generator → /opt/hostedtoolcache/Python/3.12.13/x64/bin/python dashboard_generator.py
+[2026-05-26T23:22:03+00:00]   | Dashboard written: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/dashboard.html
+[2026-05-26T23:22:03+00:00]   |   Signals: True, Daily ops: True, Snapshots: 3, Executions: 394
+[2026-05-26T23:22:03+00:00] STEP: telegram_notify → /opt/hostedtoolcache/Python/3.12.13/x64/bin/python telegram_notifier.py --run-summary --status success
+[2026-05-26T23:22:03+00:00]   | Sent. message_id=13
+[2026-05-26T23:22:03+00:00] Automated daily runner completed successfully
+[2026-05-26T23:22:03+00:00] ============================================================
