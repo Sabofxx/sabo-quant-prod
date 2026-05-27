@@ -26,6 +26,7 @@ Guidance for Claude Code when working in this repo. Overrides `/Users/oscarmisch
 | Live state files (JSONL/JSON) | `sabo_lit/sandbox/live/` |
 | Historical CSV (cached) | `sabo_lit/sandbox/data/` (gitignored, GH Actions cached) |
 | GitHub Actions workflow | `.github/workflows/daily_propfirm.yml` |
+| Intraday Telegram/risk workflow | `.github/workflows/intraday_risk.yml` |
 | Setup doc | `SETUP_AUTOMATION.md` |
 | Research scaffolding (mostly empty) | `sabo_lit/{api,backtest,execution,data,risk,strategy,...}` |
 
@@ -46,6 +47,13 @@ Guidance for Claude Code when working in this repo. Overrides `/Users/oscarmisch
 13. `telegram_notifier.py --run-summary` (sends rich Telegram message)
 
 GitHub Actions then `git commit -m "Daily run YYYY-MM-DD"` on `live/` deltas + `git push`.
+
+## Telegram cadence
+
+- Daily rebalance sends `telegram_notifier.py --run-summary` after the 22:05 UTC run.
+- Intraday risk workflow runs every 4h on weekdays and now defaults to `RISK_STATUS_MODE=always`, so it sends a non-trading status heartbeat even when there is no breach.
+- Set repo variable `RISK_STATUS_MODE=alert_only` to return to silent intraday checks unless a threshold is breached.
+- Intraday status writes `sabo_lit/sandbox/live/intraday_risk_state.json`; breach events still append to `intraday_risk_alerts.jsonl`.
 
 ## Required GitHub secrets
 

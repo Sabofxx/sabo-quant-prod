@@ -51,14 +51,17 @@ jobs:
           RISK_DD_PCT: ${{ vars.RISK_DD_PCT || '-3.0' }}
           RISK_SINGLE_POS_PCT: ${{ vars.RISK_SINGLE_POS_PCT || '-1.5' }}
           RISK_MARGIN_PCT: ${{ vars.RISK_MARGIN_PCT || '70.0' }}
+          # alert_only = silent unless breach; always = send a status every scheduled check
+          RISK_STATUS_MODE: ${{ vars.RISK_STATUS_MODE || 'always' }}
         run: |
           cd sabo_lit/sandbox
           python intraday_risk_check.py
 
-      - name: Commit alert log (if any)
+      - name: Commit risk state (if any)
         run: |
           git config user.email "automation@github.com"
           git config user.name "GitHub Actions Bot"
           git add sabo_lit/sandbox/live/intraday_risk_alerts.jsonl 2>/dev/null || true
-          git diff --staged --quiet || git commit -m "Intraday alert $(date -u +%Y-%m-%dT%H:%M)"
+          git add sabo_lit/sandbox/live/intraday_risk_state.json 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "Intraday risk state $(date -u +%Y-%m-%dT%H:%M)"
           git push || echo "Nothing to push"

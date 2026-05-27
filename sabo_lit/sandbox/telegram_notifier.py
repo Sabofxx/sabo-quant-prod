@@ -318,6 +318,56 @@ def section_today_delta(snapshots: list[dict], currency: str) -> list[str]:
     ]
 
 
+def today_balance_delta(snapshots: list[dict]) -> tuple[float, float] | None:
+    if len(snapshots) < 2:
+        return None
+    latest = snapshots[-1]
+    latest_date = latest.get("date")
+    prev = None
+    for snap in reversed(snapshots[:-1]):
+        if snap.get("date") != latest_date:
+            prev = snap
+            break
+    if not prev:
+        return None
+    bal = float(latest.get("balance", 0) or 0)
+    prev_bal = float(prev.get("balance", 0) or 0)
+    delta = bal - prev_bal
+    pct = (delta / prev_bal * 100) if prev_bal else 0.0
+    return delta, pct
+
+
+def section_quick_digest(state: dict, snapshots: list[dict], status: str) -> list[str]:
+    if not state:
+        return []
+    currency = str(state.get("currency", ""))
+    balance = float(state.get("balance", 0) or 0)
+    available = float(state.get("available", 0) or 0)
+    margin = float(state.get("margin_used", 0) or 0)
+    pl = float(state.get("profit_loss", 0) or 0)
+    margin_pct = (margin / balance * 100) if balance else 0.0
+    pl_pct = (pl / balance * 100) if balance else 0.0
+    positions = state.get("positions", []) if isinstance(state.get("positions"), list) else []
+    delta = today_balance_delta(snapshots)
+    status_label = "OK" if status == "success" else "ÉCHEC"
+    risk = "normal"
+    if margin_pct >= 70 or pl_pct <= -3:
+        risk = "élevé"
+    elif margin_pct >= 45 or pl_pct <= -1:
+        risk = "à surveiller"
+    lines = [
+        "🧭 <b>Résumé rapide</b>",
+        f"   Run : <b>{status_label}</b> · risque : <b>{risk}</b> · "
+        f"positions : <b>{len(positions)}</b>",
+        f"   Balance : {balance:,.2f} {html_escape(currency)} · "
+        f"dispo : {available:,.2f} · marge : {margin_pct:.1f}%",
+        f"   PL ouvert : {fmt_money(pl, currency)} ({fmt_pct(pl_pct)})",
+    ]
+    if delta:
+        lines.append(f"   Δ jour balance : {fmt_money(delta[0], currency)} ({fmt_pct(delta[1])})")
+    return lines + [""]
+
+
 def section_positions(state: dict) -> list[str]:
     positions = state.get("positions", []) if state else []
     if not positions:
@@ -347,6 +397,58 @@ def section_positions(state: dict) -> list[str]:
     return lines + [""]
 
 
+def section_exposure_summary(state: dict) -> list[str]:
+    positions = state.get("positions", []) if state else []
+    if not positions:
+        return []
+    currency = str(state.get("currency", ""))
+    by_epic: dict[str, dict[str, float]] = {}
+    for pos in positions:
+        epic = str(pos.get("epic", "?"))
+        row = by_epic.setdefault(epic, {"buy": 0.0, "sell": 0.0, "pl": 0.0, "count": 0.0})
+        size = float(pos.get("size", 0) or 0)
+        if pos.get("direction") == "BUY":
+            row["buy"] += size
+        elif pos.get("direction") == "SELL":
+            row["sell"] += size
+        row["pl"] += float(pos.get("profit_loss", 0) or 0)
+        row["count"] += 1
+    rows = sorted(by_epic.items(), key=lambda item: abs(item[1]["buy"] - item[1]["sell"]), reverse=True)
+    lines = ["🧱 <b>Exposition nette par symbole</b>"]
+    for epic, row in rows[:8]:
+        net = row["buy"] - row["sell"]
+        direction = "BUY" if net > 0 else "SELL" if net < 0 else "FLAT"
+        mark = "🟢" if row["pl"] >= 0 else "🔴"
+        lines.append(
+            f"   {mark} {html_escape(epic)} {direction} {abs(net):,.0f} units · "
+            f"{int(row['count'])} pos · PL {fmt_money(row['pl'], currency)}"
+        )
+    return lines + [""]
+
+
+def section_position_extremes(state: dict) -> list[str]:
+    positions = state.get("positions", []) if state else []
+    if not positions:
+        return []
+    currency = str(state.get("currency", ""))
+    sorted_pos = sorted(positions, key=lambda pos: float(pos.get("profit_loss", 0) or 0))
+    worst = sorted_pos[:3]
+    best = list(reversed(sorted_pos[-3:]))
+    lines = ["🎚️ <b>Top positions PL</b>"]
+    for label, rows in (("Pires", worst), ("Meilleures", best)):
+        if not rows:
+            continue
+        parts = []
+        for pos in rows:
+            pl = float(pos.get("profit_loss", 0) or 0)
+            parts.append(
+                f"{html_escape(pos.get('epic', '?'))} {html_escape(pos.get('direction', '?'))} "
+                f"{fmt_money(pl, currency)}"
+            )
+        lines.append(f"   {label} : " + " · ".join(parts))
+    return lines + [""]
+
+
 def section_signals() -> list[str]:
     data = load_json(LIVE_DIR / "prop_signals_latest.json")
     if not isinstance(data, dict) or not data:
@@ -365,6 +467,33 @@ def section_signals() -> list[str]:
         lines.append(f"   ⚠️ Blackout news : {html_escape(summary.get('blackout_reason', '?'))}")
     if summary.get("as_of"):
         lines.append(f"   As of : {html_escape(summary.get('as_of'))}")
+    return lines + [""]
+
+
+def section_signal_bias() -> list[str]:
+    data = load_json(LIVE_DIR / "prop_signals_latest.json")
+    if not isinstance(data, dict):
+        return []
+    orders = data.get("orders", []) if isinstance(data.get("orders"), list) else []
+    by_symbol: dict[str, dict[str, float]] = {}
+    for order in orders:
+        side = str(order.get("delta_side") or "")
+        if side not in {"BUY", "SELL"}:
+            continue
+        symbol = str(order.get("broker_symbol") or order.get("instrument") or "?")
+        row = by_symbol.setdefault(symbol, {"buy": 0.0, "sell": 0.0, "gross": 0.0})
+        delta = float(order.get("delta_notional_usd", 0) or 0)
+        row["gross"] += abs(delta)
+        row["buy" if side == "BUY" else "sell"] += abs(delta)
+    if not by_symbol:
+        return []
+    lines = ["🧮 <b>Biais signal / delta</b>"]
+    for symbol, row in sorted(by_symbol.items(), key=lambda item: item[1]["gross"], reverse=True)[:8]:
+        bias = "BUY" if row["buy"] > row["sell"] else "SELL" if row["sell"] > row["buy"] else "MIX"
+        lines.append(
+            f"   {html_escape(symbol)} : {bias} · buy ${row['buy']:,.0f} · "
+            f"sell ${row['sell']:,.0f}"
+        )
     return lines + [""]
 
 
@@ -619,12 +748,16 @@ def build_summary(status: str = "success",
     lines: list[str] = []
     lines.extend(section_header(now, state, status, weekend))
     lines.extend(section_market_status(state, now))
+    lines.extend(section_quick_digest(state, snapshots, status))
     lines.extend(section_account(state))
     lines.extend(section_today_delta(snapshots, str(currency)))
+    lines.extend(section_exposure_summary(state))
+    lines.extend(section_position_extremes(state))
     lines.extend(section_positions(state))
     if not weekend:
         lines.extend(section_executions_today(state))
         lines.extend(section_signals())
+        lines.extend(section_signal_bias())
         lines.extend(section_tradingview_filter())
     else:
         lines.extend(section_weekly_exec_summary())

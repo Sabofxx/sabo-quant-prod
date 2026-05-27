@@ -21,6 +21,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import html
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -31,6 +32,7 @@ from telegram_notifier import send_telegram
 HERE = Path(__file__).parent
 LIVE_DIR = HERE / "live"
 ALERT_LOG = LIVE_DIR / "intraday_risk_alerts.jsonl"
+STATE_FILE = LIVE_DIR / "intraday_risk_state.json"
 
 
 def env_float(name: str, default: float) -> float:
@@ -46,6 +48,10 @@ def env_float(name: str, default: float) -> float:
 def fmt_money(value: float, currency: str = "") -> str:
     sign = "+" if value > 0 else ""
     return f"{sign}{value:,.2f} {currency}".strip()
+
+
+def html_escape(value: object) -> str:
+    return html.escape(str(value), quote=False)
 
 
 def collect_state(client: CapitalClient) -> dict:
@@ -128,6 +134,42 @@ def evaluate(state: dict, dd_pct: float, single_pct: float, margin_pct: float) -
     return breaches
 
 
+def exposure_rows(state: dict) -> list[tuple[str, dict[str, float]]]:
+    by_epic: dict[str, dict[str, float]] = {}
+    for pos in state["positions"]:
+        epic = str(pos.get("epic") or "?")
+        row = by_epic.setdefault(epic, {"buy": 0.0, "sell": 0.0, "pl": 0.0, "count": 0.0})
+        size = float(pos.get("size", 0) or 0)
+        if pos.get("direction") == "BUY":
+            row["buy"] += size
+        elif pos.get("direction") == "SELL":
+            row["sell"] += size
+        row["pl"] += float(pos.get("profit_loss", 0) or 0)
+        row["count"] += 1
+    return sorted(by_epic.items(), key=lambda item: abs(item[1]["buy"] - item[1]["sell"]), reverse=True)
+
+
+def dashboard_url() -> str:
+    repo = os.environ.get("GITHUB_REPOSITORY") or "Sabofxx/sabo-quant-prod"
+    return (
+        "https://htmlpreview.github.io/?"
+        f"https://github.com/{repo}/blob/main/sabo_lit/sandbox/live/dashboard.html"
+    )
+
+
+def risk_label(state: dict, breaches: list[dict]) -> str:
+    if breaches:
+        return "ALERTE"
+    balance = state["balance"]
+    margin_pct = state["margin_used"] / balance * 100 if balance else 0.0
+    pl_pct = state["unrealized_pl"] / balance * 100 if balance else 0.0
+    if margin_pct >= 70 or pl_pct <= -3:
+        return "ÉLEVÉ"
+    if margin_pct >= 45 or pl_pct <= -1:
+        return "À SURVEILLER"
+    return "OK"
+
+
 def build_alert_html(state: dict, breaches: list[dict]) -> str:
     now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
     env = state["environment"].upper()
@@ -166,6 +208,81 @@ def build_alert_html(state: dict, breaches: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def build_status_html(state: dict, breaches: list[dict] | None = None) -> str:
+    breaches = breaches or []
+    now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
+    env = state["environment"].upper()
+    currency = state["currency"]
+    balance = state["balance"]
+    margin_pct = state["margin_used"] / balance * 100 if balance else 0.0
+    pl_pct = state["unrealized_pl"] / balance * 100 if balance else 0.0
+    label = risk_label(state, breaches)
+    icon = "🚨" if breaches else "🟢" if label == "OK" else "🟠"
+    lines = [
+        f"<b>{icon} SABO QUANT · STATUS INTRADAY · {env}</b>",
+        f"<i>{now}</i>",
+        "",
+        f"État risque : <b>{label}</b>",
+        f"💰 Balance : <b>{balance:,.2f} {html_escape(currency)}</b>",
+        f"   Disponible : {state['available']:,.2f} {html_escape(currency)}",
+        f"   Marge      : {state['margin_used']:,.2f} {html_escape(currency)} ({margin_pct:.1f}%)",
+        f"   PL ouvert  : {fmt_money(state['unrealized_pl'], currency)} ({pl_pct:+.2f}%)",
+        f"   Positions  : {len(state['positions'])}",
+        "",
+    ]
+    if breaches:
+        lines.append("<b>Seuils franchis :</b>")
+        for breach in breaches:
+            mark = "🔴" if breach["severity"] == "high" else "🟠"
+            lines.append(f"   {mark} {html_escape(breach['message'])}")
+        lines.append("")
+
+    rows = exposure_rows(state)
+    if rows:
+        lines.append("<b>Exposition nette :</b>")
+        for epic, row in rows[:6]:
+            net = row["buy"] - row["sell"]
+            direction = "BUY" if net > 0 else "SELL" if net < 0 else "FLAT"
+            mark = "🟢" if row["pl"] >= 0 else "🔴"
+            lines.append(
+                f"   {mark} {html_escape(epic)} {direction} {abs(net):,.0f} units · "
+                f"{int(row['count'])} pos · {fmt_money(row['pl'], currency)}"
+            )
+        lines.append("")
+
+    if state["positions"]:
+        worst = sorted(state["positions"], key=lambda p: p["profit_loss"])[:3]
+        lines.append("<b>Pires positions :</b>")
+        for pos in worst:
+            arrow = "▲" if pos["direction"] == "BUY" else "▼"
+            lines.append(
+                f"   🔴 {arrow} {html_escape(pos['epic'])} {html_escape(pos['direction'])} "
+                f"{pos['size']:,.0f} → {fmt_money(pos['profit_loss'], currency)}"
+            )
+        lines.append("")
+
+    lines.extend([
+        "━━━━━━━━━━━━━━━━━━━",
+        f"🔗 <a href=\"{dashboard_url()}\">Dashboard HTML</a>",
+    ])
+    return "\n".join(lines)
+
+
+def write_state(state: dict, breaches: list[dict]) -> None:
+    LIVE_DIR.mkdir(exist_ok=True)
+    record = {
+        "ts": datetime.now(UTC).isoformat(timespec="seconds"),
+        "environment": state["environment"],
+        "balance": state["balance"],
+        "available": state["available"],
+        "margin_used": state["margin_used"],
+        "unrealized_pl": state["unrealized_pl"],
+        "positions_count": len(state["positions"]),
+        "breaches": breaches,
+    }
+    STATE_FILE.write_text(json.dumps(record, indent=2), encoding="utf-8")
+
+
 def log_alert(breaches: list[dict], state: dict) -> None:
     LIVE_DIR.mkdir(exist_ok=True)
     record = {
@@ -191,6 +308,7 @@ def main() -> None:
     dd_pct = env_float("RISK_DD_PCT", -3.0)
     single_pct = env_float("RISK_SINGLE_POS_PCT", -1.5)
     margin_pct = env_float("RISK_MARGIN_PCT", 70.0)
+    status_mode = os.environ.get("RISK_STATUS_MODE", "alert_only").strip().lower()
 
     client = CapitalClient(api_key, identifier, password, env)
     try:
@@ -201,10 +319,24 @@ def main() -> None:
 
     state = collect_state(client)
     breaches = evaluate(state, dd_pct, single_pct, margin_pct)
+    write_state(state, breaches)
 
     if not breaches:
         print(f"OK: no breach. PL={state['unrealized_pl']:+.2f} {state['currency']} "
               f"margin={state['margin_used']:,.2f}/{state['balance']:,.2f}")
+        if status_mode not in {"always", "heartbeat"}:
+            return
+        token = os.environ.get("TELEGRAM_BOT_TOKEN")
+        chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+        if not token or not chat_id:
+            print("WARN: Telegram env missing — status not pushed", file=sys.stderr)
+            return
+        try:
+            send_telegram(token, chat_id, build_status_html(state))
+            print("Telegram status sent.")
+        except Exception as exc:
+            print(f"ERROR: Telegram status send failed: {exc}", file=sys.stderr)
+            sys.exit(4)
         return
 
     print(f"BREACH x{len(breaches)}: {[b['kind'] for b in breaches]}")
@@ -216,7 +348,7 @@ def main() -> None:
         print("WARN: Telegram env missing — breach logged but not pushed", file=sys.stderr)
         return
 
-    text = build_alert_html(state, breaches)
+    text = build_status_html(state, breaches)
     try:
         send_telegram(token, chat_id, text)
         print("Telegram alert sent.")
