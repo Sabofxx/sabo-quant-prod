@@ -21,6 +21,8 @@ Guidance for Claude Code when working in this repo. Overrides `/Users/oscarmisch
 | Signal generator | `sabo_lit/sandbox/propfirm_signal_generator.py` |
 | Telegram notifier | `sabo_lit/sandbox/telegram_notifier.py` |
 | Static dashboard generator | `sabo_lit/sandbox/dashboard_generator.py` |
+| TradingView filter | `sabo_lit/sandbox/tradingview_filter.py` |
+| TradingView webhook Worker | `infra/cloudflare-worker/` |
 | Live state files (JSONL/JSON) | `sabo_lit/sandbox/live/` |
 | Historical CSV (cached) | `sabo_lit/sandbox/data/` (gitignored, GH Actions cached) |
 | GitHub Actions workflow | `.github/workflows/daily_propfirm.yml` |
@@ -34,13 +36,14 @@ Guidance for Claude Code when working in this repo. Overrides `/Users/oscarmisch
 3. `log_account_snapshot()` — append to `live/automated_daily_pnl.jsonl` (capped 1/day)
 4. Loop 6 pairs → `get_daily_candles()` → `update_historical_csv()` (bootstrap if missing else append)
 5. `propfirm_signal_generator.py --adaptive` → writes `live/prop_signals_latest.{json,md,csv}` + `prop_delta_orders_latest.csv`
-6. `market_execution_allowed()` — guard FX schedule (Fri 20:59 → Sun 21:00 closed, daily 20:55-21:10 maintenance)
-7. If allowed: `capital_connector.py --execute --reset --min-notional 500` (close all then open fresh — idempotent rebalance)
-8. `live_tracker.py` refresh
-9. `log_account_snapshot()` again (post-execution balance)
-10. `write_account_state()` — rich `live/account_state.json` (balance, positions, market, env)
-11. `dashboard_generator.py` → `live/dashboard.html`
-12. `telegram_notifier.py --run-summary` (sends rich Telegram message)
+6. `tradingview_filter.py` — optional TradingView confirmation layer (`TV_FILTER_MODE=disabled` by default)
+7. `market_execution_allowed()` — guard FX schedule (Fri 20:59 → Sun 21:00 closed, daily 20:55-21:10 maintenance)
+8. If allowed: `capital_connector.py --execute --reset --min-notional 500` (close all then open fresh — idempotent rebalance)
+9. `live_tracker.py` refresh
+10. `log_account_snapshot()` again (post-execution balance)
+11. `write_account_state()` — rich `live/account_state.json` (balance, positions, market, env)
+12. `dashboard_generator.py` → `live/dashboard.html` with embedded TradingView chart widgets
+13. `telegram_notifier.py --run-summary` (sends rich Telegram message)
 
 GitHub Actions then `git commit -m "Daily run YYYY-MM-DD"` on `live/` deltas + `git push`.
 
@@ -54,6 +57,24 @@ GitHub Actions then `git commit -m "Daily run YYYY-MM-DD"` on `live/` deltas + `
 | `CAPITAL_ENVIRONMENT` | `demo` or `live` (default `demo`) | Selects base URL |
 | `TELEGRAM_BOT_TOKEN` | @BotFather `/newbot` | Notifier auth |
 | `TELEGRAM_CHAT_ID` | @userinfobot | Notifier target chat |
+| `TRADINGVIEW_WORKER_URL` | Cloudflare Worker URL | Optional pull of fresh TV confirmations |
+| `TRADINGVIEW_WORKER_READ_TOKEN` | Cloudflare Worker secret | Optional auth for `/signals/today` |
+
+## TradingView confirmation layer
+
+Recommended architecture:
+
+`TradingView alert -> Cloudflare Worker -> KV + live/tradingview_signals.jsonl -> daily SABO cron filter`
+
+The Worker lives in `infra/cloudflare-worker/`. It accepts `POST /tradingview/webhook`, validates the shared secret or optional `X-Sabo-Sig` HMAC, deduplicates by `sha256(symbol|timeframe|side|time)`, stores the signal in KV for 36h, and can append accepted signals to `sabo_lit/sandbox/live/tradingview_signals.jsonl` through the GitHub Contents API.
+
+The bot consumes confirmations through `tradingview_filter.py`. Modes:
+
+- `TV_FILTER_MODE=disabled` — current default, no trading behavior change.
+- `TV_FILTER_MODE=veto_only` — only blocks a SABO delta when TradingView confirms the opposite side.
+- `TV_FILTER_MODE=require_confirm` — SABO delta executes only when TradingView confirms the same symbol and side.
+
+Start in `disabled` for observation, then `veto_only`, then `require_confirm` after enough overlap checks. Because the Capital execution uses `--reset`, TradingView should remain a confirmation layer for the daily rebalance, not a separate intraday execution source.
 
 ## Local commands
 

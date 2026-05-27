@@ -1,0 +1,17 @@
+name = "sabo-tradingview-webhook"
+main = "src/index.ts"
+compatibility_date = "2026-05-01"
+
+[[kv_namespaces]]
+binding = "TV_SIGNALS_KV"
+id = "REPLACE_WITH_PRODUCTION_KV_ID"
+preview_id = "REPLACE_WITH_PREVIEW_KV_ID"
+
+[vars]
+TV_ALLOWED_SYMBOLS = "EURUSD,GBPUSD,USDJPY,AUDUSD,NZDUSD,USDCAD"
+TV_ALLOWED_TIMEFRAMES = "1,3,5,15,30,45,60,120,180,240,D,1D"
+TV_REQUIRE_HMAC = "0"
+SIGNAL_TTL_SECONDS = "129600"
+GITHUB_OWNER_REPO = "Sabofxx/sabo-quant-prod"
+GITHUB_BRANCH = "main"
+GITHUB_AUDIT_PATH = "sabo_lit/sandbox/live/tradingview_signals.jsonl"

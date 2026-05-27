@@ -1,0 +1,12 @@
+{
+  "accepted_orders": 39,
+  "confirmation_keys": [],
+  "enabled": false,
+  "mode": "disabled",
+  "orders_after": 39,
+  "orders_before": 39,
+  "raw_confirmations": 0,
+  "rejected_orders": 0,
+  "ts": "2026-05-27T14:41:16+00:00",
+  "valid_confirmations": 0
+}

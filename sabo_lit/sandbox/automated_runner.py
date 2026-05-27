@@ -26,6 +26,7 @@ from pathlib import Path
 import pandas as pd
 
 from capital_connector import CapitalClient, SYMBOL_MAP
+import tradingview_filter
 
 
 HERE = Path(__file__).parent
@@ -362,6 +363,21 @@ def main() -> None:
     if rc != 0:
         log("FATAL: signal generator failed")
         sys.exit(rc)
+
+    try:
+        tv_state = tradingview_filter.apply_live_filter_from_env(LIVE_DIR)
+        log(
+            "TradingView filter: "
+            f"mode={tv_state.get('mode')} "
+            f"valid={tv_state.get('valid_confirmations')} "
+            f"accepted={tv_state.get('accepted_orders')} "
+            f"rejected={tv_state.get('rejected_orders')}"
+        )
+    except Exception as e:
+        if os.environ.get("TV_FILTER_FAIL_CLOSED", "0").lower() in {"1", "true", "yes"}:
+            log(f"FATAL: TradingView filter failed: {e}")
+            sys.exit(2)
+        log(f"WARN: TradingView filter failed open: {e}")
 
     # Position reconciliation : detect broker-side drift since last run
     rec_ok, rec_msg = reconcile_positions(client)

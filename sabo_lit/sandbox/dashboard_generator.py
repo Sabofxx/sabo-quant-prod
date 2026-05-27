@@ -138,6 +138,66 @@ def build_signals_section(signals: dict) -> str:
     return section
 
 
+def tradingview_symbol(symbol: object) -> str:
+    raw = str(symbol or "").strip().upper()
+    if ":" in raw:
+        raw = raw.split(":")[-1]
+    clean = "".join(ch for ch in raw if ch.isalnum())
+    return f"FX:{clean}" if clean else ""
+
+
+def build_tradingview_section(signals: dict, account_state: dict, tv_state: dict) -> tuple[str, list[str]]:
+    symbols: list[str] = []
+
+    positions = account_state.get("positions", []) if isinstance(account_state.get("positions"), list) else []
+    for pos in positions:
+        if isinstance(pos, dict):
+            symbols.append(tradingview_symbol(pos.get("epic")))
+
+    orders = signals.get("orders", []) if isinstance(signals.get("orders"), list) else []
+    for order in orders:
+        if not isinstance(order, dict):
+            continue
+        if order.get("side") == "FLAT":
+            continue
+        symbols.append(tradingview_symbol(order.get("broker_symbol", order.get("instrument"))))
+
+    unique_symbols = []
+    seen = set()
+    for symbol in symbols:
+        if symbol and symbol not in seen:
+            seen.add(symbol)
+            unique_symbols.append(symbol)
+
+    if not unique_symbols:
+        unique_symbols = ["FX:EURUSD", "FX:GBPUSD", "FX:USDJPY", "FX:AUDUSD", "FX:NZDUSD", "FX:USDCAD"]
+
+    mode = tv_state.get("mode", "disabled") if isinstance(tv_state, dict) else "disabled"
+    valid = int(tv_state.get("valid_confirmations", 0) or 0) if isinstance(tv_state, dict) else 0
+    raw = int(tv_state.get("raw_confirmations", 0) or 0) if isinstance(tv_state, dict) else 0
+    rejected = int(tv_state.get("rejected_orders", 0) or 0) if isinstance(tv_state, dict) else 0
+    keys = tv_state.get("confirmation_keys", []) if isinstance(tv_state, dict) else []
+    keys_preview = ", ".join(str(key) for key in keys[:8]) if isinstance(keys, list) else ""
+
+    cards = [
+        card("TV mode", mode, "ok" if mode != "disabled" else "muted"),
+        card("Valid confirms", f"{valid}/{raw}"),
+        card("Rejected orders", rejected, "bad" if rejected else ""),
+        card("Confirmed pairs", keys_preview or "—"),
+    ]
+    buttons = "".join(
+        f"<button class='symbol-button' type='button' data-symbol='{esc(symbol)}'>{esc(symbol.replace('FX:', ''))}</button>"
+        for symbol in unique_symbols[:12]
+    )
+    section = (
+        "<h2>TradingView</h2>"
+        "<div class='grid'>" + "".join(cards) + "</div>"
+        f"<div class='symbol-toolbar'>{buttons}</div>"
+        "<div id='tradingview-chart'><div class='tv-fallback muted'>Loading TradingView chart...</div></div>"
+    )
+    return section, unique_symbols[:12]
+
+
 def build_tracker_section(alerts: list) -> str:
     rows = []
     for alert in alerts:
@@ -209,6 +269,8 @@ def main() -> None:
     LIVE_DIR.mkdir(exist_ok=True)
     daily_ops = load_json(LIVE_DIR / "daily_ops_metrics_latest.json")
     signals = load_json(LIVE_DIR / "prop_signals_latest.json")
+    account_state = load_json(LIVE_DIR / "account_state.json")
+    tv_state = load_json(LIVE_DIR / "tradingview_filter_state.json")
     alerts = load_json(LIVE_DIR / "tracker_alerts.json")
     snapshots = load_jsonl(LIVE_DIR / "automated_daily_pnl.jsonl")
     executions = load_jsonl(LIVE_DIR / "capital_executions.jsonl")
@@ -216,6 +278,11 @@ def main() -> None:
 
     daily_ops_section, _decision = build_daily_ops_section(daily_ops if isinstance(daily_ops, dict) else {})
     account_section, balances, dates = build_account_section(snapshots)
+    tradingview_section, tv_symbols = build_tradingview_section(
+        signals if isinstance(signals, dict) else {},
+        account_state if isinstance(account_state, dict) else {},
+        tv_state if isinstance(tv_state, dict) else {},
+    )
     html_doc = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -230,13 +297,18 @@ h1, h2 {{ color: #58a6ff; }}
 .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin: 16px 0 24px; }}
 .card {{ background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 14px; }}
 .label {{ color: #8b949e; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }}
-.value {{ font-size: 21px; font-weight: 700; margin-top: 5px; }}
+.value {{ font-size: 21px; font-weight: 700; margin-top: 5px; overflow-wrap: anywhere; }}
 .ok {{ color: #3fb950; }} .warn {{ color: #d29922; }} .bad {{ color: #f85149; }} .muted {{ color: #8b949e; }}
 table {{ width: 100%; border-collapse: collapse; background: #161b22; border: 1px solid #30363d; border-radius: 10px; overflow: hidden; margin: 12px 0 26px; }}
 th, td {{ text-align: left; padding: 9px 12px; border-bottom: 1px solid #30363d; font-size: 13px; }}
 th {{ color: #8b949e; background: #1c2128; }} tr:last-child td {{ border-bottom: none; }}
 pre {{ background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 14px; overflow-x: auto; color: #c9d1d9; }}
 #pnl-chart {{ height: 340px; background: #161b22; border: 1px solid #30363d; border-radius: 10px; margin-bottom: 26px; }}
+#tradingview-chart {{ height: 520px; background: #161b22; border: 1px solid #30363d; border-radius: 10px; margin-bottom: 26px; overflow: hidden; }}
+.symbol-toolbar {{ display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }}
+.symbol-button {{ background: #21262d; color: #c9d1d9; border: 1px solid #30363d; border-radius: 8px; padding: 8px 11px; font-weight: 650; cursor: pointer; }}
+.symbol-button:hover, .symbol-button.active {{ border-color: #58a6ff; color: #58a6ff; }}
+.tv-fallback {{ display: grid; place-items: center; height: 100%; }}
 .footer {{ margin-top: 32px; color: #8b949e; font-size: 12px; }}
 </style>
 </head>
@@ -245,14 +317,17 @@ pre {{ background: #161b22; border: 1px solid #30363d; border-radius: 10px; padd
 <div class="subtitle">Generated {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')}</div>
 {daily_ops_section}
 {build_signals_section(signals if isinstance(signals, dict) else {})}
+{tradingview_section}
 {build_tracker_section(alerts if isinstance(alerts, list) else [])}
 {account_section}
 {build_executions_section(executions)}
 {build_log_section(log_tail)}
 <div class="footer">Static dashboard generated by <code>dashboard_generator.py</code>. Live trading still requires verified broker symbols and clean demo execution.</div>
+<script src="https://s3.tradingview.com/tv.js"></script>
 <script>
 const dates = {json.dumps(dates)};
 const balances = {json.dumps(balances)};
+const tvSymbols = {json.dumps(tv_symbols)};
 if (dates.length > 0) {{
   Plotly.newPlot('pnl-chart', [{{
     x: dates, y: balances, type: 'scatter', mode: 'lines+markers', name: 'Balance',
@@ -261,6 +336,49 @@ if (dates.length > 0) {{
     paper_bgcolor: '#161b22', plot_bgcolor: '#0d1117', font: {{color: '#c9d1d9'}},
     margin: {{t: 25, r: 25, b: 45, l: 70}}, xaxis: {{gridcolor: '#30363d'}}, yaxis: {{gridcolor: '#30363d'}}
   }}, {{responsive: true, displayModeBar: false}});
+}}
+
+function renderTradingView(symbol) {{
+  const container = document.getElementById('tradingview-chart');
+  if (!container || !symbol) return;
+  container.innerHTML = '';
+  if (!window.TradingView) {{
+    container.innerHTML = "<div class='tv-fallback muted'>TradingView chart unavailable.</div>";
+    return;
+  }}
+  new TradingView.widget({{
+    autosize: true,
+    symbol: symbol,
+    interval: '60',
+    timezone: 'Etc/UTC',
+    theme: 'dark',
+    style: '1',
+    locale: 'en',
+    toolbar_bg: '#161b22',
+    enable_publishing: false,
+    hide_side_toolbar: false,
+    allow_symbol_change: true,
+    save_image: false,
+    container_id: 'tradingview-chart',
+    studies: ['RSI@tv-basicstudies']
+  }});
+}}
+
+function setActiveTradingViewButton(symbol) {{
+  document.querySelectorAll('.symbol-button').forEach((button) => {{
+    button.classList.toggle('active', button.dataset.symbol === symbol);
+  }});
+}}
+
+if (tvSymbols.length > 0) {{
+  document.querySelectorAll('.symbol-button').forEach((button) => {{
+    button.addEventListener('click', () => {{
+      setActiveTradingViewButton(button.dataset.symbol);
+      renderTradingView(button.dataset.symbol);
+    }});
+  }});
+  setActiveTradingViewButton(tvSymbols[0]);
+  setTimeout(() => renderTradingView(tvSymbols[0]), 50);
 }}
 </script>
 </body>

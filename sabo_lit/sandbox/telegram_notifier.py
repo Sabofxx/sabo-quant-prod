@@ -368,6 +368,29 @@ def section_signals() -> list[str]:
     return lines + [""]
 
 
+def section_tradingview_filter() -> list[str]:
+    state = load_json(LIVE_DIR / "tradingview_filter_state.json")
+    if not isinstance(state, dict) or not state:
+        return []
+    mode = html_escape(state.get("mode", "disabled"))
+    valid = int(state.get("valid_confirmations", 0) or 0)
+    accepted = int(state.get("accepted_orders", 0) or 0)
+    rejected = int(state.get("rejected_orders", 0) or 0)
+    raw = int(state.get("raw_confirmations", 0) or 0)
+    keys = state.get("confirmation_keys", [])
+    lines = [
+        f"📺 <b>TradingView</b> : mode <code>{mode}</code> · "
+        f"{valid}/{raw} confirmations valides · {rejected} rejetés",
+    ]
+    if accepted and mode != "disabled":
+        lines.append(f"   Ordres acceptés après filtre : {accepted}")
+    if isinstance(keys, list) and keys:
+        preview = ", ".join(html_escape(key) for key in keys[:8])
+        suffix = f", +{len(keys) - 8}" if len(keys) > 8 else ""
+        lines.append(f"   Confirmés : <code>{preview}{suffix}</code>")
+    return lines + [""]
+
+
 def section_executions_today(state: dict) -> list[str]:
     executions = load_jsonl(LIVE_DIR / "capital_executions.jsonl")
     today = datetime.now(UTC).date().isoformat()
@@ -602,6 +625,7 @@ def build_summary(status: str = "success",
     if not weekend:
         lines.extend(section_executions_today(state))
         lines.extend(section_signals())
+        lines.extend(section_tradingview_filter())
     else:
         lines.extend(section_weekly_exec_summary())
     lines.extend(section_pl_trend(snapshots, str(currency)))

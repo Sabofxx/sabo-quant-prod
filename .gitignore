@@ -14,6 +14,10 @@ __pycache__/
 venv/
 env/
 
+# Node / Cloudflare Worker
+node_modules/
+.wrangler/
+
 # OS
 .DS_Store
 Thumbs.db

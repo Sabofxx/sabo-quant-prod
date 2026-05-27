@@ -64,6 +64,14 @@ jobs:
           CAPITAL_GSL_DISTANCE_BUFFER: ${{ vars.CAPITAL_GSL_DISTANCE_BUFFER || '2.0' }}
           CAPITAL_GSL_FALLBACK_DISTANCE_PCT: ${{ vars.CAPITAL_GSL_FALLBACK_DISTANCE_PCT || '5.0' }}
           CAPITAL_GSL_STOPLOSS_RETRY_MULTIPLIER: ${{ vars.CAPITAL_GSL_STOPLOSS_RETRY_MULTIPLIER || '2.0' }}
+          TV_FILTER_MODE: ${{ vars.TV_FILTER_MODE || 'disabled' }}
+          TV_FILTER_MAX_AGE_HOURS: ${{ vars.TV_FILTER_MAX_AGE_HOURS || '24' }}
+          TV_FILTER_REQUIRE_TODAY: ${{ vars.TV_FILTER_REQUIRE_TODAY || '1' }}
+          TV_FILTER_TIMEFRAMES: ${{ vars.TV_FILTER_TIMEFRAMES || '' }}
+          TV_FILTER_SYMBOLS: ${{ vars.TV_FILTER_SYMBOLS || 'EURUSD,GBPUSD,USDJPY,AUDUSD,NZDUSD,USDCAD' }}
+          TV_FILTER_FAIL_CLOSED: ${{ vars.TV_FILTER_FAIL_CLOSED || '0' }}
+          TRADINGVIEW_WORKER_URL: ${{ secrets.TRADINGVIEW_WORKER_URL }}
+          TRADINGVIEW_WORKER_READ_TOKEN: ${{ secrets.TRADINGVIEW_WORKER_READ_TOKEN }}
         run: |
           cd sabo_lit/sandbox
           python automated_runner.py
