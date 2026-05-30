@@ -1,29 +1,16 @@
 {
-  "ts": "2026-05-29T23:39:03+00:00",
+  "ts": "2026-05-30T23:11:54+00:00",
   "environment": "demo",
   "broker": "Capital.com",
   "account_id": "321896722115941534",
   "account_name": "demo",
   "currency": "EURd",
-  "balance": 98201.45,
-  "available": 88569.67,
-  "deposit": 98179.19,
+  "balance": 98189.62,
+  "available": 88557.84,
+  "deposit": 98167.36,
   "profit_loss": 22.26,
   "margin_used": 9631.779999999999,
   "positions": [
-    {
-      "deal_id": "00005552-0055-311e-0000-000081ee5218",
-      "epic": "EURUSD",
-      "instrument": "EUR/USD",
-      "direction": "SELL",
-      "size": 15000.0,
-      "open_level": 1.16515,
-      "current_bid": 1.1658,
-      "current_offer": 1.1661,
-      "profit_loss": 0.0,
-      "currency": "USD",
-      "created": "2026-05-29T01:39:52.366"
-    },
     {
       "deal_id": "000154c4-0029-065e-0000-000080e91266",
       "epic": "USDJPY",
@@ -51,6 +38,19 @@
       "created": "2026-05-29T01:40:02.346"
     },
     {
+      "deal_id": "00005552-0055-311e-0000-000081ee5218",
+      "epic": "EURUSD",
+      "instrument": "EUR/USD",
+      "direction": "SELL",
+      "size": 15000.0,
+      "open_level": 1.16515,
+      "current_bid": 1.1658,
+      "current_offer": 1.1661,
+      "profit_loss": 0.0,
+      "currency": "USD",
+      "created": "2026-05-29T01:39:52.366"
+    },
+    {
       "deal_id": "000154c4-000c-111e-0000-000080f50f30",
       "epic": "USDCAD",
       "instrument": "USD/CAD",
@@ -62,32 +62,6 @@
       "profit_loss": 0.0,
       "currency": "CAD",
       "created": "2026-05-29T01:40:14.286"
-    },
-    {
-      "deal_id": "000154c4-0029-065e-0000-000080e91268",
-      "epic": "USDJPY",
-      "instrument": "USD/JPY",
-      "direction": "SELL",
-      "size": 17500.0,
-      "open_level": 159.249,
-      "current_bid": 159.266,
-      "current_offer": 159.296,
-      "profit_loss": 0.0,
-      "currency": "JPY",
-      "created": "2026-05-29T01:40:08.346"
-    },
-    {
-      "deal_id": "000154c4-0029-065e-0000-000080e9126e",
-      "epic": "USDJPY",
-      "instrument": "USD/JPY",
-      "direction": "SELL",
-      "size": 14000.0,
-      "open_level": 159.261,
-      "current_bid": 159.266,
-      "current_offer": 159.296,
-      "profit_loss": 0.0,
-      "currency": "JPY",
-      "created": "2026-05-29T01:40:51.346"
     },
     {
       "deal_id": "000154c4-000c-111e-0000-000080f50f3a",
@@ -207,6 +181,32 @@
       "created": "2026-05-29T01:40:04.448"
     },
     {
+      "deal_id": "000154c4-0029-065e-0000-000080e91268",
+      "epic": "USDJPY",
+      "instrument": "USD/JPY",
+      "direction": "SELL",
+      "size": 17500.0,
+      "open_level": 159.249,
+      "current_bid": 159.266,
+      "current_offer": 159.296,
+      "profit_loss": 0.0,
+      "currency": "JPY",
+      "created": "2026-05-29T01:40:08.346"
+    },
+    {
+      "deal_id": "000154c4-0029-065e-0000-000080e9126e",
+      "epic": "USDJPY",
+      "instrument": "USD/JPY",
+      "direction": "SELL",
+      "size": 14000.0,
+      "open_level": 159.261,
+      "current_bid": 159.266,
+      "current_offer": 159.296,
+      "profit_loss": 0.0,
+      "currency": "JPY",
+      "created": "2026-05-29T01:40:51.346"
+    },
+    {
       "deal_id": "000154c4-0029-065e-0000-000080e9126a",
       "epic": "USDJPY",
       "instrument": "USD/JPY",
@@ -235,6 +235,6 @@
   ],
   "positions_count": 17,
   "market_open": false,
-  "market_reason": "Friday post-close FX market closed",
+  "market_reason": "Saturday FX market closed",
   "executed_this_run": false
 }
