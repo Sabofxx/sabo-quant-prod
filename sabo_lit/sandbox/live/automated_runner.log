@@ -1341,3 +1341,61 @@
 [2026-06-03T23:57:31+00:00]   | Sent. message_id=54
 [2026-06-03T23:57:31+00:00] Automated daily runner completed successfully
 [2026-06-03T23:57:31+00:00] ============================================================
+[2026-06-04T23:20:37+00:00] ============================================================
+[2026-06-04T23:20:37+00:00] Automated daily runner started
+[2026-06-04T23:20:37+00:00] Capital env=demo
+[2026-06-04T23:20:37+00:00] Logged in. account_id=321896722115941534 currency=EUR
+[2026-06-04T23:20:38+00:00] Account snapshot: bal=97770.14 EURd avail=97770.14 pl=+0.00
+[2026-06-04T23:20:38+00:00] Fetching fresh daily candles from Capital.com...
+[2026-06-04T23:20:38+00:00]   EURUSD (EURUSD): fetched 200 bars, appended 11
+[2026-06-04T23:20:39+00:00]   GBPUSD (GBPUSD): fetched 200 bars, appended 11
+[2026-06-04T23:20:40+00:00]   USDJPY (USDJPY): fetched 200 bars, appended 11
+[2026-06-04T23:20:41+00:00]   AUDUSD (AUDUSD): fetched 200 bars, appended 11
+[2026-06-04T23:20:41+00:00]   NZDUSD (NZDUSD): fetched 200 bars, appended 11
+[2026-06-04T23:20:42+00:00]   USDCAD (USDCAD): fetched 200 bars, appended 11
+[2026-06-04T23:20:42+00:00] Updated 6/6 pair CSVs
+[2026-06-04T23:20:42+00:00] STEP: signal_generator → /opt/hostedtoolcache/Python/3.12.13/x64/bin/python propfirm_signal_generator.py --adaptive
+[2026-06-04T23:20:43+00:00]   | WARN: H1 spec H1_NASDAQ_TREND unavailable (empty H1 prices for usatechidxusd); skipping
+[2026-06-04T23:20:43+00:00]   | WARN: H1 spec H1_CHFJPY_BREAK unavailable (empty H1 prices for chfjpy); skipping
+[2026-06-04T23:20:43+00:00]   | WARN: H1 spec H1_DOW_TSM unavailable (empty H1 prices for usa30idxusd); skipping
+[2026-06-04T23:20:43+00:00]   | WARN: composite H1_MULTI missing members ['H1_NASDAQ_TREND', 'H1_CHFJPY_BREAK', 'H1_DOW_TSM']; skipping
+[2026-06-04T23:20:43+00:00]   | WARN: composite HYBRID_FX_H1 missing members ['H1_MULTI']; skipping
+[2026-06-04T23:20:43+00:00]   | WARNING: 2026-06-04 is news blackout (ECB). All accounts forced flat.
+[2026-06-04T23:20:43+00:00]   | As of: 2026-06-04
+[2026-06-04T23:20:43+00:00]   | Accounts: 8
+[2026-06-04T23:20:43+00:00]   | Orders (target): 39
+[2026-06-04T23:20:43+00:00]   | Delta orders (execute): 0
+[2026-06-04T23:20:43+00:00]   | Total target gross: $0
+[2026-06-04T23:20:43+00:00]   | Total delta gross : $0
+[2026-06-04T23:20:43+00:00]   | NEWS BLACKOUT: ECB (use --ignore-news to override)
+[2026-06-04T23:20:43+00:00]   | Wrote: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/prop_signals_2026-06-04.json
+[2026-06-04T23:20:43+00:00]   | Wrote: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/prop_orders_2026-06-04.csv
+[2026-06-04T23:20:43+00:00]   | Wrote: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/prop_signals_2026-06-04.md
+[2026-06-04T23:20:43+00:00]   | Wrote: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/prop_delta_orders_2026-06-04.csv
+[2026-06-04T23:20:43+00:00] TradingView filter: mode=disabled valid=0 accepted=39 rejected=0
+[2026-06-04T23:20:43+00:00] Position reconciliation: OK (0 deals match)
+[2026-06-04T23:20:43+00:00] Market execution check: FX execution window open
+[2026-06-04T23:20:44+00:00] Circuit breaker: DD +0.00% within budget
+[2026-06-04T23:20:44+00:00] STEP: capital_executor → /opt/hostedtoolcache/Python/3.12.13/x64/bin/python capital_connector.py --execute /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/prop_delta_orders_latest.csv --min-notional 500 --live-max-notional 250000 --reset
+[2026-06-04T23:20:47+00:00]   | Logged in. account_id=321896722115941534 currency=EUR env=demo
+[2026-06-04T23:20:47+00:00]   | Capital account preferences: hedgingMode=False
+[2026-06-04T23:20:47+00:00]   | RESET mode: closing all existing positions first...
+[2026-06-04T23:20:47+00:00]   |   Closed 0 positions (0 errors)
+[2026-06-04T23:20:47+00:00]   | Current Capital positions: 0 epics
+[2026-06-04T23:20:47+00:00]   | 
+[2026-06-04T23:20:47+00:00]   | Executed 0 orders (0 errors). Log: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/capital_executions.jsonl
+[2026-06-04T23:20:47+00:00] STEP: live_tracker_refresh → /opt/hostedtoolcache/Python/3.12.13/x64/bin/python live_tracker.py
+[2026-06-04T23:20:47+00:00]   | Trades logged so far: 1
+[2026-06-04T23:20:47+00:00]   | Daily P&L logged so far: 2
+[2026-06-04T23:20:47+00:00]   | Active alerts: 0
+[2026-06-04T23:20:47+00:00]   | Dashboard: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/tracker_dashboard.md
+[2026-06-04T23:20:47+00:00]   | Alerts JSON: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/tracker_alerts.json
+[2026-06-04T23:20:48+00:00] Account snapshot: bal=97770.14 EURd avail=97770.14 pl=+0.00
+[2026-06-04T23:20:48+00:00] Wrote account_state.json: positions=0 bal=97770.14 env=demo
+[2026-06-04T23:20:48+00:00] STEP: dashboard_generator → /opt/hostedtoolcache/Python/3.12.13/x64/bin/python dashboard_generator.py
+[2026-06-04T23:20:48+00:00]   | Dashboard written: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/dashboard.html
+[2026-06-04T23:20:48+00:00]   |   Signals: True, Daily ops: True, Snapshots: 12, Executions: 780
+[2026-06-04T23:20:48+00:00] STEP: telegram_notify → /opt/hostedtoolcache/Python/3.12.13/x64/bin/python telegram_notifier.py --run-summary --status success
+[2026-06-04T23:20:49+00:00]   | Sent. message_id=60
+[2026-06-04T23:20:49+00:00] Automated daily runner completed successfully
+[2026-06-04T23:20:49+00:00] ============================================================

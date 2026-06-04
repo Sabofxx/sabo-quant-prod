@@ -1,6 +1,6 @@
 # Prop Firm Live Tracker Dashboard
 
-Generated: 2026-06-03T23:57:29+00:00
+Generated: 2026-06-04T23:20:47+00:00
 
 ## Per-account health
 
