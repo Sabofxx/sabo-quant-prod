@@ -1,5 +1,5 @@
 {
-  "ts": "2026-06-04T23:20:48+00:00",
+  "ts": "2026-06-05T23:22:16+00:00",
   "environment": "demo",
   "broker": "Capital.com",
   "account_id": "321896722115941534",
@@ -12,7 +12,7 @@
   "margin_used": 0.0,
   "positions": [],
   "positions_count": 0,
-  "market_open": true,
-  "market_reason": "FX execution window open",
-  "executed_this_run": true
+  "market_open": false,
+  "market_reason": "Friday post-close FX market closed",
+  "executed_this_run": false
 }

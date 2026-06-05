@@ -1,0 +1,1 @@
+account_id,strategy,instrument,broker_symbol,source,side,signal,weight,target_notional_usd,target_pct_account,estimated_units,estimated_standard_lots,sizing_note,last_price,magic,current_notional_usd,delta_notional_usd,delta_side
