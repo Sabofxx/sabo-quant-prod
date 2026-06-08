@@ -21,9 +21,7 @@ from typing import Any
 import pandas as pd
 
 import live_news_calendar as news
-import strategy_h1_edge_miner as h1
 import strategy_propfirm_cashmax as cash
-import strategy_propfirm_hybrid_h1 as hybrid
 
 
 HERE = Path(__file__).parent
@@ -43,16 +41,10 @@ FX_SPECS = {
     "FAST_STACK": [("EURUSD", 3), ("GBPUSD", 3), ("USDCAD", 3)],
 }
 
-H1_SPECS = {
-    "H1_NASDAQ_TREND": ("usatechidxusd", "MA_LONG", 200),
-    "H1_CHFJPY_BREAK": ("chfjpy", "DON_BREAK", 100),
-    "H1_DOW_TSM": ("usa30idxusd", "TSM", 5),
-}
-
-COMPOSITE_SPECS = {
-    "H1_MULTI": ["H1_NASDAQ_TREND", "H1_CHFJPY_BREAK", "H1_DOW_TSM"],
-    "HYBRID_FX_H1": ["FX_MR_STACK", "H1_MULTI"],
-}
+# H1 index/cross specs (NASDAQ/CHFJPY/DOW) and their composites were dropped
+# after the Capital.com pivot removed those instruments' intraday data feed.
+# Active account configs reference FX specs only, so they contributed nothing but
+# a WARN per run. Removed. See git history if H1 data is ever restored.
 
 
 @dataclass(frozen=True)
@@ -156,66 +148,6 @@ def build_fx_spec(name: str, members: list[tuple[str, int]], closes: dict[str, p
     return SpecState(daily_returns=daily, components=components)
 
 
-def h1_daily_prices(symbol: str) -> pd.DataFrame:
-    prices = h1.load_symbol(symbol)
-    if prices.empty:
-        raise RuntimeError(f"empty H1 data for {symbol}")
-    return prices.resample("1D").last().dropna()
-
-
-def h1_live_signal(symbol: str, family: str, lookback: int, as_of: pd.Timestamp) -> tuple[float, float]:
-    prices = h1.load_symbol(symbol)
-    daily_prices = prices.resample("1D").last().dropna().loc[:as_of]
-    if daily_prices.empty:
-        return 0.0, 0.0
-    if family == "MA_LONG":
-        signal_series = h1.signal_ma_filter_daily(daily_prices, lookback, "LONG")
-    elif family == "DON_BREAK":
-        signal_series = h1.signal_donchian_daily(daily_prices, lookback, "BREAK")
-    elif family == "TSM":
-        signal_series = h1.signal_mr_tsm_daily(daily_prices, lookback, "TSM")
-    else:
-        raise ValueError(f"unknown H1 family: {family}")
-    signal = float(signal_series.dropna().iloc[-1]) if not signal_series.dropna().empty else 0.0
-    return signal, float(daily_prices["mid_close"].iloc[-1])
-
-
-def build_h1_spec(name: str, definition: tuple[str, str, int], as_of: pd.Timestamp) -> SpecState:
-    symbol, family, lookback = definition
-    daily, _intraday = hybrid.h1_daily_path_returns(symbol, family, lookback)
-    signal, price = h1_live_signal(symbol, family, lookback, as_of)
-    return SpecState(
-        daily_returns=daily,
-        components=[
-            Component(
-                instrument=symbol,
-                source=f"{symbol}_{family}_{lookback}",
-                signal=signal,
-                weight=1.0,
-                last_price=price,
-            )
-        ],
-    )
-
-
-def combine_spec(name: str, member_names: list[str], specs: dict[str, SpecState]) -> SpecState:
-    weight = 1.0 / len(member_names)
-    daily = pd.DataFrame({member: specs[member].daily_returns for member in member_names}).fillna(0.0).mean(axis=1)
-    components = []
-    for member in member_names:
-        for component in specs[member].components:
-            components.append(
-                Component(
-                    instrument=component.instrument,
-                    source=f"{name}:{component.source}",
-                    signal=component.signal,
-                    weight=component.weight * weight,
-                    last_price=component.last_price,
-                )
-            )
-    return SpecState(daily_returns=daily, components=components)
-
-
 def build_specs(as_of: pd.Timestamp | None) -> tuple[dict[str, SpecState], pd.Timestamp]:
     closes = load_fx_daily_closes()
     preliminary_as_of = as_of or min(series.index.max() for series in closes.values()).floor("D")
@@ -223,22 +155,6 @@ def build_specs(as_of: pd.Timestamp | None) -> tuple[dict[str, SpecState], pd.Ti
     specs: dict[str, SpecState] = {}
     for name, members in FX_SPECS.items():
         specs[name] = build_fx_spec(name, members, closes, preliminary_as_of)
-
-    # H1 specs optional : skip on missing Dukascopy H1 data (gitignored on GH runner).
-    # Active accounts JSON references FX only, so H1 absence is non-fatal.
-    for name, definition in H1_SPECS.items():
-        try:
-            specs[name] = build_h1_spec(name, definition, preliminary_as_of)
-        except (RuntimeError, FileNotFoundError) as exc:
-            print(f"WARN: H1 spec {name} unavailable ({exc}); skipping", flush=True)
-
-    # Composite specs : skip if any member missing (H1 dependency)
-    for name, members in COMPOSITE_SPECS.items():
-        missing = [m for m in members if m not in specs]
-        if missing:
-            print(f"WARN: composite {name} missing members {missing}; skipping", flush=True)
-            continue
-        specs[name] = combine_spec(name, members, specs)
 
     final_as_of = as_of or latest_common_date(specs)
     if final_as_of != preliminary_as_of:

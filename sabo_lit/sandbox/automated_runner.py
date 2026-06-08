@@ -230,11 +230,15 @@ def write_account_state(client: CapitalClient, market_open: bool,
 
 
 def reconcile_positions(client: CapitalClient) -> tuple[bool, str]:
-    """Compare current Capital positions to last run's account_state.json snapshot.
+    """Compare current Capital net exposure to last run's account_state.json.
 
-    Returns (matches, detail). Drift = positions opened/closed between runs by
-    something other than our pipeline (manual intervention, broker auto-stop,
-    margin call). Non-fatal — surface in Telegram but don't block execution.
+    Returns (matches, detail). Drift = net per-epic exposure changed between runs
+    by something other than our pipeline (manual close, broker auto-stop, margin
+    liquidation). Non-fatal — surface in Telegram but don't block execution.
+
+    Compares signed net size per epic, NOT individual deal IDs: Capital rolls
+    over CFD dealIds daily, so a deal-ID diff fires on every run even when nothing
+    actually changed. Net exposure is the meaningful invariant between runs.
     """
     if not ACCOUNT_STATE.exists():
         return True, "no prior state file (first run)"
@@ -242,23 +246,43 @@ def reconcile_positions(client: CapitalClient) -> tuple[bool, str]:
         last = json.loads(ACCOUNT_STATE.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return True, "prior state file unparseable"
-    prior_deals = {p.get("deal_id") for p in last.get("positions", []) if p.get("deal_id")}
+
+    def _net_by_epic(rows: list[tuple[str, str, float]]) -> dict[str, float]:
+        net: dict[str, float] = {}
+        for epic, direction, size in rows:
+            if not epic:
+                continue
+            signed = size if str(direction).upper() == "BUY" else -size
+            net[epic] = net.get(epic, 0.0) + signed
+        return net
+
+    prior_rows = [(p.get("epic"), p.get("direction"), float(p.get("size", 0) or 0))
+                  for p in last.get("positions", [])]
+    prior_net = _net_by_epic(prior_rows)
     try:
         live_positions = client.get_positions()
     except Exception as exc:
         return False, f"reconcile fetch failed: {exc}"
-    live_deals = {p.get("position", {}).get("dealId") for p in live_positions
-                   if p.get("position", {}).get("dealId")}
-    missing = prior_deals - live_deals
-    added = live_deals - prior_deals
-    if not missing and not added:
-        return True, f"OK ({len(prior_deals)} deals match)"
-    parts = []
-    if missing:
-        parts.append(f"{len(missing)} deals disappeared since last run")
-    if added:
-        parts.append(f"{len(added)} unexpected new deals")
-    return False, "; ".join(parts)
+    live_rows = [(e.get("market", {}).get("epic"),
+                  e.get("position", {}).get("direction"),
+                  float(e.get("position", {}).get("size", 0) or 0))
+                 for e in live_positions]
+    live_net = _net_by_epic(live_rows)
+
+    # Flag an epic only if net exposure diverged materially: prior had exposure
+    # and live drifted >5% from it (or vice versa). Tolerates rounding/partial
+    # fills; catches manual closes and liquidations.
+    drifted: list[str] = []
+    for epic in set(prior_net) | set(live_net):
+        p = prior_net.get(epic, 0.0)
+        l = live_net.get(epic, 0.0)
+        ref = max(abs(p), abs(l), 1.0)
+        if abs(l - p) / ref > 0.05:
+            drifted.append(f"{epic} {p:+.0f}->{l:+.0f}")
+    if not drifted:
+        n = sum(1 for v in prior_net.values() if abs(v) > 0)
+        return True, f"OK ({n} epics net-matched)"
+    return False, "net exposure drift: " + "; ".join(drifted)
 
 
 def circuit_breaker_check(client: CapitalClient,
