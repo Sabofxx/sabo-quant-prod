@@ -1,13 +1,13 @@
 {
-  "ts": "2026-06-12T23:43:50+00:00",
+  "ts": "2026-06-13T23:19:00+00:00",
   "environment": "demo",
   "broker": "Capital.com",
   "account_id": "321896722115941534",
   "account_name": "demo",
   "currency": "EURd",
-  "balance": 95214.55,
-  "available": 81445.89,
-  "deposit": 95444.91,
+  "balance": 95197.33,
+  "available": 81428.67,
+  "deposit": 95427.69,
   "profit_loss": -230.36,
   "margin_used": 13768.660000000003,
   "positions": [
@@ -313,6 +313,6 @@
   ],
   "positions_count": 23,
   "market_open": false,
-  "market_reason": "Friday post-close FX market closed",
+  "market_reason": "Saturday FX market closed",
   "executed_this_run": false
 }

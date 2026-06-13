@@ -1875,3 +1875,47 @@
 [2026-06-12T23:43:51+00:00]   | Sent. message_id=104
 [2026-06-12T23:43:51+00:00] Automated daily runner completed successfully
 [2026-06-12T23:43:51+00:00] ============================================================
+[2026-06-13T23:18:49+00:00] ============================================================
+[2026-06-13T23:18:49+00:00] Automated daily runner started
+[2026-06-13T23:18:49+00:00] Capital env=demo
+[2026-06-13T23:18:50+00:00] Logged in. account_id=321896722115941534 currency=EUR
+[2026-06-13T23:18:50+00:00] Account snapshot: bal=95197.33 EURd avail=81428.67 pl=-230.36
+[2026-06-13T23:18:50+00:00] Fetching fresh daily candles from Capital.com...
+[2026-06-13T23:18:51+00:00]   EURUSD (EURUSD): fetched 200 bars, appended 18
+[2026-06-13T23:18:52+00:00]   GBPUSD (GBPUSD): fetched 200 bars, appended 18
+[2026-06-13T23:18:53+00:00]   USDJPY (USDJPY): fetched 200 bars, appended 18
+[2026-06-13T23:18:54+00:00]   AUDUSD (AUDUSD): fetched 200 bars, appended 18
+[2026-06-13T23:18:55+00:00]   NZDUSD (NZDUSD): fetched 200 bars, appended 18
+[2026-06-13T23:18:56+00:00]   USDCAD (USDCAD): fetched 200 bars, appended 18
+[2026-06-13T23:18:56+00:00] Updated 6/6 pair CSVs
+[2026-06-13T23:18:56+00:00] STEP: signal_generator → /opt/hostedtoolcache/Python/3.12.13/x64/bin/python propfirm_signal_generator.py --adaptive
+[2026-06-13T23:18:57+00:00]   | As of: 2026-06-12
+[2026-06-13T23:18:57+00:00]   | Accounts: 8
+[2026-06-13T23:18:57+00:00]   | Orders (target): 39
+[2026-06-13T23:18:57+00:00]   | Delta orders (execute): 39
+[2026-06-13T23:18:57+00:00]   | Total target gross: $820525
+[2026-06-13T23:18:57+00:00]   | Total delta gross : $820525
+[2026-06-13T23:18:57+00:00]   | Wrote: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/prop_signals_2026-06-12.json
+[2026-06-13T23:18:57+00:00]   | Wrote: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/prop_orders_2026-06-12.csv
+[2026-06-13T23:18:57+00:00]   | Wrote: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/prop_signals_2026-06-12.md
+[2026-06-13T23:18:57+00:00]   | Wrote: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/prop_delta_orders_2026-06-12.csv
+[2026-06-13T23:18:57+00:00] TradingView filter: mode=disabled valid=0 accepted=39 rejected=0
+[2026-06-13T23:18:57+00:00] Position reconciliation: OK (4 epics net-matched)
+[2026-06-13T23:18:57+00:00] Market execution check: Saturday FX market closed
+[2026-06-13T23:18:58+00:00] Circuit breaker: DD +0.00% within budget
+[2026-06-13T23:18:58+00:00] INFO: skipping Capital execution: Saturday FX market closed
+[2026-06-13T23:18:58+00:00] STEP: live_tracker_refresh → /opt/hostedtoolcache/Python/3.12.13/x64/bin/python live_tracker.py
+[2026-06-13T23:18:58+00:00]   | Trades logged so far: 1
+[2026-06-13T23:18:58+00:00]   | Daily P&L logged so far: 2
+[2026-06-13T23:18:58+00:00]   | Active alerts: 0
+[2026-06-13T23:18:58+00:00]   | Dashboard: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/tracker_dashboard.md
+[2026-06-13T23:18:58+00:00]   | Alerts JSON: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/tracker_alerts.json
+[2026-06-13T23:18:58+00:00] Account snapshot: bal=95197.33 EURd avail=81428.67 pl=-230.36
+[2026-06-13T23:19:00+00:00] Wrote account_state.json: positions=23 bal=95197.33 env=demo
+[2026-06-13T23:19:00+00:00] STEP: dashboard_generator → /opt/hostedtoolcache/Python/3.12.13/x64/bin/python dashboard_generator.py
+[2026-06-13T23:19:00+00:00]   | Dashboard written: /home/runner/work/sabo-quant-prod/sabo-quant-prod/sabo_lit/sandbox/live/dashboard.html
+[2026-06-13T23:19:00+00:00]   |   Signals: True, Daily ops: True, Snapshots: 21, Executions: 1069
+[2026-06-13T23:19:00+00:00] STEP: telegram_notify → /opt/hostedtoolcache/Python/3.12.13/x64/bin/python telegram_notifier.py --run-summary --status success
+[2026-06-13T23:19:01+00:00]   | Sent. message_id=105
+[2026-06-13T23:19:01+00:00] Automated daily runner completed successfully
+[2026-06-13T23:19:01+00:00] ============================================================
