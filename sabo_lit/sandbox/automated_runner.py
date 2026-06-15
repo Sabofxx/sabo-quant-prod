@@ -518,6 +518,13 @@ def main() -> None:
     except Exception as e:
         log(f"WARN: account_state write failed: {e}")
 
+    # Sync realized PnL from Capital transaction history (captures reset closes
+    # AND intraday guaranteed-stop-outs that never reach close_all). Must run
+    # before the dashboards/Telegram so they report fresh realized results.
+    rc = run_step("realized_pnl_sync", [py, "capital_connector.py", "--sync-realized"])
+    if rc != 0:
+        log("WARN: realized_pnl_sync failed")
+
     # Generate static HTML dashboard from latest state files
     rc = run_step("dashboard_generator", [py, "dashboard_generator.py"])
     if rc != 0:

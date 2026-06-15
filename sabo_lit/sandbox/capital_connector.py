@@ -31,7 +31,7 @@ import math
 import os
 import sys
 import time
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import requests
@@ -134,6 +134,22 @@ class CapitalClient:
         r.raise_for_status()
         return r.json().get("prices", [])
 
+    def get_transactions(self, from_iso: str, to_iso: str | None = None) -> list[dict]:
+        """Capital transaction history (/history/transactions).
+
+        Authoritative record of every closed deal — including positions taken
+        out by a guaranteed stop intraday, which never pass through our reset
+        close loop. Each row carries profitAndLoss, instrumentName, size,
+        open/close level and a unique reference.
+        """
+        url = f"{self.base}/history/transactions"
+        params: dict[str, str] = {"from": from_iso}
+        if to_iso:
+            params["to"] = to_iso
+        r = requests.get(url, headers=self._headers(), params=params, timeout=20)
+        r.raise_for_status()
+        return r.json().get("transactions", [])
+
     def get_deal_confirm_price(self, deal_reference: str | None) -> float | None:
         """Fetch executed fill price via /confirms/{dealReference}. Returns None on miss."""
         if not deal_reference:
@@ -173,9 +189,10 @@ class CapitalClient:
     def close_all_positions(self) -> list[dict]:
         """Close every open position. Returns list of {deal_id, status, ...}.
 
-        Logs each closed position's realized PnL (the position's running profit at
-        close time) to realized_pnl.jsonl — the only place per-trade win/loss is
-        recorded, since Capital's close response carries no PnL.
+        Realized PnL is NOT logged here — positions stopped out by a guaranteed
+        stop intraday never reach this loop, so it would undercount losses.
+        sync_realized_from_transactions() pulls the authoritative PnL for every
+        close (ours + stop-outs) from Capital's transaction history instead.
         """
         results = []
         for p in self.get_positions():
@@ -194,15 +211,6 @@ class CapitalClient:
                     "status": "closed",
                     "reference": resp.get("dealReference"),
                 })
-                _append_realized(
-                    deal_id=deal_id,
-                    epic=epic,
-                    direction=pos.get("direction"),
-                    size=float(pos.get("size", 0) or 0),
-                    open_level=float(pos.get("level", 0) or 0),
-                    profit=profit,
-                    currency=pos.get("currency"),
-                )
                 print(f"  CLOSED {epic} {deal_id} pnl={profit:+.2f}")
             except requests.HTTPError as e:
                 err = f"{e.response.status_code}: {e.response.text[:200]}"
@@ -413,24 +421,91 @@ def append_log(record: dict) -> None:
         f.write(json.dumps(record, default=str) + "\n")
 
 
-def _append_realized(*, deal_id: str, epic: str, direction: str | None,
-                     size: float, open_level: float, profit: float,
-                     currency: str | None) -> None:
-    """Append one closed-trade realized PnL record to realized_pnl.jsonl."""
+def _parse_pnl(raw: object) -> float | None:
+    """Parse Capital profitAndLoss strings like 'EUR-12.34', '£5', '-3.2'."""
+    if raw is None:
+        return None
+    if isinstance(raw, (int, float)):
+        return float(raw)
+    s = str(raw).strip()
+    neg = "-" in s
+    digits = "".join(ch for ch in s if ch.isdigit() or ch == ".")
+    if not digits or digits == ".":
+        return None
+    try:
+        val = float(digits)
+    except ValueError:
+        return None
+    return -val if neg else val
+
+
+def _logged_references() -> set[str]:
+    refs: set[str] = set()
+    if not REALIZED_LOG.exists():
+        return refs
+    for line in REALIZED_LOG.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            ref = json.loads(line).get("reference")
+            if ref:
+                refs.add(str(ref))
+        except json.JSONDecodeError:
+            continue
+    return refs
+
+
+def sync_realized_from_transactions(client: CapitalClient,
+                                    lookback_days: int = 7) -> int:
+    """Append any new closed-trade PnL from Capital's transaction history.
+
+    Authoritative source covering BOTH our reset closes and positions taken out
+    by a guaranteed stop intraday (which never reach close_all_positions).
+    Deduplicated by transaction reference. Returns count of new rows.
+    """
+    now = datetime.now(UTC)
+    from_iso = (now - timedelta(days=lookback_days)).strftime("%Y-%m-%dT%H:%M:%S")
+    to_iso = now.strftime("%Y-%m-%dT%H:%M:%S")
+    try:
+        txns = client.get_transactions(from_iso, to_iso)
+    except Exception as exc:
+        print(f"WARN: realized PnL sync failed: {exc}")
+        return 0
+
+    seen = _logged_references()
     LIVE_DIR.mkdir(exist_ok=True)
-    rec = {
-        "ts": datetime.now(UTC).isoformat(timespec="seconds"),
-        "deal_id": deal_id,
-        "epic": epic,
-        "direction": direction,
-        "size": round(size, 2),
-        "open_level": open_level,
-        "profit": round(profit, 2),
-        "win": profit > 0,
-        "currency": currency,
-    }
+    new = 0
     with REALIZED_LOG.open("a") as f:
-        f.write(json.dumps(rec, default=str) + "\n")
+        for t in txns:
+            ref = str(t.get("reference") or t.get("dealId") or "")
+            if not ref or ref in seen:
+                continue
+            pnl = _parse_pnl(t.get("profitAndLoss"))
+            if pnl is None or pnl == 0.0:
+                continue  # deposits/fees/zero-PnL rows are not trades
+            ttype = str(t.get("transactionType") or t.get("type") or "")
+            # Skip obvious non-trade ledger entries
+            if ttype.upper() in {"DEPOSIT", "WITHDRAWAL", "INACTIVITY_FEE", "TRANSFER"}:
+                continue
+            rec = {
+                "ts": t.get("date") or now.isoformat(timespec="seconds"),
+                "reference": ref,
+                "epic": t.get("instrumentName") or t.get("epic"),
+                "type": ttype,
+                "size": _parse_pnl(t.get("size")),
+                "open_level": t.get("openLevel"),
+                "close_level": t.get("closeLevel"),
+                "profit": round(pnl, 2),
+                "win": pnl > 0,
+                "currency": t.get("currency"),
+            }
+            f.write(json.dumps(rec, default=str) + "\n")
+            seen.add(ref)
+            new += 1
+    if new:
+        print(f"Realized PnL sync: +{new} closed trades from transaction history")
+    return new
 
 
 LIVE_MAX_NOTIONAL_USD_DEFAULT = 250_000.0
@@ -712,6 +787,9 @@ def main() -> None:
     parser.add_argument("--allow-live", action="store_true",
                           help="Required to submit on CAPITAL_ENVIRONMENT=live. "
                                "Also honored via env ALLOW_LIVE=1.")
+    parser.add_argument("--sync-realized", action="store_true",
+                        help="Append new closed-trade PnL from Capital transaction history")
+    parser.add_argument("--realized-lookback-days", type=int, default=7)
     parser.add_argument("--live-max-notional", type=float,
                           default=LIVE_MAX_NOTIONAL_USD_DEFAULT,
                           help=f"Per-order notional cap on live (default ${LIVE_MAX_NOTIONAL_USD_DEFAULT:,.0f})")
@@ -755,6 +833,11 @@ def main() -> None:
             return
         for epic, info in nets.items():
             print(f"  {epic}: net_size={info['net_size']:+.2f} ({len(info['deals'])} deals)")
+        return
+
+    if args.sync_realized:
+        n = sync_realized_from_transactions(client, args.realized_lookback_days)
+        print(f"Synced {n} new realized trades → {REALIZED_LOG}")
         return
 
     if args.reset and not args.execute:

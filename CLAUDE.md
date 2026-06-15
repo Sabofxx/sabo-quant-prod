@@ -41,7 +41,8 @@ Guidance for Claude Code when working in this repo. Overrides `/Users/oscarmisch
 6. `tradingview_filter.py` — optional TradingView confirmation layer (`TV_FILTER_MODE=disabled` by default)
 7. `market_execution_allowed()` — guard FX schedule (Fri 20:59 → Sun 21:00 closed, daily 20:55-21:10 maintenance)
 7b. `circuit_breaker_check()` (same-day DD vs `DAILY_DD_BREAKER_PCT`) AND `peak_drawdown_check()` (DD from all-time equity peak vs `MAX_PEAK_DD_PCT`, default -8%) — either trips → skip execution
-8. If allowed: `capital_connector.py --execute --reset --min-notional 500` (close all then open fresh — idempotent rebalance). On each close, realized PnL is appended to `live/realized_pnl.jsonl`. Guaranteed stops are mandatory on this account; distance floored at `max(exchange_min×buffer, ATR×CAPITAL_GSL_ATR_MULT)` so intraday noise can't clip a 24h hold.
+8. If allowed: `capital_connector.py --execute --reset --min-notional 500` (close all then open fresh — idempotent rebalance). Guaranteed stops are mandatory on this account; distance floored at `max(exchange_min×buffer, ATR×CAPITAL_GSL_ATR_MULT)` so intraday noise can't clip a 24h hold.
+8b. `capital_connector.py --sync-realized` — pull Capital transaction history → append new closed-trade PnL to `live/realized_pnl.jsonl` (dedup by reference). Captures reset closes AND intraday GSL stop-outs (which never reach the close loop). This is the ONLY accurate per-trade win/loss source.
 9. `live_tracker.py` refresh
 10. `log_account_snapshot()` again (post-execution balance)
 11. `write_account_state()` — rich `live/account_state.json` (balance, positions, market, env)
@@ -54,7 +55,7 @@ GitHub Actions then `git commit -m "Daily run YYYY-MM-DD"` on `live/` deltas + `
 
 - **GSL is mandatory** on this Capital account (every order errors `guaranteed-stop-loss.required` without it). `CAPITAL_GSL_MODE=off` therefore HALTS trading (every order rejected, execution aborts) — it is NOT "trade without a stop".
 - The bleed diagnosed 2026-06: directional signal was +EV but guaranteed stops sat at `exchange_min×2` (~12-32 pip), inside the daily range → ~75% of positions clipped intraday for a guaranteed loss. Fix = ATR floor (`CAPITAL_GSL_ATR_MULT` default 1.5). Set `CAPITAL_GSL_ATR_MULT=0` to disable the floor.
-- Telegram `PL ouvert` is **latent** (mark-to-market right after entry, includes entry spread) — not a trade result. Realized win/loss lives only in `live/realized_pnl.jsonl` (Capital's close response carries no PnL).
+- Telegram `PL ouvert` is **latent** (mark-to-market right after entry, includes entry spread) — not a trade result. Realized win/loss lives in `live/realized_pnl.jsonl`, sourced from Capital's transaction history (`--sync-realized`), NOT from the close loop — so it includes GSL stop-outs. Logging at close-time would undercount losses (stop-outs vanish before the daily reset).
 - Tunable repo variables: `MAX_PEAK_DD_PCT`, `CAPITAL_GSL_ATR_MULT`, `CAPITAL_GSL_ATR_PERIOD` (plus the existing `EXEC_MIN_NOTIONAL_USD`, `DAILY_DD_BREAKER_PCT`, `CAPITAL_GSL_*`).
 
 ## Telegram cadence
