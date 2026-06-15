@@ -322,6 +322,46 @@ def circuit_breaker_check(client: CapitalClient,
     return True, f"DD {dd_pct:+.2f}% within budget"
 
 
+def peak_drawdown_check(client: CapitalClient,
+                          max_peak_dd_pct: float) -> tuple[bool, str, dict]:
+    """Check drawdown from all-time equity peak (FTMO-style max-loss guard).
+
+    Returns (allowed_to_trade, reason, stats). The daily breaker only sees
+    same-day moves; this catches a slow bleed across days. stats carries
+    {peak, current, dd_pct} for reporting even when within budget.
+    """
+    balances: list[float] = []
+    if LATEST_PNL.exists():
+        for line in LATEST_PNL.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                b = float(json.loads(line).get("balance", 0) or 0)
+                if b > 0:
+                    balances.append(b)
+            except (json.JSONDecodeError, TypeError, ValueError):
+                continue
+    try:
+        acc = client.account_summary()
+        bal = float(acc.get("balance", {}).get("balance", 0))
+    except Exception as exc:
+        return True, f"balance fetch failed ({exc}); skip peak check", {}
+    if bal > 0:
+        balances.append(bal)
+    if not balances:
+        return True, "no balance history yet", {}
+    peak = max(balances)
+    if peak <= 0:
+        return True, "peak zero; skip", {}
+    dd_pct = (bal - peak) / peak * 100
+    stats = {"peak": peak, "current": bal, "dd_pct": dd_pct}
+    if dd_pct < max_peak_dd_pct:
+        return False, (f"PEAK DD BREAKER: {dd_pct:+.2f}% < {max_peak_dd_pct:+.2f}% "
+                        f"(peak {peak:,.2f} → now {bal:,.2f})"), stats
+    return True, f"peak DD {dd_pct:+.2f}% within budget (peak {peak:,.2f})", stats
+
+
 def market_execution_allowed(now: datetime | None = None) -> tuple[bool, str]:
     """Return whether FX execution is allowed on Capital.com at current UTC time.
 
@@ -419,6 +459,11 @@ def main() -> None:
     breaker_allowed, breaker_msg = circuit_breaker_check(client, breaker_pct)
     log(f"Circuit breaker: {breaker_msg}")
 
+    # Peak drawdown breaker : halt on slow multi-day bleed from equity peak
+    peak_dd_pct = float(os.environ.get("MAX_PEAK_DD_PCT", "-8.0"))
+    peak_allowed, peak_msg, _peak_stats = peak_drawdown_check(client, peak_dd_pct)
+    log(f"Peak drawdown: {peak_msg}")
+
     executed = False
     if not delta_csv.exists():
         log(f"WARN: {delta_csv} not found, skipping execution")
@@ -427,6 +472,10 @@ def main() -> None:
     elif not breaker_allowed:
         log(f"INFO: skipping Capital execution: {breaker_msg}")
         execution_reason = breaker_msg
+        execution_allowed = False
+    elif not peak_allowed:
+        log(f"INFO: skipping Capital execution: {peak_msg}")
+        execution_reason = peak_msg
         execution_allowed = False
     else:
         min_notional = os.environ.get("EXEC_MIN_NOTIONAL_USD", "500")
@@ -473,6 +522,11 @@ def main() -> None:
     rc = run_step("dashboard_generator", [py, "dashboard_generator.py"])
     if rc != 0:
         log("WARN: dashboard_generator failed")
+
+    # Rich local dashboard (equity, drawdown, realized PnL, slippage, GSL stop-out)
+    rc = run_step("local_dashboard", [py, "local_dashboard.py"])
+    if rc != 0:
+        log("WARN: local_dashboard failed")
 
     # Send Telegram daily summary (success path)
     if os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"):

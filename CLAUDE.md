@@ -20,7 +20,8 @@ Guidance for Claude Code when working in this repo. Overrides `/Users/oscarmisch
 | Daily runner (entry point) | `sabo_lit/sandbox/automated_runner.py` |
 | Signal generator | `sabo_lit/sandbox/propfirm_signal_generator.py` |
 | Telegram notifier | `sabo_lit/sandbox/telegram_notifier.py` |
-| Static dashboard generator | `sabo_lit/sandbox/dashboard_generator.py` |
+| Static dashboard generator (pipeline, TradingView widgets) | `sabo_lit/sandbox/dashboard_generator.py` → `live/dashboard.html` |
+| Rich local dashboard (equity/DD/realized/slippage/GSL stop-out) | `sabo_lit/sandbox/local_dashboard.py` → `live/dashboard_full.html` (`--serve` to open locally) |
 | TradingView filter | `sabo_lit/sandbox/tradingview_filter.py` |
 | TradingView webhook Worker | `infra/cloudflare-worker/` |
 | Live state files (JSONL/JSON) | `sabo_lit/sandbox/live/` |
@@ -28,7 +29,7 @@ Guidance for Claude Code when working in this repo. Overrides `/Users/oscarmisch
 | GitHub Actions workflow | `.github/workflows/daily_propfirm.yml` |
 | Intraday Telegram/risk workflow | `.github/workflows/intraday_risk.yml` |
 | Setup doc | `SETUP_AUTOMATION.md` |
-| Research scaffolding (mostly empty) | `sabo_lit/{api,backtest,execution,data,risk,strategy,...}` |
+| Architecture scaffold layers (docstring-only `__init__.py`) | `sabo_lit/{api,backtest,execution,risk,strategy,persistence,features,models,microstructure,filters}` — **do NOT delete**: hard-referenced in `governance/dependency_rules.py` as the canonical layer set with enforced import-edge rules; governance tests scan the real tree. Empty ≠ unused. |
 
 ## Pipeline flow (`automated_runner.py`)
 
@@ -39,14 +40,22 @@ Guidance for Claude Code when working in this repo. Overrides `/Users/oscarmisch
 5. `propfirm_signal_generator.py --adaptive` → writes `live/prop_signals_latest.{json,md,csv}` + `prop_delta_orders_latest.csv`
 6. `tradingview_filter.py` — optional TradingView confirmation layer (`TV_FILTER_MODE=disabled` by default)
 7. `market_execution_allowed()` — guard FX schedule (Fri 20:59 → Sun 21:00 closed, daily 20:55-21:10 maintenance)
-8. If allowed: `capital_connector.py --execute --reset --min-notional 500` (close all then open fresh — idempotent rebalance)
+7b. `circuit_breaker_check()` (same-day DD vs `DAILY_DD_BREAKER_PCT`) AND `peak_drawdown_check()` (DD from all-time equity peak vs `MAX_PEAK_DD_PCT`, default -8%) — either trips → skip execution
+8. If allowed: `capital_connector.py --execute --reset --min-notional 500` (close all then open fresh — idempotent rebalance). On each close, realized PnL is appended to `live/realized_pnl.jsonl`. Guaranteed stops are mandatory on this account; distance floored at `max(exchange_min×buffer, ATR×CAPITAL_GSL_ATR_MULT)` so intraday noise can't clip a 24h hold.
 9. `live_tracker.py` refresh
 10. `log_account_snapshot()` again (post-execution balance)
 11. `write_account_state()` — rich `live/account_state.json` (balance, positions, market, env)
-12. `dashboard_generator.py` → `live/dashboard.html` with embedded TradingView chart widgets
-13. `telegram_notifier.py --run-summary` (sends rich Telegram message)
+12. `dashboard_generator.py` → `live/dashboard.html` (TradingView widgets); `local_dashboard.py` → `live/dashboard_full.html` (equity, drawdown, realized PnL, slippage, GSL stop-out)
+13. `telegram_notifier.py --run-summary` (rich message: realized vs latent PnL, DD from peak, per-pair edge)
 
 GitHub Actions then `git commit -m "Daily run YYYY-MM-DD"` on `live/` deltas + `git push`.
+
+## Risk controls & known cost structure
+
+- **GSL is mandatory** on this Capital account (every order errors `guaranteed-stop-loss.required` without it). `CAPITAL_GSL_MODE=off` therefore HALTS trading (every order rejected, execution aborts) — it is NOT "trade without a stop".
+- The bleed diagnosed 2026-06: directional signal was +EV but guaranteed stops sat at `exchange_min×2` (~12-32 pip), inside the daily range → ~75% of positions clipped intraday for a guaranteed loss. Fix = ATR floor (`CAPITAL_GSL_ATR_MULT` default 1.5). Set `CAPITAL_GSL_ATR_MULT=0` to disable the floor.
+- Telegram `PL ouvert` is **latent** (mark-to-market right after entry, includes entry spread) — not a trade result. Realized win/loss lives only in `live/realized_pnl.jsonl` (Capital's close response carries no PnL).
+- Tunable repo variables: `MAX_PEAK_DD_PCT`, `CAPITAL_GSL_ATR_MULT`, `CAPITAL_GSL_ATR_PERIOD` (plus the existing `EXEC_MIN_NOTIONAL_USD`, `DAILY_DD_BREAKER_PCT`, `CAPITAL_GSL_*`).
 
 ## Telegram cadence
 

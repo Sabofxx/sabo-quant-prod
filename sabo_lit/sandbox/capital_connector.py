@@ -41,11 +41,18 @@ HERE = Path(__file__).parent
 LIVE_DIR = HERE / "live"
 TRADE_LOG = LIVE_DIR / "capital_executions.jsonl"
 SLIPPAGE_LOG = LIVE_DIR / "slippage.jsonl"
+REALIZED_LOG = LIVE_DIR / "realized_pnl.jsonl"  # per-trade realized PnL booked at close
 GSL_REQUIRED_ERROR_CODE = "error.vallidation.guaranteed-stop-loss.required"
 GSL_MODE_DEFAULT = "auto"  # off | auto | on
 GSL_DISTANCE_BUFFER_DEFAULT = 2.0
 GSL_FALLBACK_DISTANCE_PCT_DEFAULT = 5.0
 GSL_STOPLOSS_RETRY_MULTIPLIER_DEFAULT = 2.0
+# Guaranteed stops are mandatory on this account, but Capital's minimum distance
+# (×buffer) sits well inside the daily range, so normal intraday noise clips the
+# stop and books a guaranteed loss on positions meant to be held ~24h. Floor the
+# stop at a multiple of daily ATR so it only triggers on genuine adverse moves.
+GSL_ATR_PERIOD_DEFAULT = 14
+GSL_ATR_MULT_DEFAULT = 1.5  # 0 disables the ATR floor (falls back to exchange min)
 
 DEMO_BASE = "https://demo-api-capital.backend-capital.com/api/v1"
 LIVE_BASE = "https://api-capital.backend-capital.com/api/v1"
@@ -164,7 +171,12 @@ class CapitalClient:
         return r.json()
 
     def close_all_positions(self) -> list[dict]:
-        """Close every open position. Returns list of {deal_id, status, ...}."""
+        """Close every open position. Returns list of {deal_id, status, ...}.
+
+        Logs each closed position's realized PnL (the position's running profit at
+        close time) to realized_pnl.jsonl — the only place per-trade win/loss is
+        recorded, since Capital's close response carries no PnL.
+        """
         results = []
         for p in self.get_positions():
             pos = p.get("position", {})
@@ -174,6 +186,7 @@ class CapitalClient:
             if not deal_id:
                 continue
             try:
+                profit = float(pos.get("profit", 0) or 0)
                 resp = self.close_position(deal_id)
                 results.append({
                     "deal_id": deal_id,
@@ -181,7 +194,16 @@ class CapitalClient:
                     "status": "closed",
                     "reference": resp.get("dealReference"),
                 })
-                print(f"  CLOSED {epic} {deal_id}")
+                _append_realized(
+                    deal_id=deal_id,
+                    epic=epic,
+                    direction=pos.get("direction"),
+                    size=float(pos.get("size", 0) or 0),
+                    open_level=float(pos.get("level", 0) or 0),
+                    profit=profit,
+                    currency=pos.get("currency"),
+                )
+                print(f"  CLOSED {epic} {deal_id} pnl={profit:+.2f}")
             except requests.HTTPError as e:
                 err = f"{e.response.status_code}: {e.response.text[:200]}"
                 results.append({"deal_id": deal_id, "epic": epic,
@@ -266,12 +288,73 @@ def ceil_price_distance(distance: float, epic: str) -> float:
     return math.ceil(distance * factor) / factor
 
 
+def _candle_mid(node: object) -> float | None:
+    """Mid of a candle price node {bid, ask} (or scalar). None if unusable."""
+    if isinstance(node, dict):
+        bid = node.get("bid")
+        ask = node.get("ask", node.get("offer"))
+        vals = [float(v) for v in (bid, ask) if v is not None]
+        return sum(vals) / len(vals) if vals else None
+    if isinstance(node, (int, float)):
+        return float(node)
+    return None
+
+
+def compute_atr(candles: list[dict], period: int = GSL_ATR_PERIOD_DEFAULT) -> float | None:
+    """ATR in price units from DAY candles. None if not enough data."""
+    rows = []
+    for c in candles:
+        hi = _candle_mid(c.get("highPrice"))
+        lo = _candle_mid(c.get("lowPrice"))
+        cl = _candle_mid(c.get("closePrice"))
+        if hi is None or lo is None or cl is None:
+            continue
+        rows.append((hi, lo, cl))
+    if len(rows) < 2:
+        return None
+    trs = []
+    for i in range(1, len(rows)):
+        hi, lo, _ = rows[i]
+        prev_close = rows[i - 1][2]
+        trs.append(max(hi - lo, abs(hi - prev_close), abs(lo - prev_close)))
+    if not trs:
+        return None
+    window = trs[-period:] if len(trs) >= period else trs
+    return sum(window) / len(window)
+
+
+def atr_stop_floor(client: CapitalClient, epic: str, period: int, mult: float,
+                   cache: dict[str, float | None]) -> float | None:
+    """ATR-based minimum guaranteed-stop distance for an epic (price units).
+
+    Cached per epic so the daily-candle fetch happens once even though many
+    accounts submit the same epic. Returns None on data/API failure (caller
+    then falls back to the exchange-minimum distance).
+    """
+    if mult <= 0:
+        return None
+    if epic in cache:
+        atr = cache[epic]
+    else:
+        try:
+            atr = compute_atr(client.get_daily_candles(epic, max_bars=period + 5), period)
+        except Exception as exc:
+            print(f"    WARN: ATR fetch failed for {epic} ({exc}); using exchange min")
+            atr = None
+        cache[epic] = atr
+    if not atr or atr <= 0:
+        return None
+    return atr * mult
+
+
 def guaranteed_stop_distance(epic: str, market: dict, price: float,
                              buffer: float = GSL_DISTANCE_BUFFER_DEFAULT,
-                             fallback_pct: float = GSL_FALLBACK_DISTANCE_PCT_DEFAULT) -> float:
+                             fallback_pct: float = GSL_FALLBACK_DISTANCE_PCT_DEFAULT,
+                             atr_floor: float | None = None) -> float:
     rules = market.get("dealingRules") if isinstance(market, dict) else {}
     if not isinstance(rules, dict):
         rules = {}
+    floor = atr_floor if (atr_floor and atr_floor > 0) else 0.0
     for key in (
         "minGuaranteedStopDistance",
         "minGuaranteedStopOrLimitDistance",
@@ -282,9 +365,9 @@ def guaranteed_stop_distance(epic: str, market: dict, price: float,
         if value is None:
             continue
         distance = _distance_from_rule_value(value, unit, price, epic) * max(buffer, 1.0)
-        return ceil_price_distance(distance, epic)
+        return ceil_price_distance(max(distance, floor), epic)
     fallback_distance = price * max(fallback_pct, 0.1) / 100.0
-    return ceil_price_distance(fallback_distance, epic)
+    return ceil_price_distance(max(fallback_distance, floor), epic)
 
 
 def configured_gsl_mode() -> str:
@@ -328,6 +411,26 @@ def append_log(record: dict) -> None:
     LIVE_DIR.mkdir(exist_ok=True)
     with TRADE_LOG.open("a") as f:
         f.write(json.dumps(record, default=str) + "\n")
+
+
+def _append_realized(*, deal_id: str, epic: str, direction: str | None,
+                     size: float, open_level: float, profit: float,
+                     currency: str | None) -> None:
+    """Append one closed-trade realized PnL record to realized_pnl.jsonl."""
+    LIVE_DIR.mkdir(exist_ok=True)
+    rec = {
+        "ts": datetime.now(UTC).isoformat(timespec="seconds"),
+        "deal_id": deal_id,
+        "epic": epic,
+        "direction": direction,
+        "size": round(size, 2),
+        "open_level": open_level,
+        "profit": round(profit, 2),
+        "win": profit > 0,
+        "currency": currency,
+    }
+    with REALIZED_LOG.open("a") as f:
+        f.write(json.dumps(rec, default=str) + "\n")
 
 
 LIVE_MAX_NOTIONAL_USD_DEFAULT = 250_000.0
@@ -386,6 +489,9 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
         "CAPITAL_GSL_STOPLOSS_RETRY_MULTIPLIER",
         GSL_STOPLOSS_RETRY_MULTIPLIER_DEFAULT,
     )
+    gsl_atr_mult = configured_float_env("CAPITAL_GSL_ATR_MULT", GSL_ATR_MULT_DEFAULT)
+    gsl_atr_period = int(configured_float_env("CAPITAL_GSL_ATR_PERIOD", GSL_ATR_PERIOD_DEFAULT))
+    atr_cache: dict[str, float | None] = {}
     hedging_mode: bool | None = None
     if not dry_run and gsl_mode in {"auto", "on"}:
         try:
@@ -470,7 +576,9 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
                     requested_stop_distance = None
                     if requested_gsl:
                         requested_stop_distance = guaranteed_stop_distance(
-                            epic, market, price, gsl_buffer, gsl_fallback_pct
+                            epic, market, price, gsl_buffer, gsl_fallback_pct,
+                            atr_floor=atr_stop_floor(client, epic, gsl_atr_period,
+                                                     gsl_atr_mult, atr_cache),
                         )
                         record["guaranteed_stop"] = True
                         record["stop_distance"] = requested_stop_distance
@@ -490,7 +598,9 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
                             and hedging_mode is not True
                         ):
                             requested_stop_distance = guaranteed_stop_distance(
-                                epic, market, price, gsl_buffer, gsl_fallback_pct
+                                epic, market, price, gsl_buffer, gsl_fallback_pct,
+                                atr_floor=atr_stop_floor(client, epic, gsl_atr_period,
+                                                         gsl_atr_mult, atr_cache),
                             )
                             print(
                                 f"    RETRY {epic} with guaranteed stop "

@@ -60,10 +60,15 @@ jobs:
           EXEC_MIN_NOTIONAL_USD: ${{ vars.EXEC_MIN_NOTIONAL_USD || '500' }}
           MAX_NOTIONAL_PER_ORDER_USD: ${{ vars.MAX_NOTIONAL_PER_ORDER_USD || '250000' }}
           DAILY_DD_BREAKER_PCT: ${{ vars.DAILY_DD_BREAKER_PCT || '-2.0' }}
+          MAX_PEAK_DD_PCT: ${{ vars.MAX_PEAK_DD_PCT || '-8.0' }}
           CAPITAL_GSL_MODE: ${{ vars.CAPITAL_GSL_MODE || 'auto' }}
           CAPITAL_GSL_DISTANCE_BUFFER: ${{ vars.CAPITAL_GSL_DISTANCE_BUFFER || '2.0' }}
           CAPITAL_GSL_FALLBACK_DISTANCE_PCT: ${{ vars.CAPITAL_GSL_FALLBACK_DISTANCE_PCT || '5.0' }}
           CAPITAL_GSL_STOPLOSS_RETRY_MULTIPLIER: ${{ vars.CAPITAL_GSL_STOPLOSS_RETRY_MULTIPLIER || '2.0' }}
+          # ATR floor on guaranteed-stop distance: stop = max(exchange_min*buffer, ATR*mult).
+          # Keeps the mandatory GSL from being clipped by intraday noise on ~24h holds.
+          CAPITAL_GSL_ATR_MULT: ${{ vars.CAPITAL_GSL_ATR_MULT || '1.5' }}
+          CAPITAL_GSL_ATR_PERIOD: ${{ vars.CAPITAL_GSL_ATR_PERIOD || '14' }}
           TV_FILTER_MODE: ${{ vars.TV_FILTER_MODE || 'disabled' }}
           TV_FILTER_MAX_AGE_HOURS: ${{ vars.TV_FILTER_MAX_AGE_HOURS || '24' }}
           TV_FILTER_REQUIRE_TODAY: ${{ vars.TV_FILTER_REQUIRE_TODAY || '1' }}

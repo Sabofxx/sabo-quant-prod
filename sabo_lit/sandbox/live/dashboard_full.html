@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SABO Quant — Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+ :root { --bg:#0d1117; --card:#161b22; --bd:#30363d; --tx:#e6edf3; --mut:#8b949e;
+         --grn:#3fb950; --red:#f85149; --org:#d29922; --blu:#58a6ff; }
+ *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--tx);
+   font:14px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif}
+ header{padding:18px 24px;border-bottom:1px solid var(--bd);display:flex;
+   justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
+ h1{font-size:18px;margin:0} .mut{color:var(--mut);font-size:12px}
+ .wrap{padding:20px 24px;max-width:1280px;margin:0 auto}
+ .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+ .kpi{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px}
+ .kpi .lbl{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+ .kpi .val{font-size:22px;font-weight:600;margin-top:4px}
+ .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+ @media(max-width:880px){.grid{grid-template-columns:1fr}}
+ .card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:16px}
+ .card h2{font-size:13px;margin:0 0 12px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+ table{width:100%;border-collapse:collapse;font-size:13px}
+ th,td{text-align:right;padding:6px 8px;border-bottom:1px solid var(--bd)}
+ th:first-child,td:first-child{text-align:left}
+ .grn{color:var(--grn)} .red{color:var(--red)} .org{color:var(--org)}
+ canvas{max-height:260px}
+</style></head><body>
+<header>
+  <div><h1>📊 SABO Quant — Dashboard</h1>
+    <div class="mut" id="sub"></div></div>
+  <div class="mut" id="gen"></div>
+</header>
+<div class="wrap">
+  <div class="kpis" id="kpis"></div>
+  <div class="grid">
+    <div class="card"><h2>Equity vs dépôt</h2><canvas id="eq"></canvas></div>
+    <div class="card"><h2>Drawdown depuis le pic (%)</h2><canvas id="dd"></canvas></div>
+    <div class="card"><h2>PnL réalisé par jour</h2><canvas id="rd"></canvas></div>
+    <div class="card"><h2>PnL réalisé par paire</h2><canvas id="pp"></canvas></div>
+    <div class="card"><h2>Slippage (pips)</h2><canvas id="sl"></canvas></div>
+    <div class="card"><h2>Taux de stop-out GSL (%)</h2><canvas id="so"></canvas></div>
+  </div>
+  <div class="grid">
+    <div class="card"><h2>Positions ouvertes</h2><div id="pos"></div></div>
+    <div class="card"><h2>Signaux du jour</h2><div id="sig"></div></div>
+  </div>
+  <div class="card"><h2>Détail par paire</h2><div id="ptab"></div></div>
+</div>
+<script>
+const D = {"generated_at": "2026-06-15T13:34:17+00:00", "currency": "EURd", "environment": "demo", "kpi": {"balance": 94878.39, "peak": 99935.88, "dd_pct": -5.06, "deposit": 94877.54, "open_pl": -67.69, "realized_total": 0, "n_trades": 0, "win_rate": 0.0, "avg_win": 0.0, "avg_loss": 0.0, "profit_factor": 0.0, "margin_used": 24798.84, "n_positions": 39}, "equity": [{"date": "2026-05-23", "balance": 91000.0, "deposit": 91000.0}, {"date": "2026-05-25", "balance": 99462.32, "deposit": 99555.18}, {"date": "2026-05-26", "balance": 99003.87, "deposit": 99091.87}, {"date": "2026-05-27", "balance": 99935.88, "deposit": 100024.24}, {"date": "2026-05-28", "balance": 98904.88, "deposit": 98999.89}, {"date": "2026-05-29", "balance": 98201.45, "deposit": 98179.19}, {"date": "2026-05-30", "balance": 98189.62, "deposit": 98167.36}, {"date": "2026-05-31", "balance": 98073.19, "deposit": 98157.26}, {"date": "2026-06-01", "balance": 98793.23, "deposit": 98901.19}, {"date": "2026-06-02", "balance": 99084.34, "deposit": 98637.12}, {"date": "2026-06-03", "balance": 97770.14, "deposit": 97770.14}, {"date": "2026-06-04", "balance": 97770.14, "deposit": 97770.14}, {"date": "2026-06-05", "balance": 97770.14, "deposit": 97770.14}, {"date": "2026-06-06", "balance": 97770.14, "deposit": 97770.14}, {"date": "2026-06-07", "balance": 97692.82, "deposit": 97770.14}, {"date": "2026-06-08", "balance": 98014.17, "deposit": 98107.74}, {"date": "2026-06-09", "balance": 97615.87, "deposit": 97709.96}, {"date": "2026-06-10", "balance": 96688.19, "deposit": 96787.84}, {"date": "2026-06-11", "balance": 95988.74, "deposit": 96083.09}, {"date": "2026-06-12", "balance": 95214.55, "deposit": 95444.91}, {"date": "2026-06-13", "balance": 95197.33, "deposit": 95427.69}, {"date": "2026-06-14", "balance": 94809.85, "deposit": 94877.54}], "dd_curve": [{"date": "2026-05-23", "dd": 0.0}, {"date": "2026-05-25", "dd": 0.0}, {"date": "2026-05-26", "dd": -0.461}, {"date": "2026-05-27", "dd": 0.0}, {"date": "2026-05-28", "dd": -1.032}, {"date": "2026-05-29", "dd": -1.736}, {"date": "2026-05-30", "dd": -1.747}, {"date": "2026-05-31", "dd": -1.864}, {"date": "2026-06-01", "dd": -1.143}, {"date": "2026-06-02", "dd": -0.852}, {"date": "2026-06-03", "dd": -2.167}, {"date": "2026-06-04", "dd": -2.167}, {"date": "2026-06-05", "dd": -2.167}, {"date": "2026-06-06", "dd": -2.167}, {"date": "2026-06-07", "dd": -2.244}, {"date": "2026-06-08", "dd": -1.923}, {"date": "2026-06-09", "dd": -2.321}, {"date": "2026-06-10", "dd": -3.25}, {"date": "2026-06-11", "dd": -3.95}, {"date": "2026-06-12", "dd": -4.724}, {"date": "2026-06-13", "dd": -4.742}, {"date": "2026-06-14", "dd": -5.129}], "realized_daily": [], "pair_stats": [], "slip_stats": {"n": 658, "mean": 0.656, "median": 0.65, "p90": 1.0, "max": 1.15}, "slip_hist": [0.35, 0.65, 0.6, 0.5, 0.8, 1.0, 0.35, 0.65, 0.6, 0.3, 0.6, 1.0, 0.75, 0.6, 0.3, 0.8, 0.9, 0.65, 0.1, 0.3, 0.8, 1.1, 0.3, 0.8, 1.0, 0.3, 0.75, 1.0, 0.35, 0.65, 0.4, 0.3, 0.8, 1.0, 0.55, 0.35, 0.65, 0.6, 0.3, 0.75, 1.0, 0.35, 0.65, 0.6, 0.3, 0.75, 0.9, 0.65, 0.6, 0.2, 0.75, 1.1, 0.65, 0.6, 0.3, 0.75, 1.0, 0.3, 1.1, 0.4, 0.75, 1.0, 0.35, 0.65, 0.6, 0.3, 0.8, 1.0, 0.35, 0.7, 0.3, 0.75, 1.0, 0.35, 0.75, 0.6, 0.3, 0.8, 1.0, 0.45, 0.55, 0.6, 0.3, 0.75, 0.9, 0.65, 0.6, 0.3, 0.85, 1.0, 0.55, 0.6, 0.3, 0.75, 1.0, 0.3, 0.8, 1.0, 0.3, 0.85, 1.0, 0.35, 0.65, 0.6, 0.3, 1.1, 1.0, 0.55, 0.6, 0.3, 0.8, 1.0, 0.35, 0.65, 0.6, 0.3, 0.8, 1.0, 0.35, 0.65, 0.6, 0.3, 0.85, 1.0, 0.85, 0.6, 0.3, 0.85, 1.0, 0.65, 0.6, 0.3, 0.75, 1.0, 0.3, 0.85, 1.0, 0.3, 0.85, 1.0, 0.35, 0.65, 0.7, 0.3, 0.8, 1.0, 0.65, 0.6, 0.3, 0.8, 1.0, 0.35, 0.65, 0.6, 0.3, 0.75, 1.0, 0.35, 0.65, 0.6, 0.3, 0.75, 1.0, 0.55, 0.6, 0.3, 0.8, 1.0, 0.75, 0.6, 0.3, 0.75, 1.0, 0.3, 0.8, 1.0, 0.3, 0.8, 1.0, 0.35, 0.65, 0.6, 0.3, 0.75, 1.0, 0.65, 0.6, 0.3, 0.8, 1.0, 0.35, 0.65, 0.6, 0.4, 0.75, 1.0, 0.25, 0.65, 0.7, 0.3, 0.8, 1.0, 0.65, 0.6, 0.2, 0.7, 1.0, 0.65, 0.6, 0.3, 0.9, 0.8, 0.0, 0.9, 1.0, 0.3, 0.9, 1.0, 0.25, 1.15, 0.8, 0.2, 0.9, 0.7, 0.55, 0.7, 0.1, 1.0, 0.9, 0.35, 0.65, 0.6, 0.3, 0.9, 1.0, 0.35, 0.55, 0.6, 0.3, 0.8, 1.0, 1.15, 0.6, 0.3, 0.8, 1.0, 0.65, 0.5, 0.3, 0.8, 1.0, 0.3, 0.8, 1.0, 0.3, 0.8, 1.0, 0.35, 0.65, 0.6, 0.3, 0.8, 1.0, 0.65, 0.6, 0.3, 0.75, 1.0, 0.35, 0.65, 0.7, 0.3, 0.95, 1.0, 0.35, 0.75, 0.8, 0.3, 0.75, 1.0, 0.65, 0.6, 0.3, 0.8, 1.0, 0.65, 0.6, 0.3, 0.85, 1.0, 0.3, 0.85, 1.1, 0.3, 0.85, 1.0, 0.35, 0.65, 0.6, 0.2, 0.8, 1.0, 0.65, 0.6, 0.3, 0.75, 1.0, 0.35, 0.75, 0.6, 0.3, 0.75, 0.9, 0.35, 0.75, 0.6, 0.2, 0.75, 1.0, 0.65, 0.6, 0.3, 0.8, 1.0, 0.65, 0.6, 0.3, 0.8, 1.1, 0.3, 0.8, 1.0, 0.3, 0.8, 1.0, 0.35, 0.65, 0.6, 0.3, 0.8, 1.0, 0.65, 0.6, 0.3, 0.8, 1.0, 0.35, 0.65, 0.6, 0.2, 0.85, 1.0, 0.35, 0.65, 0.3, 0.3, 0.85, 1.0, 0.75, 0.6, 0.3, 0.8, 1.0, 0.65, 0.6, 0.4, 1.05, 1.0, 0.3, 0.9, 1.0, 0.3, 0.65, 1.0, 0.35, 0.65, 0.6, 0.3, 0.75, 1.0, 0.65, 0.6, 0.6, 0.8, 1.0, 0.35, 0.65, 0.6, 0.3, 0.75, 1.0, 0.25, 0.65, 0.7, 0.1, 0.95, 0.9, 0.55, 0.6, 0.3, 0.95, 1.0, 0.55, 0.6, 0.3, 0.65, 1.0, 0.3, 0.95, 0.9, 0.9, 0.9, 1.0, 0.35, 0.55, 0.6, 0.3, 0.85, 1.0, 0.65, 0.6, 0.3, 0.85, 0.9, 0.35, 0.65, 0.7, 0.3, 0.85, 1.0, 0.35, 0.65, 0.6, 0.3, 0.85, 1.0, 0.75, 0.6, 0.5, 0.85, 1.0, 0.65, 0.6, 0.3, 0.8, 1.0, 0.4, 0.85, 1.0, 0.3, 0.85, 1.0, 0.35, 0.65, 0.6, 0.3, 0.8, 1.0, 0.65, 0.6, 0.2, 0.8, 1.0, 0.35, 0.65, 0.6, 0.3, 0.8, 1.0, 0.35, 0.65, 0.6, 0.3, 0.8, 1.0, 0.65, 0.6, 0.4, 0.8, 1.0, 0.65, 0.6, 0.3, 0.8, 1.0, 0.3, 0.8, 1.0, 0.3, 0.8, 1.0, 0.45, 0.65, 0.6, 0.3, 0.8, 1.0, 0.65, 0.4, 0.3, 0.8, 1.0, 0.35, 0.65, 0.6, 0.3, 0.9, 1.0, 0.35, 0.65, 0.6, 0.4, 0.85, 1.0, 0.65, 0.7, 0.3, 0.85, 1.0, 0.65, 0.6, 0.3, 0.85, 1.0, 0.3, 0.85, 1.0, 0.2, 0.85, 1.0, 0.35, 0.65, 0.6, 0.4, 0.85, 1.0, 0.65, 0.6, 0.3, 0.85, 1.0, 0.35, 0.65, 0.9, 0.5, 0.75, 1.0, 0.35, 0.65, 0.7, 0.3, 0.9, 1.0, 0.65, 0.6, 0.3, 0.9, 1.0, 0.65, 0.6, 0.3, 0.8, 1.0, 0.3, 0.85, 1.0, 0.3, 0.9, 1.0, 0.35, 0.75, 0.6, 0.3, 0.7, 1.0, 0.55, 0.6, 0.2, 0.8, 1.0, 0.35, 0.65, 0.6, 0.3, 0.85, 1.1, 0.35, 0.85, 0.7, 0.3, 0.85, 1.0, 0.65, 0.6, 0.3, 0.8, 1.0, 0.55, 0.6, 0.3, 0.8, 1.0, 0.3, 0.8, 1.0, 0.3, 0.75, 1.0, 0.45, 0.65, 0.5, 0.4, 0.85, 1.0, 0.65, 0.6, 0.3, 0.8, 1.0, 0.35, 0.65, 0.6, 0.3, 0.9, 1.0, 0.35, 0.65, 0.6, 0.4, 0.95, 1.0, 0.55, 0.6, 0.4, 0.95, 1.0, 0.65, 0.6, 0.3, 0.9, 1.1, 0.3, 0.9, 1.0, 0.3, 0.85, 1.0, 0.35, 1.15, 0.6, 0.4, 0.7, 1.0, 0.55, 0.6, 0.3, 0.9, 1.0], "stopout": [{"date": "2026-05-25", "opened": 155, "closed_next": 17, "stopout_pct": 89.0}, {"date": "2026-05-26", "opened": 39, "closed_next": 65, "stopout_pct": -66.7}, {"date": "2026-05-27", "opened": 78, "closed_next": 9, "stopout_pct": 88.5}, {"date": "2026-05-28", "opened": 39, "closed_next": 17, "stopout_pct": 56.4}, {"date": "2026-05-31", "opened": 39, "closed_next": 19, "stopout_pct": 51.3}, {"date": "2026-06-01", "opened": 39, "closed_next": 33, "stopout_pct": 15.4}, {"date": "2026-06-02", "opened": 9, "closed_next": 9, "stopout_pct": 0.0}, {"date": "2026-06-03", "opened": 30, "closed_next": 0, "stopout_pct": 100.0}, {"date": "2026-06-07", "opened": 39, "closed_next": 37, "stopout_pct": 5.1}, {"date": "2026-06-08", "opened": 39, "closed_next": 31, "stopout_pct": 20.5}, {"date": "2026-06-09", "opened": 39, "closed_next": 17, "stopout_pct": 56.4}, {"date": "2026-06-10", "opened": 39, "closed_next": 9, "stopout_pct": 76.9}, {"date": "2026-06-11", "opened": 39, "closed_next": 9, "stopout_pct": 76.9}, {"date": "2026-06-14", "opened": 39, "closed_next": null, "stopout_pct": null}], "positions": [{"epic": "EURUSD", "direction": "SELL", "size": 10500.0, "open_level": 1.16045, "profit_loss": 0.0}, {"epic": "AUDUSD", "direction": "BUY", "size": 17300.0, "open_level": 0.70725, "profit_loss": 0.0}, {"epic": "GBPUSD", "direction": "SELL", "size": 9100.0, "open_level": 1.34462, "profit_loss": 0.0}, {"epic": "USDJPY", "direction": "BUY", "size": 12200.0, "open_level": 159.943, "profit_loss": 0.0}, {"epic": "USDCAD", "direction": "SELL", "size": 12200.0, "open_level": 1.39626, "profit_loss": 0.0}, {"epic": "NZDUSD", "direction": "BUY", "size": 21000.0, "open_level": 0.58518, "profit_loss": 0.0}, {"epic": "USDCAD", "direction": "SELL", "size": 12200.0, "open_level": 1.39624, "profit_loss": 0.0}, {"epic": "EURUSD", "direction": "SELL", "size": 10500.0, "open_level": 1.1605, "profit_loss": 0.0}, {"epic": "GBPUSD", "direction": "SELL", "size": 9100.0, "open_level": 1.34467, "profit_loss": 0.0}, {"epic": "USDJPY", "direction": "BUY", "size": 12200.0, "open_level": 159.938, "profit_loss": 0.0}, {"epic": "AUDUSD", "direction": "BUY", "size": 17300.0, "open_level": 0.70731, "profit_loss": 0.0}, {"epic": "GBPUSD", "direction": "SELL", "size": 21700.0, "open_level": 1.34469, "profit_loss": 0.0}, {"epic": "NZDUSD", "direction": "BUY", "size": 28400.0, "open_level": 0.58533, "profit_loss": 0.0}, {"epic": "NZDUSD", "direction": "BUY", "size": 21000.0, "open_level": 0.58526, "profit_loss": 0.0}, {"epic": "AUDUSD", "direction": "BUY", "size": 23500.0, "open_level": 0.70732, "profit_loss": 0.0}, {"epic": "USDCAD", "direction": "SELL", "size": 16600.0, "open_level": 1.3962, "profit_loss": 0.0}, {"epic": "USDCAD", "direction": "SELL", "size": 29200.0, "open_level": 1.39622, "profit_loss": 0.0}, {"epic": "USDJPY", "direction": "BUY", "size": 29200.0, "open_level": 159.934, "profit_loss": 0.0}, {"epic": "AUDUSD", "direction": "BUY", "size": 41300.0, "open_level": 0.70733, "profit_loss": 0.0}, {"epic": "NZDUSD", "direction": "BUY", "size": 50000.0, "open_level": 0.58528, "profit_loss": 0.0}, {"epic": "GBPUSD", "direction": "SELL", "size": 21700.0, "open_level": 1.34471, "profit_loss": 0.0}, {"epic": "USDJPY", "direction": "BUY", "size": 29200.0, "open_level": 159.934, "profit_loss": 0.0}, {"epic": "AUDUSD", "direction": "BUY", "size": 41300.0, "open_level": 0.70732, "profit_loss": 0.0}, {"epic": "NZDUSD", "direction": "BUY", "size": 50000.0, "open_level": 0.58533, "profit_loss": 0.0}, {"epic": "USDCAD", "direction": "SELL", "size": 29200.0, "open_level": 1.3962, "profit_loss": 0.0}, {"epic": "EURUSD", "direction": "SELL", "size": 8400.0, "open_level": 1.16055, "profit_loss": 0.0}, {"epic": "USDJPY", "direction": "BUY", "size": 9800.0, "open_level": 159.933, "profit_loss": 0.0}, {"epic": "AUDUSD", "direction": "BUY", "size": 13800.0, "open_level": 0.70739, "profit_loss": 0.0}, {"epic": "NZDUSD", "direction": "BUY", "size": 16700.0, "open_level": 0.58533, "profit_loss": 0.0}, {"epic": "AUDUSD", "direction": "BUY", "size": 23500.0, "open_level": 0.70737, "profit_loss": 0.0}, {"epic": "NZDUSD", "direction": "BUY", "size": 28400.0, "open_level": 0.58534, "profit_loss": 0.0}, {"epic": "USDCAD", "direction": "SELL", "size": 16600.0, "open_level": 1.3962, "profit_loss": 0.0}, {"epic": "GBPUSD", "direction": "SELL", "size": 7300.0, "open_level": 1.34472, "profit_loss": 0.0}, {"epic": "USDJPY", "direction": "BUY", "size": 23400.0, "open_level": 159.93, "profit_loss": 0.0}, {"epic": "GBPUSD", "direction": "SELL", "size": 17400.0, "open_level": 1.34472, "profit_loss": 0.0}, {"epic": "USDCAD", "direction": "SELL", "size": 9800.0, "open_level": 1.39621, "profit_loss": 0.0}, {"epic": "AUDUSD", "direction": "BUY", "size": 33100.0, "open_level": 0.70741, "profit_loss": 0.0}, {"epic": "NZDUSD", "direction": "BUY", "size": 40000.0, "open_level": 0.58541, "profit_loss": 0.0}, {"epic": "USDCAD", "direction": "SELL", "size": 23400.0, "open_level": 1.3962, "profit_loss": 0.0}], "signals": [{"pair": "EURUSD", "side": "SHORT", "signal": -1.0, "price": 1.160455}, {"pair": "GBPUSD", "side": "SHORT", "signal": -1.0, "price": 1.344835}, {"pair": "USDJPY", "side": "LONG", "signal": 1.0, "price": 159.935}, {"pair": "AUDUSD", "side": "LONG", "signal": 1.0, "price": 0.70725}, {"pair": "NZDUSD", "side": "LONG", "signal": 1.0, "price": 0.585155}, {"pair": "USDCAD", "side": "SHORT", "signal": -1.0, "price": 1.3964}]};
+const CUR = "EURd";
+const money = v => (v>=0?"+":"") + v.toLocaleString("fr-FR",{maximumFractionDigits:2}) + " " + CUR;
+const pct = v => (v>=0?"+":"") + v.toFixed(2) + "%";
+const cls = v => v>=0?"grn":"red";
+document.getElementById("gen").textContent = "généré " + D.generated_at.replace("T"," ").replace("+00:00"," UTC");
+document.getElementById("sub").textContent = D.environment.toUpperCase() + " · " + CUR;
+
+const k = D.kpi;
+const ddCls = k.dd_pct>-1?"grn":k.dd_pct>-5?"org":"red";
+const kpis = [
+  ["Balance", money(k.balance), ""],
+  ["Pic equity", k.peak.toLocaleString("fr-FR"), ""],
+  ["Drawdown / pic", pct(k.dd_pct), ddCls],
+  ["PnL réalisé", money(k.realized_total), cls(k.realized_total)],
+  ["Win rate", k.win_rate.toFixed(0)+"% ("+k.n_trades+")", ""],
+  ["Profit factor", k.profit_factor.toFixed(2), k.profit_factor>=1?"grn":"red"],
+  ["Avg win / loss", money(k.avg_win)+" / "+money(k.avg_loss), ""],
+  ["PL ouvert (latent)", money(k.open_pl), cls(k.open_pl)],
+  ["Marge utilisée", k.margin_used.toLocaleString("fr-FR")+" "+CUR, ""],
+  ["Positions", String(k.n_positions), ""],
+];
+document.getElementById("kpis").innerHTML = kpis.map(([l,v,c]) =>
+  `<div class="kpi"><div class="lbl">${l}</div><div class="val ${c||''}">${v}</div></div>`).join("");
+
+const gridC = "#30363d", txC = "#8b949e";
+Chart.defaults.color = txC; Chart.defaults.borderColor = gridC; Chart.defaults.font.size = 11;
+const baseOpts = {responsive:true, plugins:{legend:{labels:{boxWidth:12}}},
+  scales:{x:{grid:{color:gridC}}, y:{grid:{color:gridC}}}};
+
+new Chart(eq, {type:"line", data:{labels:D.equity.map(e=>e.date),
+  datasets:[
+   {label:"Balance", data:D.equity.map(e=>e.balance), borderColor:"#58a6ff", tension:.2, pointRadius:0},
+   {label:"Dépôt", data:D.equity.map(e=>e.deposit), borderColor:"#8b949e", borderDash:[4,4], tension:.2, pointRadius:0}
+  ]}, options:baseOpts});
+
+new Chart(dd, {type:"line", data:{labels:D.dd_curve.map(e=>e.date),
+  datasets:[{label:"DD %", data:D.dd_curve.map(e=>e.dd), borderColor:"#f85149",
+    backgroundColor:"rgba(248,81,73,.15)", fill:true, tension:.2, pointRadius:0}]},
+  options:baseOpts});
+
+new Chart(rd, {type:"bar", data:{labels:D.realized_daily.map(e=>e.date),
+  datasets:[{label:"PnL", data:D.realized_daily.map(e=>e.pnl),
+    backgroundColor:D.realized_daily.map(e=>e.pnl>=0?"#3fb950":"#f85149")}]},
+  options:baseOpts});
+
+new Chart(pp, {type:"bar", data:{labels:D.pair_stats.map(e=>e.pair),
+  datasets:[{label:"PnL", data:D.pair_stats.map(e=>e.pnl),
+    backgroundColor:D.pair_stats.map(e=>e.pnl>=0?"#3fb950":"#f85149")}]},
+  options:{...baseOpts, indexAxis:"y"}});
+
+// slippage histogram (bucket 0.25 pip)
+const hb = {}; D.slip_hist.forEach(v=>{const b=(Math.floor(v/0.25)*0.25).toFixed(2); hb[b]=(hb[b]||0)+1;});
+const hk = Object.keys(hb).sort((a,b)=>a-b);
+new Chart(sl, {type:"bar", data:{labels:hk,
+  datasets:[{label:"fills", data:hk.map(k=>hb[k]), backgroundColor:"#58a6ff"}]},
+  options:baseOpts});
+
+new Chart(so, {type:"line", data:{labels:D.stopout.map(e=>e.date),
+  datasets:[{label:"stop-out %", data:D.stopout.map(e=>e.stopout_pct), borderColor:"#d29922",
+    backgroundColor:"rgba(210,153,34,.15)", fill:true, tension:.2, spanGaps:true}]},
+  options:baseOpts});
+
+function tbl(el, rows, head, fmt){
+  if(!rows.length){document.getElementById(el).innerHTML='<div class="mut">aucune donnée</div>';return;}
+  document.getElementById(el).innerHTML =
+    '<table><thead><tr>'+head.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>'+
+    rows.map(fmt).join('')+'</tbody></table>';
+}
+tbl("pos", D.positions, ["Paire","Sens","Taille","Entrée","PL"], p=>
+  `<tr><td>${p.epic||''}</td><td>${p.direction||''}</td><td>${(p.size||0).toLocaleString("fr-FR")}</td>`+
+  `<td>${p.open_level||''}</td><td class="${cls(p.profit_loss||0)}">${money(p.profit_loss||0)}</td></tr>`);
+tbl("sig", D.signals, ["Paire","Sens","Signal","Prix"], s=>
+  `<tr><td>${s.pair}</td><td>${s.side}</td><td>${s.signal}</td><td>${s.price}</td></tr>`);
+tbl("ptab", D.pair_stats, ["Paire","PnL réalisé","Trades","Win rate"], p=>
+  `<tr><td>${p.pair}</td><td class="${cls(p.pnl)}">${money(p.pnl)}</td><td>${p.n}</td><td>${p.win_rate}%</td></tr>`);
+</script></body></html>

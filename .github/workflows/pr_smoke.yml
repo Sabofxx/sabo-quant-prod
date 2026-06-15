@@ -46,7 +46,7 @@ jobs:
       - name: Import smoke test
         run: |
           cd sabo_lit/sandbox
-          python -c "import automated_runner, capital_connector, telegram_notifier, dashboard_generator, intraday_risk_check; print('All imports OK')"
+          python -c "import automated_runner, capital_connector, telegram_notifier, dashboard_generator, intraday_risk_check, local_dashboard, propfirm_signal_generator; print('All imports OK')"
 
       - name: Telegram message render (offline)
         run: |
@@ -61,6 +61,9 @@ jobs:
           python dashboard_generator.py
           test -s live/dashboard.html || (echo "Dashboard not generated"; exit 1)
           echo "Dashboard render OK ($(wc -c < live/dashboard.html) bytes)"
+          python local_dashboard.py
+          test -s live/dashboard_full.html || (echo "Local dashboard not generated"; exit 1)
+          python -c "import re,json; h=open('live/dashboard_full.html').read(); json.loads(re.search(r'const D = (\{.*?\});\nconst CUR', h, re.S).group(1)); print('Local dashboard JSON OK')"
 
       - name: Intraday alert render (offline)
         run: |

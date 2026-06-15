@@ -248,7 +248,8 @@ def section_account(state: dict) -> list[str]:
         f"   Balance      : <b>{bal:,.2f} {html_escape(currency)}</b>",
         f"   Disponible   : {avail:,.2f} {html_escape(currency)}",
         f"   Marge utilisée: {margin:,.2f} {html_escape(currency)} ({margin_pct:.1f}% balance)",
-        f"   {pl_emoji} PL ouvert   : {fmt_money(pl, str(currency))}",
+        f"   {pl_emoji} PL ouvert   : {fmt_money(pl, str(currency))} "
+        f"<i>(latent, spread d'entrée inclus — pas un résultat)</i>",
     ]
     if deposit:
         lines.append(f"   Dépôt initial : {deposit:,.2f} {html_escape(currency)} "
@@ -732,6 +733,68 @@ def section_footer(repo: str) -> list[str]:
 # Build messages
 # ─────────────────────────────────────────────────────────────────────────────
 
+def section_drawdown(snapshots: list[dict], state: dict, currency: str) -> list[str]:
+    """Drawdown from all-time equity peak — the FTMO-relevant number."""
+    balances = [float(s.get("balance", 0) or 0) for s in snapshots
+                if float(s.get("balance", 0) or 0) > 0]
+    cur = float(state.get("balance", 0) or 0)
+    if cur > 0:
+        balances.append(cur)
+    if len(balances) < 2:
+        return []
+    peak = max(balances)
+    now = balances[-1]
+    dd = (now - peak) / peak * 100 if peak else 0.0
+    emoji = "🟢" if dd >= -1 else "🟠" if dd >= -5 else "🔴"
+    lines = [
+        "🎯 <b>Drawdown vs pic (limite FTMO)</b>",
+        f"   Pic equity   : {peak:,.2f} {html_escape(currency)}",
+        f"   {emoji} DD actuel : {fmt_pct(dd)} ({fmt_money(now - peak, str(currency))})",
+    ]
+    if dd <= -5:
+        lines.append("   ⚠️ <b>Proche/au-delà de la limite -5% — challenge à risque</b>")
+    return lines + [""]
+
+
+def section_realized(currency: str) -> list[str]:
+    """Realized PnL from closed trades (realized_pnl.jsonl) — true win/loss."""
+    rows = load_jsonl(LIVE_DIR / "realized_pnl.jsonl")
+    if not rows:
+        return []
+    profits = [float(r.get("profit", 0) or 0) for r in rows]
+    total = sum(profits)
+    wins = [p for p in profits if p > 0]
+    losses = [p for p in profits if p < 0]
+    n = len(profits)
+    win_rate = len(wins) / n * 100 if n else 0.0
+    # last 7 days window
+    cutoff = (datetime.now(UTC) - timedelta(days=7)).isoformat()
+    recent = [float(r.get("profit", 0) or 0) for r in rows if r.get("ts", "") >= cutoff]
+    emoji = "📈" if total >= 0 else "📉"
+    lines = [
+        "🧾 <b>PnL réalisé (trades clôturés)</b>",
+        f"   {emoji} Total : {fmt_money(total, str(currency))} sur {n} trades",
+        f"   Win rate : {win_rate:.0f}% ({len(wins)}W / {len(losses)}L)",
+    ]
+    if wins:
+        lines.append(f"   Best : {fmt_money(max(wins), str(currency))}")
+    if losses:
+        lines.append(f"   Worst: {fmt_money(min(losses), str(currency))}")
+    if recent:
+        lines.append(f"   Σ 7j : {fmt_money(sum(recent), str(currency))} ({len(recent)} trades)")
+    # per-pair breakdown
+    by_pair: dict[str, float] = {}
+    for r in rows:
+        by_pair[r.get("epic", "?")] = by_pair.get(r.get("epic", "?"), 0.0) + float(r.get("profit", 0) or 0)
+    if by_pair:
+        ranked = sorted(by_pair.items(), key=lambda kv: kv[1])
+        worst = ranked[0]
+        best = ranked[-1]
+        lines.append(f"   Paire+ : {html_escape(best[0])} {fmt_money(best[1], str(currency))}  "
+                     f"Paire- : {html_escape(worst[0])} {fmt_money(worst[1], str(currency))}")
+    return lines + [""]
+
+
 def build_summary(status: str = "success",
                    repo: str | None = None) -> str:
     """Build the full HTML message for Telegram."""
@@ -751,6 +814,8 @@ def build_summary(status: str = "success",
     lines.extend(section_quick_digest(state, snapshots, status))
     lines.extend(section_account(state))
     lines.extend(section_today_delta(snapshots, str(currency)))
+    lines.extend(section_drawdown(snapshots, state, str(currency)))
+    lines.extend(section_realized(str(currency)))
     lines.extend(section_exposure_summary(state))
     lines.extend(section_position_extremes(state))
     lines.extend(section_positions(state))
