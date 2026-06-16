@@ -610,9 +610,16 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
         print(f"ERROR: delta CSV not found: {csv_path}", file=sys.stderr)
         sys.exit(3)
 
-    # Account guard (defense in depth): refuse to trade if the live session is not
-    # on the account this strategy is pinned to. Catches a bad/forgotten switch.
-    if expected_account_id and not dry_run:
+    # Account guard (MANDATORY, structural): no execution may act on the implicit
+    # "active account". Every execution MUST declare an account_id and the live
+    # session MUST match it. This neutralizes any base-credential caller that does
+    # not pin an account (legacy runner, manual CLI, a resurrected cron).
+    if not dry_run:
+        if not expected_account_id:
+            print("FATAL: refusing to execute without an explicit account_id "
+                  "(no implicit active-account trading). Pass --account-id / set "
+                  "account_id in the strategy config.", file=sys.stderr)
+            sys.exit(7)
         try:
             client.assert_active_account(expected_account_id)
         except RuntimeError as exc:
@@ -860,6 +867,9 @@ def main() -> None:
     parser.add_argument("--allow-live", action="store_true",
                           help="Required to submit on CAPITAL_ENVIRONMENT=live. "
                                "Also honored via env ALLOW_LIVE=1.")
+    parser.add_argument("--account-id", default="",
+                        help="Pinned accountId. REQUIRED for --execute and --reset: "
+                             "the live session must match it or the action is refused.")
     parser.add_argument("--list-accounts", action="store_true",
                         help="List all accountId / name / balance under this login")
     parser.add_argument("--check-account", metavar="EXPECTED_ACCOUNT_ID",
@@ -943,6 +953,16 @@ def main() -> None:
         return
 
     if args.reset and not args.execute:
+        # Standalone close-all is destructive -> require an explicit pinned account.
+        if not args.account_id:
+            print("FATAL: --reset (close-all) requires --account-id (no implicit "
+                  "active-account action).", file=sys.stderr)
+            sys.exit(7)
+        try:
+            client.assert_active_account(args.account_id)
+        except RuntimeError as exc:
+            print(f"FATAL: {exc}", file=sys.stderr)
+            sys.exit(7)
         closes = client.close_all_positions()
         n_closed = sum(1 for c in closes if c["status"] == "closed")
         print(f"Closed {n_closed} positions (of {len(closes)} attempted).")
@@ -954,7 +974,8 @@ def main() -> None:
                                         dry_run=args.dry_run,
                                         reset=args.reset,
                                         allow_live=args.allow_live,
-                                        live_max_notional=args.live_max_notional)
+                                        live_max_notional=args.live_max_notional,
+                                        expected_account_id=args.account_id or "")
         n_errors = sum(1 for item in executions if item.get("status") == "error")
         print(f"\nExecuted {len(executions)} orders ({n_errors} errors). Log: {TRADE_LOG}")
         if n_errors and not args.dry_run:

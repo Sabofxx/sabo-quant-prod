@@ -174,6 +174,10 @@ def write_account_state(client: cc.CapitalClient, cfg: StrategyConfig,
 
 def run_once(cfg: StrategyConfig, dry_run: bool = False) -> int:
     log(f"=== strategy={cfg.id} account={cfg.account_id or '(unset)'} env={cfg.env} dry_run={dry_run} ===")
+    if not dry_run and not cfg.account_id:
+        log("FATAL: account_id empty in config — refusing live run (no implicit "
+            "active-account trading). Set account_id or use --dry-run.")
+        sys.exit(7)
     cfg.live_dir.mkdir(parents=True, exist_ok=True)
     cc.set_live_dir(cfg.live_dir)  # isolate executions/slippage/realized to this strategy
 
