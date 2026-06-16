@@ -133,6 +133,11 @@ class CapitalClient:
                 return a
         return accs[0] if accs else {}
 
+    def list_accounts(self) -> list[dict]:
+        r = requests.get(f"{self.base}/accounts", headers=self._headers(), timeout=15)
+        r.raise_for_status()
+        return r.json().get("accounts", [])
+
     def account_preferences(self) -> dict:
         r = requests.get(f"{self.base}/accounts/preferences", headers=self._headers(), timeout=15)
         r.raise_for_status()
@@ -855,6 +860,8 @@ def main() -> None:
     parser.add_argument("--allow-live", action="store_true",
                           help="Required to submit on CAPITAL_ENVIRONMENT=live. "
                                "Also honored via env ALLOW_LIVE=1.")
+    parser.add_argument("--list-accounts", action="store_true",
+                        help="List all accountId / name / balance under this login")
     parser.add_argument("--check-account", metavar="EXPECTED_ACCOUNT_ID",
                         help="Login then assert active session account == EXPECTED. "
                              "exit 7 + 'ACCOUNT MISMATCH' on mismatch (proves the guard live).")
@@ -885,6 +892,14 @@ def main() -> None:
     client = CapitalClient(api_key, identifier, password, env)
     client.login()
     print(f"Logged in. account_id={client.account_id} currency={client.currency} env={env}")
+
+    if args.list_accounts:
+        for a in client.list_accounts():
+            bal = a.get("balance", {})
+            print(f"  accountId={a.get('accountId')}  name={a.get('accountName')!r}  "
+                  f"type={a.get('accountType')}  balance={bal.get('balance')} {a.get('currency')}"
+                  f"{'  <- ACTIVE' if a.get('accountId') == client.account_id else ''}")
+        return
 
     if args.switch_account:
         print(f"Switching active account -> {args.switch_account}")
