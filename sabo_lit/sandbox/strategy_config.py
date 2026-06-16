@@ -84,8 +84,11 @@ class StrategyConfig:
         if self.env not in {"demo", "live"}:
             raise ValueError(f"{self.id}: env must be demo|live")
         for ins in self.instruments:
+            # Data may be absent on a fresh runner (data/ is gitignored); the runner
+            # bootstraps it from the broker via refresh_csv. Warn, don't hard-fail —
+            # generate_delta_orders/backtest will raise clearly if it's truly missing.
             if not (HERE / "data" / ins.csv).exists():
-                raise FileNotFoundError(f"{self.id}: data file missing for {ins.symbol}: data/{ins.csv}")
+                print(f"WARN: {self.id}: data/{ins.csv} absent — will bootstrap from broker", flush=True)
 
 
 def load_config(name_or_path: str) -> StrategyConfig:
