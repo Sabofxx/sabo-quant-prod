@@ -65,7 +65,24 @@ SYMBOL_MAP = {
     "AUDUSD": "AUDUSD",
     "NZDUSD": "NZDUSD",
     "USDCAD": "USDCAD",
+    # Non-FX instruments. Internal symbol -> Capital.com epic. This is the generic
+    # "add an instrument" path reused for phase-2 indices/energy (US500, OIL_CRUDE...).
+    "XAUUSD": "GOLD",
 }
+
+
+def set_live_dir(path) -> None:
+    """Redirect all connector log files to an isolated per-strategy live/ dir.
+
+    The multi-account runner calls this before executing so each strategy's
+    executions/slippage/realized PnL stay fully separate. No shared state.
+    """
+    global LIVE_DIR, TRADE_LOG, SLIPPAGE_LOG, REALIZED_LOG
+    from pathlib import Path as _P
+    LIVE_DIR = _P(path)
+    TRADE_LOG = LIVE_DIR / "capital_executions.jsonl"
+    SLIPPAGE_LOG = LIVE_DIR / "slippage.jsonl"
+    REALIZED_LOG = LIVE_DIR / "realized_pnl.jsonl"
 
 
 class CapitalClient:
@@ -111,6 +128,38 @@ class CapitalClient:
         r = requests.get(f"{self.base}/accounts/preferences", headers=self._headers(), timeout=15)
         r.raise_for_status()
         return r.json()
+
+    def switch_account(self, account_id: str) -> None:
+        """Switch the active account on this session (Cas A: one login, many accounts)."""
+        r = requests.put(f"{self.base}/session", json={"accountId": account_id},
+                         headers=self._headers(), timeout=15)
+        r.raise_for_status()
+        self.account_id = account_id
+        # Refresh CST/token if the broker rotated them on switch
+        if r.headers.get("CST"):
+            self.cst = r.headers["CST"]
+        if r.headers.get("X-SECURITY-TOKEN"):
+            self.security_token = r.headers["X-SECURITY-TOKEN"]
+
+    def active_account_id(self) -> str | None:
+        """Authoritative active accountId from the live session (not cached)."""
+        r = requests.get(f"{self.base}/session", headers=self._headers(), timeout=15)
+        r.raise_for_status()
+        return r.json().get("accountId") or r.json().get("currentAccountId")
+
+    def assert_active_account(self, expected: str) -> None:
+        """Hard guard: refuse to proceed unless the LIVE session account == expected.
+
+        Prevents placing an order on the wrong account after a switch. Verifies
+        against the broker (active_account_id), not just the cached value.
+        """
+        if not expected:
+            return  # no account pinned in config (Cas B single-account) -> skip
+        live = self.active_account_id()
+        if live != expected:
+            raise RuntimeError(
+                f"ACCOUNT MISMATCH: session active={live!r} but config expects={expected!r}. "
+                f"Refusing to trade.")
 
     def get_positions(self) -> list[dict]:
         r = requests.get(f"{self.base}/positions", headers=self._headers(), timeout=15)
@@ -541,10 +590,20 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
                        min_notional: float = 100.0, dry_run: bool = False,
                        reset: bool = False,
                        allow_live: bool = False,
-                       live_max_notional: float = LIVE_MAX_NOTIONAL_USD_DEFAULT) -> list[dict]:
+                       live_max_notional: float = LIVE_MAX_NOTIONAL_USD_DEFAULT,
+                       expected_account_id: str = "") -> list[dict]:
     if not csv_path.exists():
         print(f"ERROR: delta CSV not found: {csv_path}", file=sys.stderr)
         sys.exit(3)
+
+    # Account guard (defense in depth): refuse to trade if the live session is not
+    # on the account this strategy is pinned to. Catches a bad/forgotten switch.
+    if expected_account_id and not dry_run:
+        try:
+            client.assert_active_account(expected_account_id)
+        except RuntimeError as exc:
+            print(f"FATAL: {exc}", file=sys.stderr)
+            sys.exit(7)
 
     # Live safety preflight: scan max single-order notional before any submit
     if client.base == LIVE_BASE and not dry_run:

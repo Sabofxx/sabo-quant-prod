@@ -365,13 +365,19 @@ tbl("ptab", D.pair_stats, ["Paire","PnL réalisé","Trades","Win rate"], p=>
 
 
 def main() -> None:
+    global LIVE_DIR, OUTPUT
     ap = argparse.ArgumentParser(description="Rich local sabo-quant dashboard")
     ap.add_argument("--serve", action="store_true", help="serve + open in browser")
     ap.add_argument("--port", type=int, default=8765)
+    ap.add_argument("--live-dir", default="", help="state dir to read (e.g. live/fxtsm); default global live/")
     args = ap.parse_args()
 
+    if args.live_dir:
+        LIVE_DIR = Path(args.live_dir) if Path(args.live_dir).is_absolute() else HERE / args.live_dir
+        OUTPUT = LIVE_DIR / "dashboard_full.html"
+
     data = compute()
-    LIVE_DIR.mkdir(exist_ok=True)
+    LIVE_DIR.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(render(data), encoding="utf-8")
     print(f"Wrote {OUTPUT} ({OUTPUT.stat().st_size:,} bytes)")
     k = data["kpi"]

@@ -1,0 +1,26 @@
+{
+  "id": "fxtsm",
+  "description": "FX-TSM — time-series momentum (trend) on 6 USD majors, daily. FTMO-convex: small losses in chop, big gains in trends.",
+  "signal": "tsm",
+  "target_vol": 0.05,
+  "env": "demo",
+  "account_id": "",
+  "secret_suffix": "",
+  "max_leverage": 10.0,
+  "min_notional_usd": 500.0,
+  "live_subdir": "fxtsm",
+  "min_trades": 30,
+  "min_live_sharpe": 0.50,
+  "min_backtest_track": 0.50,
+  "red_flag_track": 0.40,
+  "max_median_slippage_pips": 1.5,
+  "min_observation_days": 60,
+  "instruments": [
+    {"symbol": "EURUSD", "csv": "eurusd-m5-bid-2019-01-01-2026-01-01.csv", "lookback": 60},
+    {"symbol": "GBPUSD", "csv": "gbpusd-m5-bid-2019-01-01-2026-01-01.csv", "lookback": 60},
+    {"symbol": "USDJPY", "csv": "usdjpy-m5-bid-2019-01-01-2026-01-01.csv", "lookback": 60},
+    {"symbol": "AUDUSD", "csv": "audusd-m5-bid-2019-01-01-2026-01-01.csv", "lookback": 60},
+    {"symbol": "NZDUSD", "csv": "nzdusd-m5-bid-2019-01-01-2026-01-01.csv", "lookback": 60},
+    {"symbol": "USDCAD", "csv": "usdcad-m5-bid-2019-01-01-2026-01-01.csv", "lookback": 60}
+  ]
+}

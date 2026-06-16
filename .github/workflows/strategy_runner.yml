@@ -1,0 +1,90 @@
+name: Strategy Runner (multi-account)
+
+on:
+  schedule:
+    - cron: '20 22 * * *'   # 22:20 UTC daily, after the legacy MR run (22:05)
+  workflow_dispatch:
+    inputs:
+      strategy:
+        description: 'Run a single strategy (blank = all)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      max-parallel: 1          # serialize: avoids git push races on live/ + staggers API calls
+      fail-fast: false
+      matrix:
+        strategy: [fxtsm, gold]
+    concurrency:
+      group: strategy-${{ matrix.strategy }}   # isolated per strategy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Cache market data
+        uses: actions/cache@v4
+        with:
+          path: sabo_lit/sandbox/data
+          key: capital-daily-bars-v1
+          restore-keys: capital-daily-bars-
+
+      - name: Install
+        run: |
+          pip install --upgrade pip
+          pip install -r sabo_lit/sandbox/requirements.txt
+
+      - name: Run strategy ${{ matrix.strategy }}
+        if: ${{ github.event.inputs.strategy == '' || github.event.inputs.strategy == matrix.strategy }}
+        env:
+          # Cas A (one login, switch accountId per config): base secrets used for all.
+          CAPITAL_API_KEY: ${{ secrets.CAPITAL_API_KEY }}
+          CAPITAL_IDENTIFIER: ${{ secrets.CAPITAL_IDENTIFIER }}
+          CAPITAL_API_PASSWORD: ${{ secrets.CAPITAL_API_PASSWORD }}
+          CAPITAL_ENVIRONMENT: ${{ secrets.CAPITAL_ENVIRONMENT || 'demo' }}
+          # Cas B (separate login per strategy): add suffixed secrets and set
+          # secret_suffix in the config, e.g. CAPITAL_API_KEY_FXTSM. Uncomment:
+          # CAPITAL_API_KEY_FXTSM: ${{ secrets.CAPITAL_API_KEY_FXTSM }}
+          # CAPITAL_IDENTIFIER_FXTSM: ${{ secrets.CAPITAL_IDENTIFIER_FXTSM }}
+          # CAPITAL_API_PASSWORD_FXTSM: ${{ secrets.CAPITAL_API_PASSWORD_FXTSM }}
+          # CAPITAL_API_KEY_GOLD: ${{ secrets.CAPITAL_API_KEY_GOLD }}
+          # CAPITAL_IDENTIFIER_GOLD: ${{ secrets.CAPITAL_IDENTIFIER_GOLD }}
+          # CAPITAL_API_PASSWORD_GOLD: ${{ secrets.CAPITAL_API_PASSWORD_GOLD }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          CAPITAL_GSL_ATR_MULT: ${{ vars.CAPITAL_GSL_ATR_MULT || '1.5' }}
+        run: |
+          cd sabo_lit/sandbox
+          python strategy_runner.py --config ${{ matrix.strategy }}
+
+      - name: Render dashboard for ${{ matrix.strategy }}
+        if: always()
+        run: |
+          cd sabo_lit/sandbox
+          python local_dashboard.py --live-dir live/${{ matrix.strategy }} || echo "dashboard skipped"
+
+      - name: Commit state for ${{ matrix.strategy }}
+        if: always()
+        run: |
+          git config user.email "automation@github.com"
+          git config user.name "GitHub Actions Bot"
+          git pull --rebase origin ${{ github.ref_name }} || true
+          git add sabo_lit/sandbox/live/${{ matrix.strategy }}/ || true
+          git diff --staged --quiet || git commit -m "Strategy ${{ matrix.strategy }} run $(date -u +%Y-%m-%d)"
+          git push || echo "Nothing to push"

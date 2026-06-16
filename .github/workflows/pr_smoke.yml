@@ -46,7 +46,28 @@ jobs:
       - name: Import smoke test
         run: |
           cd sabo_lit/sandbox
-          python -c "import automated_runner, capital_connector, telegram_notifier, dashboard_generator, intraday_risk_check, local_dashboard, propfirm_signal_generator; print('All imports OK')"
+          python -c "import automated_runner, capital_connector, telegram_notifier, dashboard_generator, intraday_risk_check, local_dashboard, propfirm_signal_generator, strategy_config, strategy_signals, strategy_runner; print('All imports OK')"
+
+      - name: Strategy config + signal smoke (offline, data-tolerant)
+        run: |
+          cd sabo_lit/sandbox
+          python -c "
+          import json
+          from pathlib import Path
+          from strategy_config import StrategyConfig, CONFIG_DIR
+          from strategy_signals import generate_delta_orders
+          for cfgfile in sorted(CONFIG_DIR.glob('*.json')):
+              raw = json.loads(cfgfile.read_text())  # config must parse
+              assert raw.get('signal') in {'tsm','ma'}, cfgfile.name
+              print(f'{cfgfile.stem}: config parses OK')
+              try:
+                  cfg = StrategyConfig.from_json(cfgfile)
+                  rows = generate_delta_orders(cfg, 100000.0)
+                  assert rows and all('delta_notional_usd' in r for r in rows)
+                  print(f'{cfgfile.stem}: {len(rows)} orders OK')
+              except FileNotFoundError:
+                  print(f'{cfgfile.stem}: market data absent in CI -> signal-gen skipped (OK)')
+          "
 
       - name: Telegram message render (offline)
         run: |
