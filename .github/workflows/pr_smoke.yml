@@ -58,7 +58,7 @@ jobs:
           from strategy_signals import generate_delta_orders
           for cfgfile in sorted(CONFIG_DIR.glob('*.json')):
               raw = json.loads(cfgfile.read_text())  # config must parse
-              assert raw.get('signal') in {'tsm','ma'}, cfgfile.name
+              assert raw.get('signal') in {'tsm','ma','donchian','carry'}, cfgfile.name
               print(f'{cfgfile.stem}: config parses OK')
               try:
                   cfg = StrategyConfig.from_json(cfgfile)
