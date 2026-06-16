@@ -4,7 +4,7 @@
   "signal": "ma",
   "target_vol": 0.03,
   "env": "demo",
-  "account_id": "",
+  "account_id": "323735182871179550",
   "secret_suffix": "_INDEX",
   "max_leverage": 8.0,
   "min_notional_usd": 500.0,
