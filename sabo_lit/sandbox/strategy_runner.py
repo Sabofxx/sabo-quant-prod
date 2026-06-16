@@ -200,25 +200,55 @@ def run_once(cfg: StrategyConfig, dry_run: bool = False) -> int:
         if n:
             log(f"  data {ins.symbol}: +{n} bars")
 
+    # Confirm each instrument's epic + candle format against the live broker.
+    # In dry-run this is the proof that "GOLD"/index/oil epics and the candle
+    # schema are correct on THIS account — fail loud if not.
+    for ins in cfg.instruments:
+        epic = cc.SYMBOL_MAP.get(ins.symbol)
+        if not epic:
+            log(f"FATAL: no epic mapping for {ins.symbol}"); sys.exit(8)
+        try:
+            mkt = client.get_market(epic)
+            snap = mkt.get("snapshot", {})
+            inst = mkt.get("instrument", {})
+            log(f"  EPIC CONFIRM {ins.symbol} -> epic='{inst.get('epic', epic)}' "
+                f"name='{inst.get('name','?')}' bid={snap.get('bid')} offer={snap.get('offer')}")
+        except Exception as exc:
+            log(f"FATAL: epic '{epic}' for {ins.symbol} not resolvable on this account: {exc}")
+            sys.exit(8)
+        try:
+            cnd = client.get_daily_candles(epic, max_bars=2)
+            log(f"  CANDLE FORMAT {ins.symbol}: {cnd[0] if cnd else 'EMPTY'}")
+        except Exception as exc:
+            log(f"FATAL: candle fetch for {ins.symbol}/{epic} failed: {exc}")
+            sys.exit(8)
+
     rows = generate_delta_orders(cfg, equity)
     nonflat = [r for r in rows if r["signal"] != 0]
     log(f"Signals: {len(rows)} instruments, {len(nonflat)} non-flat, "
         f"leverage={rows[0]['leverage'] if rows else 0}")
     for r in rows:
-        log(f"  {r['instrument']}: signal={r['signal']:+.0f} delta=${r['delta_notional_usd']:+,.0f}")
+        epic = cc.SYMBOL_MAP.get(r["instrument"], "?")
+        side = "BUY" if r["delta_notional_usd"] > 0 else "SELL" if r["delta_notional_usd"] < 0 else "FLAT"
+        log(f"  {'WOULD ORDER' if dry_run else 'ORDER'} {r['instrument']} (epic={epic}) "
+            f"{side} signal={r['signal']:+.0f} delta=${r['delta_notional_usd']:+,.0f} "
+            f"account={cfg.account_id or '(unset)'}")
 
     delta_csv = cfg.live_dir / "prop_delta_orders_latest.csv"
     allowed, reason = market_execution_allowed()
     log(f"Market execution: {reason}")
 
     executed = False
-    if not allowed:
+    if dry_run:
+        log("DRY-RUN: chain validated (login/switch/assert/epic/candles/signal). "
+            "No order placed. STOP.")
+    elif not allowed:
         log(f"INFO: skip execution: {reason}")
     else:
         cc.execute_delta_csv(client, delta_csv,
                              min_notional=cfg.min_notional_usd, dry_run=dry_run,
                              reset=True, expected_account_id=cfg.account_id)
-        executed = not dry_run
+        executed = True
 
     if not dry_run:
         try:

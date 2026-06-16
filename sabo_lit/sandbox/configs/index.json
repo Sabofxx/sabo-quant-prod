@@ -1,0 +1,25 @@
+{
+  "id": "index",
+  "description": "Index-Trend — long-biased trend on US500/US100/DE40, daily, with a vol filter (stand aside in the top-20% vol regimes; mandatory after Mar-2020). Right-skew from structural equity drift.",
+  "signal": "ma",
+  "target_vol": 0.05,
+  "env": "demo",
+  "account_id": "",
+  "secret_suffix": "_INDEX",
+  "max_leverage": 8.0,
+  "min_notional_usd": 500.0,
+  "live_subdir": "index",
+  "long_only": true,
+  "vol_filter_pct": 0.80,
+  "min_trades": 30,
+  "min_live_sharpe": 0.50,
+  "min_backtest_track": 0.50,
+  "red_flag_track": 0.40,
+  "max_median_slippage_pips": 1.5,
+  "min_observation_days": 60,
+  "instruments": [
+    {"symbol": "US500", "csv": "us500-d1-2019-01-01-2026-01-01.csv", "lookback": 100},
+    {"symbol": "US100", "csv": "us100-d1-2019-01-01-2026-01-01.csv", "lookback": 100},
+    {"symbol": "DE40",  "csv": "de40-d1-2019-01-01-2026-01-01.csv",  "lookback": 100}
+  ]
+}

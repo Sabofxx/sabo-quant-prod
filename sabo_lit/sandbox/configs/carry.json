@@ -1,0 +1,26 @@
+{
+  "id": "carry",
+  "description": "FX-Carry+Trend — long the higher-yield currency in each USD pair (FRED OECD 3m rates), but only when the price trend agrees. Trend filter cuts carry-unwind crashes (turns negative skew into convex-ish).",
+  "signal": "carry",
+  "target_vol": 0.05,
+  "env": "demo",
+  "account_id": "",
+  "secret_suffix": "_CARRY",
+  "max_leverage": 10.0,
+  "min_notional_usd": 500.0,
+  "live_subdir": "carry",
+  "min_trades": 30,
+  "min_live_sharpe": 0.50,
+  "min_backtest_track": 0.50,
+  "red_flag_track": 0.40,
+  "max_median_slippage_pips": 1.5,
+  "min_observation_days": 60,
+  "instruments": [
+    {"symbol": "EURUSD", "csv": "eurusd-m5-bid-2019-01-01-2026-01-01.csv", "lookback": 60},
+    {"symbol": "GBPUSD", "csv": "gbpusd-m5-bid-2019-01-01-2026-01-01.csv", "lookback": 60},
+    {"symbol": "USDJPY", "csv": "usdjpy-m5-bid-2019-01-01-2026-01-01.csv", "lookback": 60},
+    {"symbol": "AUDUSD", "csv": "audusd-m5-bid-2019-01-01-2026-01-01.csv", "lookback": 60},
+    {"symbol": "NZDUSD", "csv": "nzdusd-m5-bid-2019-01-01-2026-01-01.csv", "lookback": 60},
+    {"symbol": "USDCAD", "csv": "usdcad-m5-bid-2019-01-01-2026-01-01.csv", "lookback": 60}
+  ]
+}

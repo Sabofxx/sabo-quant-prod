@@ -9,6 +9,11 @@ on:
         description: 'Run a single strategy (blank = all)'
         required: false
         default: ''
+      dry_run:
+        description: 'Dry-run: full chain (login/switch/assert/epic/candles/signal) but NO order'
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: write
@@ -71,7 +76,8 @@ jobs:
           CAPITAL_GSL_ATR_MULT: ${{ vars.CAPITAL_GSL_ATR_MULT || '1.5' }}
         run: |
           cd sabo_lit/sandbox
-          python strategy_runner.py --config ${{ matrix.strategy }}
+          python strategy_runner.py --config ${{ matrix.strategy }} \
+            ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
 
       - name: Render dashboard for ${{ matrix.strategy }}
         if: always()

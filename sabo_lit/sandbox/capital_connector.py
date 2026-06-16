@@ -66,8 +66,15 @@ SYMBOL_MAP = {
     "NZDUSD": "NZDUSD",
     "USDCAD": "USDCAD",
     # Non-FX instruments. Internal symbol -> Capital.com epic. This is the generic
-    # "add an instrument" path reused for phase-2 indices/energy (US500, OIL_CRUDE...).
+    # "add an instrument" path. Epic strings are best-guess and MUST be confirmed
+    # by the dry-run (strategy_runner logs the resolved epic and exits loud if the
+    # epic is not found on the account — see EPIC CONFIRM).
     "XAUUSD": "GOLD",
+    "US500": "US500",
+    "US100": "US100",
+    "DE40": "DE40",
+    "OILWTI": "OIL_CRUDE",
+    "OILBRENT": "OIL_BRENT",
 }
 
 
@@ -846,6 +853,11 @@ def main() -> None:
     parser.add_argument("--allow-live", action="store_true",
                           help="Required to submit on CAPITAL_ENVIRONMENT=live. "
                                "Also honored via env ALLOW_LIVE=1.")
+    parser.add_argument("--check-account", metavar="EXPECTED_ACCOUNT_ID",
+                        help="Login then assert active session account == EXPECTED. "
+                             "exit 7 + 'ACCOUNT MISMATCH' on mismatch (proves the guard live).")
+    parser.add_argument("--switch-account", metavar="ACCOUNT_ID",
+                        help="Switch active account before --check-account (test the switch endpoint)")
     parser.add_argument("--sync-realized", action="store_true",
                         help="Append new closed-trade PnL from Capital transaction history")
     parser.add_argument("--realized-lookback-days", type=int, default=7)
@@ -871,6 +883,20 @@ def main() -> None:
     client = CapitalClient(api_key, identifier, password, env)
     client.login()
     print(f"Logged in. account_id={client.account_id} currency={client.currency} env={env}")
+
+    if args.switch_account:
+        print(f"Switching active account -> {args.switch_account}")
+        client.switch_account(args.switch_account)
+        print(f"  session account now = {client.active_account_id()}")
+
+    if args.check_account:
+        try:
+            client.assert_active_account(args.check_account)
+            print(f"ACCOUNT OK: live session == expected ({args.check_account})")
+            return
+        except RuntimeError as exc:
+            print(f"FATAL: {exc}", file=sys.stderr)
+            sys.exit(7)
 
     if args.account_info:
         acc = client.account_summary()

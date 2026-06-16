@@ -1,0 +1,23 @@
+{
+  "id": "oil",
+  "description": "Oil-Breakout — Donchian channel breakout on WTI, daily. Supply shocks -> explosive one-way moves = convex right tail. Decorrelated from FX/equities.",
+  "signal": "donchian",
+  "target_vol": 0.05,
+  "env": "demo",
+  "account_id": "",
+  "secret_suffix": "_OIL",
+  "max_leverage": 8.0,
+  "min_notional_usd": 500.0,
+  "live_subdir": "oil",
+  "long_only": false,
+  "vol_filter_pct": 0.0,
+  "min_trades": 30,
+  "min_live_sharpe": 0.50,
+  "min_backtest_track": 0.50,
+  "red_flag_track": 0.40,
+  "max_median_slippage_pips": 1.5,
+  "min_observation_days": 60,
+  "instruments": [
+    {"symbol": "OILWTI", "csv": "oilwti-d1-2019-01-01-2026-01-01.csv", "lookback": 55}
+  ]
+}

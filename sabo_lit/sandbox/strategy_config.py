@@ -36,7 +36,7 @@ class Instrument:
 class StrategyConfig:
     id: str                          # short id, e.g. "fxtsm", "gold"
     description: str
-    signal: str                      # "tsm" (time-series momentum) | "ma" (MA filter)
+    signal: str                      # "tsm" (momentum) | "ma" (MA filter) | "donchian" (breakout)
     instruments: list[Instrument]
     target_vol: float                # ANNUALIZED vol target (e.g. 0.05 = 5%)
     account_id: str                  # Capital.com accountId this strategy may trade ("" = unset)
@@ -45,6 +45,10 @@ class StrategyConfig:
     max_leverage: float = 10.0
     min_notional_usd: float = 500.0
     live_subdir: str = ""            # defaults to id if empty
+    long_only: bool = False          # True -> shorts become flat (e.g. index long-bias)
+    vol_filter_pct: float = 0.0      # 0 = off; else flat when realized-vol rank > this (e.g. 0.80
+                                     #   skips the top-20% most volatile regimes — crash protection)
+    intraday: bool = False           # True -> intraday strategy (flat at EOD; see strategy_runner)
 
     # --- pre-registered elimination criteria (carried for reporting/dashboards) ---
     min_trades: int = 30
@@ -71,8 +75,8 @@ class StrategyConfig:
         return cfg
 
     def validate(self) -> None:
-        if self.signal not in {"tsm", "ma"}:
-            raise ValueError(f"{self.id}: signal must be 'tsm' or 'ma', got {self.signal!r}")
+        if self.signal not in {"tsm", "ma", "donchian", "carry"}:
+            raise ValueError(f"{self.id}: signal must be tsm|ma|donchian|carry, got {self.signal!r}")
         if not self.instruments:
             raise ValueError(f"{self.id}: no instruments")
         if self.target_vol <= 0 or self.target_vol > 0.5:
