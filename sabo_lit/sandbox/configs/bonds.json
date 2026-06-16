@@ -1,0 +1,21 @@
+{
+  "id": "bonds",
+  "description": "Bonds-Trend (EXPLORATORY) — time-series momentum on US 10Y T-Note, daily. Bonds trend persistently and rally in flight-to-quality -> convex hedge, decorrelated from FX/equities/commodities. Swappable after phase-1 edge results.",
+  "signal": "tsm",
+  "target_vol": 0.05,
+  "env": "demo",
+  "account_id": "",
+  "secret_suffix": "_BONDS",
+  "max_leverage": 8.0,
+  "min_notional_usd": 500.0,
+  "live_subdir": "bonds",
+  "min_trades": 30,
+  "min_live_sharpe": 0.50,
+  "min_backtest_track": 0.50,
+  "red_flag_track": 0.40,
+  "max_median_slippage_pips": 1.5,
+  "min_observation_days": 60,
+  "instruments": [
+    {"symbol": "US10Y", "csv": "us10y-d1-2019-01-01-2026-01-01.csv", "lookback": 80}
+  ]
+}

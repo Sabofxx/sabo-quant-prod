@@ -1,0 +1,21 @@
+{
+  "id": "copper",
+  "description": "Copper-Breakout (EXPLORATORY) — Donchian breakout on copper, daily. Industrial-demand + supply shocks drive explosive directional moves -> convex right tail, decorrelated from FX/equities/bonds. Swappable after phase-1 edge results.",
+  "signal": "donchian",
+  "target_vol": 0.05,
+  "env": "demo",
+  "account_id": "",
+  "secret_suffix": "_COPPER",
+  "max_leverage": 8.0,
+  "min_notional_usd": 500.0,
+  "live_subdir": "copper",
+  "min_trades": 30,
+  "min_live_sharpe": 0.50,
+  "min_backtest_track": 0.50,
+  "red_flag_track": 0.40,
+  "max_median_slippage_pips": 1.5,
+  "min_observation_days": 60,
+  "instruments": [
+    {"symbol": "COPPER", "csv": "copper-d1-2019-01-01-2026-01-01.csv", "lookback": 55}
+  ]
+}

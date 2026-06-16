@@ -75,6 +75,8 @@ SYMBOL_MAP = {
     "DE40": "DE40",
     "OILWTI": "OIL_CRUDE",
     "OILBRENT": "OIL_BRENT",
+    "US10Y": "US10YT",
+    "COPPER": "COPPER",
 }
 
 
