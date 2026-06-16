@@ -1,0 +1,329 @@
+{
+  "ts": "2026-06-16T14:15:15+00:00",
+  "strategy": "gold",
+  "account_id": "321896722115941534",
+  "environment": "demo",
+  "balance": 94788.38,
+  "available": 73202.32,
+  "margin_used": 21549.25,
+  "profit_loss": 36.81,
+  "deposit": 94751.57,
+  "currency": "EURd",
+  "market_open": true,
+  "market_reason": "FX execution window open",
+  "executed_this_run": false,
+  "positions": [
+    {
+      "deal_id": "00001544-0055-311e-0000-000080f90df5",
+      "epic": "AUDUSD",
+      "direction": "BUY",
+      "size": 31400.0,
+      "open_level": 0.7072,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "00005552-0055-311e-0000-000082063824",
+      "epic": "EURUSD",
+      "direction": "SELL",
+      "size": 10600.0,
+      "open_level": 1.15914,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "00005552-0055-311e-0000-000082063826",
+      "epic": "EURUSD",
+      "direction": "SELL",
+      "size": 10600.0,
+      "open_level": 1.15913,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "00007090-0055-311e-0000-000081370a8f",
+      "epic": "GBPUSD",
+      "direction": "SELL",
+      "size": 9200.0,
+      "open_level": 1.34149,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "000154c4-0029-065e-0000-000080ef0530",
+      "epic": "USDJPY",
+      "direction": "SELL",
+      "size": 12300.0,
+      "open_level": 160.234,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "00001544-0055-311e-0000-000080f90ded",
+      "epic": "AUDUSD",
+      "direction": "BUY",
+      "size": 17400.0,
+      "open_level": 0.70725,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "0000e684-0055-311e-0000-000080e40195",
+      "epic": "NZDUSD",
+      "direction": "BUY",
+      "size": 21200.0,
+      "open_level": 0.58275,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "000154c4-000c-111e-0000-000080fb06d1",
+      "epic": "USDCAD",
+      "direction": "SELL",
+      "size": 12300.0,
+      "open_level": 1.39918,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "00001544-0055-311e-0000-000080f90df1",
+      "epic": "AUDUSD",
+      "direction": "BUY",
+      "size": 17400.0,
+      "open_level": 0.70725,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "00007090-0055-311e-0000-000081370a91",
+      "epic": "GBPUSD",
+      "direction": "SELL",
+      "size": 9200.0,
+      "open_level": 1.34149,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "0000e684-0055-311e-0000-000080e40197",
+      "epic": "NZDUSD",
+      "direction": "BUY",
+      "size": 21200.0,
+      "open_level": 0.58275,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "000154c4-0029-065e-0000-000080ef0532",
+      "epic": "USDJPY",
+      "direction": "SELL",
+      "size": 12300.0,
+      "open_level": 160.241,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "000154c4-000c-111e-0000-000080fb06d5",
+      "epic": "USDCAD",
+      "direction": "SELL",
+      "size": 12300.0,
+      "open_level": 1.39918,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "00007090-0055-311e-0000-000081370a93",
+      "epic": "GBPUSD",
+      "direction": "SELL",
+      "size": 16500.0,
+      "open_level": 1.34149,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "000154c4-0029-065e-0000-000080ef0534",
+      "epic": "USDJPY",
+      "direction": "SELL",
+      "size": 22200.0,
+      "open_level": 160.241,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "00001544-0055-311e-0000-000080f90df3",
+      "epic": "AUDUSD",
+      "direction": "BUY",
+      "size": 31400.0,
+      "open_level": 0.70722,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "0000e684-0055-311e-0000-000080e40199",
+      "epic": "NZDUSD",
+      "direction": "BUY",
+      "size": 38200.0,
+      "open_level": 0.58273,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "000154c4-000c-111e-0000-000080fb06d7",
+      "epic": "USDCAD",
+      "direction": "SELL",
+      "size": 22200.0,
+      "open_level": 1.39919,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "00007090-0055-311e-0000-000081370a95",
+      "epic": "GBPUSD",
+      "direction": "SELL",
+      "size": 16500.0,
+      "open_level": 1.34149,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "000154c4-0029-065e-0000-000080ef0536",
+      "epic": "USDJPY",
+      "direction": "SELL",
+      "size": 22200.0,
+      "open_level": 160.243,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "00001544-0055-311e-0000-000080f90df7",
+      "epic": "AUDUSD",
+      "direction": "BUY",
+      "size": 23600.0,
+      "open_level": 0.70715,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "0000e684-0055-311e-0000-000080e4019b",
+      "epic": "NZDUSD",
+      "direction": "BUY",
+      "size": 38200.0,
+      "open_level": 0.58274,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "000154c4-000c-111e-0000-000080fb06da",
+      "epic": "USDCAD",
+      "direction": "SELL",
+      "size": 22200.0,
+      "open_level": 1.39918,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "0000e684-0055-311e-0000-000080e4019f",
+      "epic": "NZDUSD",
+      "direction": "BUY",
+      "size": 28700.0,
+      "open_level": 0.58271,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "000154c4-000c-111e-0000-000080fb06dc",
+      "epic": "USDCAD",
+      "direction": "SELL",
+      "size": 16700.0,
+      "open_level": 1.39918,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "00001544-0055-311e-0000-000080f90df9",
+      "epic": "AUDUSD",
+      "direction": "BUY",
+      "size": 23600.0,
+      "open_level": 0.70716,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "0000e684-0055-311e-0000-000080e401a1",
+      "epic": "NZDUSD",
+      "direction": "BUY",
+      "size": 28700.0,
+      "open_level": 0.58271,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "000154c4-000c-111e-0000-000080fb06de",
+      "epic": "USDCAD",
+      "direction": "SELL",
+      "size": 16700.0,
+      "open_level": 1.39919,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "00005552-0055-311e-0000-00008206382f",
+      "epic": "EURUSD",
+      "direction": "SELL",
+      "size": 8500.0,
+      "open_level": 1.15907,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "00007090-0055-311e-0000-000081370a98",
+      "epic": "GBPUSD",
+      "direction": "SELL",
+      "size": 7300.0,
+      "open_level": 1.34139,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "000154c4-0029-065e-0000-000080ef0539",
+      "epic": "USDJPY",
+      "direction": "SELL",
+      "size": 9800.0,
+      "open_level": 160.24,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "00001544-0055-311e-0000-000080f90dfe",
+      "epic": "AUDUSD",
+      "direction": "BUY",
+      "size": 13900.0,
+      "open_level": 0.70709,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "0000e684-0055-311e-0000-000080e401a3",
+      "epic": "NZDUSD",
+      "direction": "BUY",
+      "size": 16900.0,
+      "open_level": 0.58265,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "000154c4-000c-111e-0000-000080fb06e0",
+      "epic": "USDCAD",
+      "direction": "SELL",
+      "size": 9800.0,
+      "open_level": 1.39919,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "00007090-0055-311e-0000-000081370a9a",
+      "epic": "GBPUSD",
+      "direction": "SELL",
+      "size": 13200.0,
+      "open_level": 1.34139,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "000154c4-0029-065e-0000-000080ef053b",
+      "epic": "USDJPY",
+      "direction": "SELL",
+      "size": 17800.0,
+      "open_level": 160.238,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "00001544-0055-311e-0000-000080f90e00",
+      "epic": "AUDUSD",
+      "direction": "BUY",
+      "size": 25100.0,
+      "open_level": 0.70715,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "0000e684-0055-311e-0000-000080e401a5",
+      "epic": "NZDUSD",
+      "direction": "BUY",
+      "size": 30500.0,
+      "open_level": 0.58274,
+      "profit_loss": 0.0
+    },
+    {
+      "deal_id": "000154c4-000c-111e-0000-000080fb06e2",
+      "epic": "USDCAD",
+      "direction": "SELL",
+      "size": 17800.0,
+      "open_level": 1.39904,
+      "profit_loss": 0.0
+    }
+  ]
+}
