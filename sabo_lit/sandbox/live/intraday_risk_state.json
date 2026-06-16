@@ -1,10 +1,10 @@
 {
-  "ts": "2026-06-16T03:52:26+00:00",
+  "ts": "2026-06-16T09:24:50+00:00",
   "environment": "demo",
-  "balance": 94324.39,
-  "available": 73186.47,
-  "margin_used": 21137.92,
-  "unrealized_pl": -427.18,
+  "balance": 94392.31,
+  "available": 73219.53,
+  "margin_used": 21172.78,
+  "unrealized_pl": -359.26,
   "positions_count": 39,
   "breaches": []
 }
