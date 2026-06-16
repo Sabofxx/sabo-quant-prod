@@ -7,6 +7,10 @@ on:
         description: 'Secret suffix to use ("" = base, "_GOLD" = Gold creds)'
         required: false
         default: ''
+      check_account:
+        description: 'If set, assert active account == this id (exit 7 on mismatch) instead of listing'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -33,4 +37,8 @@ jobs:
           CAPITAL_ENVIRONMENT: ${{ secrets.CAPITAL_ENVIRONMENT || 'demo' }}
         run: |
           cd sabo_lit/sandbox
-          python capital_connector.py --list-accounts
+          if [ -n "${{ inputs.check_account }}" ]; then
+            python capital_connector.py --check-account "${{ inputs.check_account }}"
+          else
+            python capital_connector.py --list-accounts
+          fi
