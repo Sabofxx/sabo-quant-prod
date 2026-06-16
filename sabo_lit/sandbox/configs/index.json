@@ -2,7 +2,7 @@
   "id": "index",
   "description": "Index-Trend — long-biased trend on US500/US100/DE40, daily, with a vol filter (stand aside in the top-20% vol regimes; mandatory after Mar-2020). Right-skew from structural equity drift.",
   "signal": "ma",
-  "target_vol": 0.05,
+  "target_vol": 0.03,
   "env": "demo",
   "account_id": "",
   "secret_suffix": "_INDEX",

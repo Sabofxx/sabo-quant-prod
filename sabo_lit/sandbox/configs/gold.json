@@ -2,7 +2,7 @@
   "id": "gold",
   "description": "Gold-RiskOff — time-series momentum (trend) on XAUUSD, daily. Decorrelated from FX; trends hard in risk-off. Convex right tail.",
   "signal": "tsm",
-  "target_vol": 0.05,
+  "target_vol": 0.04,
   "env": "demo",
   "account_id": "",
   "secret_suffix": "",
