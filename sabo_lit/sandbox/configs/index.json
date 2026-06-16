@@ -1,6 +1,6 @@
 {
   "id": "index",
-  "description": "Index-Trend — long-biased trend on US500/US100/DE40, daily, with a vol filter (stand aside in the top-20% vol regimes; mandatory after Mar-2020). Right-skew from structural equity drift.",
+  "description": "Index-Trend [OBSERVATION — NOT a confirmed edge] — long-biased trend on US500/US100/DE40, daily, vol filter (stand aside top-20% vol regimes). OOS +0.99 but RESIDUAL TAIL RISK: full-sample keeps a -5.2% gap day the vol filter cannot catch (gaps through). On watch, not validated for a paid challenge. Elimination criteria below apply.",
   "signal": "ma",
   "target_vol": 0.03,
   "env": "demo",
