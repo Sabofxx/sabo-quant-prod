@@ -1,0 +1,36 @@
+name: List Capital Accounts
+
+on:
+  workflow_dispatch:
+    inputs:
+      suffix:
+        description: 'Secret suffix to use ("" = base, "_GOLD" = Gold creds)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install -r sabo_lit/sandbox/requirements.txt
+      - name: List accounts
+        env:
+          CAPITAL_API_KEY: ${{ inputs.suffix == '_GOLD' && secrets.CAPITAL_API_KEY_GOLD || secrets.CAPITAL_API_KEY }}
+          CAPITAL_IDENTIFIER: ${{ inputs.suffix == '_GOLD' && secrets.CAPITAL_IDENTIFIER_GOLD || secrets.CAPITAL_IDENTIFIER }}
+          CAPITAL_API_PASSWORD: ${{ inputs.suffix == '_GOLD' && secrets.CAPITAL_API_PASSWORD_GOLD || secrets.CAPITAL_API_PASSWORD }}
+          CAPITAL_ENVIRONMENT: ${{ secrets.CAPITAL_ENVIRONMENT || 'demo' }}
+        run: |
+          cd sabo_lit/sandbox
+          python capital_connector.py --list-accounts
