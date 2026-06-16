@@ -29,9 +29,9 @@ jobs:
       max-parallel: 1          # serialize: avoids git push races on live/ + staggers API calls
       fail-fast: false
       matrix:
-        # Only strategies that passed their dry-run go live here. Add others as
-        # they validate. fxtsm etc. stay out until configured + dry-run-green.
-        strategy: [gold]
+        # Strategies with a pinned account, validated by dry-run. Sequenced
+        # (max-parallel 1) on distinct accounts -> no collision. Others stay out.
+        strategy: [gold, index]
     concurrency:
       group: strategy-${{ matrix.strategy }}   # isolated per strategy
       cancel-in-progress: false
