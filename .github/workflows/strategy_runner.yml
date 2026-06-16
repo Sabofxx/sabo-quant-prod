@@ -90,6 +90,17 @@ jobs:
           cd sabo_lit/sandbox
           python local_dashboard.py --live-dir live/${{ matrix.strategy }} || echo "dashboard skipped"
 
+      - name: Status report -> run summary
+        if: always()
+        run: |
+          cd sabo_lit/sandbox
+          {
+            echo "## 📊 ${{ matrix.strategy }} — live status"
+            echo '```'
+            python strategy_status.py ${{ matrix.strategy }} 2>&1 || echo "(status unavailable)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Commit state for ${{ matrix.strategy }}
         if: always()
         run: |
