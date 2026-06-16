@@ -28,8 +28,9 @@ jobs:
     strategy:
       max-parallel: 1          # serialize: avoids git push races on live/ + staggers API calls
       fail-fast: false
-      matrix:
-        strategy: [fxtsm, gold]
+        # Only strategies that passed their dry-run go live here. Add others as
+        # they validate. fxtsm/index/etc. stay out until configured + dry-run-green.
+        strategy: [gold]
     concurrency:
       group: strategy-${{ matrix.strategy }}   # isolated per strategy
       cancel-in-progress: false
