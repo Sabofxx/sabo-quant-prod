@@ -4,7 +4,7 @@
   "signal": "tsm",
   "target_vol": 0.03,
   "env": "demo",
-  "account_id": "",
+  "account_id": "323733202891256094",
   "secret_suffix": "_GOLD",
   "max_leverage": 10.0,
   "min_notional_usd": 500.0,
