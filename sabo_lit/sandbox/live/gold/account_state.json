@@ -1,17 +1,17 @@
 {
-  "ts": "2026-07-01T23:46:37+00:00",
+  "ts": "2026-07-02T06:28:07+00:00",
   "strategy": "gold",
   "account_id": "323733202891256094",
   "environment": "demo",
-  "balance": 100916.72,
+  "balance": 100777.03,
   "available": 100248.72,
   "margin_used": 669.679999999993,
-  "profit_loss": -1.68,
+  "profit_loss": -141.37,
   "deposit": 100918.4,
   "currency": "USDd",
   "market_open": true,
   "market_reason": "FX execution window open",
-  "executed_this_run": true,
+  "executed_this_run": false,
   "positions": [
     {
       "deal_id": "00601567-0055-311e-0000-000084d6f2a5",
