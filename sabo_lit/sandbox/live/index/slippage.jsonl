@@ -1,0 +1,2 @@
+{"ts": "2026-07-02T23:32:44+00:00", "epic": "US500", "direction": "BUY", "expected_price": 7483.3, "fill_price": 7483.6, "slippage_pips": 0.3, "size": 1.13}
+{"ts": "2026-07-02T23:32:47+00:00", "epic": "DE40", "direction": "BUY", "expected_price": 25648.0, "fill_price": 25652.0, "slippage_pips": 4.0, "size": 0.33}
