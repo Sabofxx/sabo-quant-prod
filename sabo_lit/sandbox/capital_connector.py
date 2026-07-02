@@ -166,7 +166,14 @@ class CapitalClient:
         return r.json()
 
     def switch_account(self, account_id: str) -> None:
-        """Switch the active account on this session (Cas A: one login, many accounts)."""
+        """Switch the active account on this session (Cas A: one login, many accounts).
+
+        No-op when the target is already active: Capital answers 400 to a
+        switch onto the current account, which would fail a harmless request.
+        """
+        if account_id == self.account_id or account_id == self.active_account_id():
+            self.account_id = account_id
+            return
         r = requests.put(f"{self.base}/session", json={"accountId": account_id},
                          headers=self._headers(), timeout=15)
         r.raise_for_status()
