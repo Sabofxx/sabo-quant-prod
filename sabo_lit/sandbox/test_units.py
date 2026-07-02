@@ -76,6 +76,48 @@ def test_parse_pnl_currency_prefixed():
     assert cc._parse_pnl("") is None
 
 
+# --- Capital transaction -> realized record (exact row shapes observed live) -----
+
+GOLD_TRADE_ROW = {
+    "date": "2026-07-02T01:46:31.281", "dateUtc": "2026-07-01T23:46:31.281",
+    "instrumentName": "GOLD", "transactionType": "TRADE", "note": "Trade closed",
+    "reference": "132126428272116", "size": "-80.43", "currency": "USDd",
+    "status": "PROCESSED", "dealId": "00601567-0055-311e-0000-000084d60a14",
+}
+GOLD_SWAP_ROW = {
+    "date": "2026-07-01T23:05:26.293", "dateUtc": "2026-07-01T21:05:26.293",
+    "instrumentName": "GOLD", "transactionType": "SWAP", "note": "Overnight fee",
+    "reference": "132116293832863", "size": "4.08", "currency": "USDd",
+    "status": "PROCESSED",
+}
+
+
+def test_txn_trade_row_maps_to_realized_loss():
+    rec, why = cc.txn_to_realized(GOLD_TRADE_ROW)
+    assert why == "ok"
+    assert rec["profit"] == -80.43 and rec["win"] is False
+    assert rec["epic"] == "GOLD" and rec["reference"] == "132126428272116"
+    assert rec["ts"] == "2026-07-01T23:46:31.281"
+
+
+def test_txn_swap_row_is_not_a_trade():
+    rec, why = cc.txn_to_realized(GOLD_SWAP_ROW)
+    assert rec is None and why == "non_trade"
+
+
+def test_txn_prefers_profit_and_loss_field_when_present():
+    row = dict(GOLD_TRADE_ROW, profitAndLoss="USDd12.5")
+    rec, _ = cc.txn_to_realized(row)
+    assert rec["profit"] == 12.5 and rec["win"] is True
+
+
+def test_txn_without_reference_skipped():
+    row = dict(GOLD_TRADE_ROW)
+    del row["reference"], row["dealId"]
+    rec, why = cc.txn_to_realized(row)
+    assert rec is None and why == "no_ref"
+
+
 # --- FX schedule guard ----------------------------------------------------------
 
 def test_market_guard_saturday_closed():

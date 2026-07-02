@@ -557,7 +557,39 @@ def _logged_references() -> set[str]:
     return refs
 
 
-NON_TRADE_TYPES = {"DEPOSIT", "WITHDRAWAL", "INACTIVITY_FEE", "TRANSFER"}
+NON_TRADE_TYPES = {"DEPOSIT", "WITHDRAWAL", "INACTIVITY_FEE", "TRANSFER", "SWAP"}
+
+
+def txn_to_realized(t: dict) -> tuple[dict | None, str]:
+    """Map one Capital transaction row to a realized-PnL record, or (None, why).
+
+    Observed row shape (2026-07, demo): NO profitAndLoss field — the realized
+    amount in account currency is in "size" for transactionType=TRADE rows
+    ("note": "Trade closed"). SWAP rows are overnight fees, not trades.
+    """
+    ttype = str(t.get("transactionType") or t.get("type") or "?")
+    ref = str(t.get("reference") or t.get("dealId") or "")
+    if not ref:
+        return None, "no_ref"
+    if ttype.upper() in NON_TRADE_TYPES:
+        return None, "non_trade"
+    pnl = _parse_pnl(t.get("profitAndLoss"))
+    if pnl is None:
+        pnl = _parse_pnl(t.get("size"))
+    if pnl is None:
+        return None, "no_pnl"
+    if pnl == 0.0:
+        return None, "zero_pnl"
+    return {
+        "ts": t.get("dateUtc") or t.get("date") or datetime.now(UTC).isoformat(timespec="seconds"),
+        "reference": ref,
+        "epic": t.get("instrumentName") or t.get("epic"),
+        "type": ttype,
+        "note": t.get("note"),
+        "profit": round(pnl, 2),
+        "win": pnl > 0,
+        "currency": t.get("currency"),
+    }, "ok"
 
 
 def sync_realized_from_transactions(client: CapitalClient,
@@ -590,37 +622,15 @@ def sync_realized_from_transactions(client: CapitalClient,
         for t in txns:
             ttype = str(t.get("transactionType") or t.get("type") or "?")
             type_counts[ttype] = type_counts.get(ttype, 0) + 1
-            ref = str(t.get("reference") or t.get("dealId") or "")
-            if not ref:
-                skipped["no_ref"] += 1
+            rec, why = txn_to_realized(t)
+            if rec is None:
+                skipped[why] = skipped.get(why, 0) + 1
                 continue
-            if ref in seen:
+            if rec["reference"] in seen:
                 skipped["dup"] += 1
                 continue
-            if ttype.upper() in NON_TRADE_TYPES:
-                skipped["non_trade"] += 1
-                continue
-            pnl = _parse_pnl(t.get("profitAndLoss"))
-            if pnl is None:
-                skipped["no_pnl"] += 1
-                continue
-            if pnl == 0.0:
-                skipped["zero_pnl"] += 1
-                continue
-            rec = {
-                "ts": t.get("dateUtc") or t.get("date") or now.isoformat(timespec="seconds"),
-                "reference": ref,
-                "epic": t.get("instrumentName") or t.get("epic"),
-                "type": ttype,
-                "size": _parse_pnl(t.get("size")),
-                "open_level": t.get("openLevel"),
-                "close_level": t.get("closeLevel"),
-                "profit": round(pnl, 2),
-                "win": pnl > 0,
-                "currency": t.get("currency"),
-            }
             f.write(json.dumps(rec, default=str) + "\n")
-            seen.add(ref)
+            seen.add(rec["reference"])
             new += 1
     print(f"Realized PnL sync: fetched={len(txns)} new={new} "
           f"skipped={ {k: v for k, v in skipped.items() if v} or '{}'} "

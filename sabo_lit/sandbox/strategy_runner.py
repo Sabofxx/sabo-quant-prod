@@ -351,7 +351,9 @@ def run_once(cfg: StrategyConfig, dry_run: bool = False) -> int:
     n_realized = 0
     if not dry_run:
         try:
-            n_realized = cc.sync_realized_from_transactions(client)
+            # 30d lookback: dedup by reference makes it idempotent, and it
+            # backfills the weeks lost to the profitAndLoss-field bug.
+            n_realized = cc.sync_realized_from_transactions(client, lookback_days=30)
         except Exception as exc:
             log(f"WARN: realized sync failed: {exc}")
     post = snapshot(client, cfg, "post")
