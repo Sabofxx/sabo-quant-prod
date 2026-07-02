@@ -49,8 +49,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: sabo_lit/sandbox/data
-          key: capital-daily-bars-v1
-          restore-keys: capital-daily-bars-
+          # Unique key per run: an exact-hit cache is never re-saved, so the fixed
+          # v1 key froze the data at its first save and every run re-bootstrapped
+          # only ~200 broker bars. run_id key -> miss -> restore latest -> save fresh.
+          key: capital-daily-bars-v2-${{ github.run_id }}
+          restore-keys: |
+            capital-daily-bars-v2-
+            capital-daily-bars-
 
       - name: Install
         run: |
@@ -78,7 +83,14 @@ jobs:
           CAPITAL_API_PASSWORD_INDEX: ${{ secrets.CAPITAL_API_PASSWORD_INDEX }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          CAPITAL_GSL_MODE: ${{ vars.CAPITAL_GSL_MODE || 'auto' }}
+          CAPITAL_GSL_DISTANCE_BUFFER: ${{ vars.CAPITAL_GSL_DISTANCE_BUFFER || '2.0' }}
+          CAPITAL_GSL_FALLBACK_DISTANCE_PCT: ${{ vars.CAPITAL_GSL_FALLBACK_DISTANCE_PCT || '5.0' }}
+          CAPITAL_GSL_STOPLOSS_RETRY_MULTIPLIER: ${{ vars.CAPITAL_GSL_STOPLOSS_RETRY_MULTIPLIER || '2.0' }}
           CAPITAL_GSL_ATR_MULT: ${{ vars.CAPITAL_GSL_ATR_MULT || '1.5' }}
+          CAPITAL_GSL_ATR_PERIOD: ${{ vars.CAPITAL_GSL_ATR_PERIOD || '14' }}
+          DAILY_DD_BREAKER_PCT: ${{ vars.DAILY_DD_BREAKER_PCT || '-2.0' }}
+          MAX_PEAK_DD_PCT: ${{ vars.MAX_PEAK_DD_PCT || '-8.0' }}
         run: |
           cd sabo_lit/sandbox
           python strategy_runner.py --config ${{ matrix.strategy }} \
@@ -104,9 +116,39 @@ jobs:
       - name: Commit state for ${{ matrix.strategy }}
         if: always()
         run: |
+          # Order matters: commit FIRST, then rebase+push with retries. The old
+          # sequence pulled before adding -> unstaged live/ changes blocked the
+          # rebase, then the push was rejected (previous matrix job had pushed)
+          # and swallowed by "|| echo" -> index state was silently lost daily.
           git config user.email "automation@github.com"
           git config user.name "GitHub Actions Bot"
-          git pull --rebase origin ${{ github.ref_name }} || true
-          git add sabo_lit/sandbox/live/${{ matrix.strategy }}/ || true
-          git diff --staged --quiet || git commit -m "Strategy ${{ matrix.strategy }} run $(date -u +%Y-%m-%d)"
-          git push || echo "Nothing to push"
+          git add -A sabo_lit/sandbox/live/${{ matrix.strategy }}/
+          if git diff --staged --quiet; then
+            echo "No state changes to commit"
+            exit 0
+          fi
+          git commit -m "Strategy ${{ matrix.strategy }} run $(date -u +%Y-%m-%d)"
+          git stash --include-untracked || true
+          ok=0
+          for i in 1 2 3; do
+            if git pull --rebase origin ${{ github.ref_name }} && git push; then
+              ok=1
+              break
+            fi
+            sleep $((i * 5))
+          done
+          if [ "$ok" != "1" ]; then
+            echo "::error::state push failed after 3 attempts — live/${{ matrix.strategy }} not persisted"
+            exit 1
+          fi
+
+      - name: Notify failure (Telegram)
+        if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+            cd sabo_lit/sandbox
+            python telegram_notifier.py --message "❌ Strategy ${{ matrix.strategy }} run FAILED — check GitHub Actions ($GITHUB_RUN_ID)" || true
+          fi

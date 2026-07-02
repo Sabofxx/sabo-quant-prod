@@ -80,6 +80,28 @@ SYMBOL_MAP = {
 }
 
 
+# Price value of "1 pip" per epic — slippage in FX-style pips is meaningless for
+# metals/indices/commodities, so each non-FX epic declares its own pip unit.
+# FX default: 0.0001 (0.01 for JPY crosses).
+PIP_SIZE = {
+    "GOLD": 0.1,        # XAUUSD quoted ~4000.0 -> pip = 10 cents
+    "SILVER": 0.01,
+    "US500": 1.0,       # index points
+    "US100": 1.0,
+    "DE40": 1.0,
+    "OIL_CRUDE": 0.01,
+    "OIL_BRENT": 0.01,
+    "US10YT": 0.01,
+    "COPPER": 0.001,
+}
+
+
+def pip_size(epic: str) -> float:
+    if epic in PIP_SIZE:
+        return PIP_SIZE[epic]
+    return 0.01 if "JPY" in epic else 0.0001
+
+
 def set_live_dir(path) -> None:
     """Redirect all connector log files to an isolated per-strategy live/ dir.
 
@@ -210,6 +232,15 @@ class CapitalClient:
         if to_iso:
             params["to"] = to_iso
         r = requests.get(url, headers=self._headers(), params=params, timeout=20)
+        r.raise_for_status()
+        txns = r.json().get("transactions", [])
+        if txns:
+            return txns
+        # Some Capital backends ignore from/to and only honor lastPeriod (seconds,
+        # capped at 86400 = 24h). Fall back so a daily sync never silently misses
+        # the last session's closes.
+        r = requests.get(url, headers=self._headers(),
+                         params={"lastPeriod": "86400"}, timeout=20)
         r.raise_for_status()
         return r.json().get("transactions", [])
 
@@ -519,13 +550,20 @@ def _logged_references() -> set[str]:
     return refs
 
 
+NON_TRADE_TYPES = {"DEPOSIT", "WITHDRAWAL", "INACTIVITY_FEE", "TRANSFER"}
+
+
 def sync_realized_from_transactions(client: CapitalClient,
-                                    lookback_days: int = 7) -> int:
+                                    lookback_days: int = 7,
+                                    debug: bool = False) -> int:
     """Append any new closed-trade PnL from Capital's transaction history.
 
     Authoritative source covering BOTH our reset closes and positions taken out
     by a guaranteed stop intraday (which never reach close_all_positions).
     Deduplicated by transaction reference. Returns count of new rows.
+
+    Always prints a fetch/skip breakdown: a silent 0 here previously hid a
+    never-populated realized_pnl.jsonl for weeks (no win/loss stats at all).
     """
     now = datetime.now(UTC)
     from_iso = (now - timedelta(days=lookback_days)).strftime("%Y-%m-%dT%H:%M:%S")
@@ -539,20 +577,31 @@ def sync_realized_from_transactions(client: CapitalClient,
     seen = _logged_references()
     LIVE_DIR.mkdir(exist_ok=True)
     new = 0
+    skipped = {"no_ref": 0, "dup": 0, "no_pnl": 0, "zero_pnl": 0, "non_trade": 0}
+    type_counts: dict[str, int] = {}
     with REALIZED_LOG.open("a") as f:
         for t in txns:
+            ttype = str(t.get("transactionType") or t.get("type") or "?")
+            type_counts[ttype] = type_counts.get(ttype, 0) + 1
             ref = str(t.get("reference") or t.get("dealId") or "")
-            if not ref or ref in seen:
+            if not ref:
+                skipped["no_ref"] += 1
+                continue
+            if ref in seen:
+                skipped["dup"] += 1
+                continue
+            if ttype.upper() in NON_TRADE_TYPES:
+                skipped["non_trade"] += 1
                 continue
             pnl = _parse_pnl(t.get("profitAndLoss"))
-            if pnl is None or pnl == 0.0:
-                continue  # deposits/fees/zero-PnL rows are not trades
-            ttype = str(t.get("transactionType") or t.get("type") or "")
-            # Skip obvious non-trade ledger entries
-            if ttype.upper() in {"DEPOSIT", "WITHDRAWAL", "INACTIVITY_FEE", "TRANSFER"}:
+            if pnl is None:
+                skipped["no_pnl"] += 1
+                continue
+            if pnl == 0.0:
+                skipped["zero_pnl"] += 1
                 continue
             rec = {
-                "ts": t.get("date") or now.isoformat(timespec="seconds"),
+                "ts": t.get("dateUtc") or t.get("date") or now.isoformat(timespec="seconds"),
                 "reference": ref,
                 "epic": t.get("instrumentName") or t.get("epic"),
                 "type": ttype,
@@ -566,8 +615,13 @@ def sync_realized_from_transactions(client: CapitalClient,
             f.write(json.dumps(rec, default=str) + "\n")
             seen.add(ref)
             new += 1
-    if new:
-        print(f"Realized PnL sync: +{new} closed trades from transaction history")
+    print(f"Realized PnL sync: fetched={len(txns)} new={new} "
+          f"skipped={ {k: v for k, v in skipped.items() if v} or '{}'} "
+          f"types={type_counts or '{}'}")
+    if debug and txns:
+        print("  DEBUG first rows (raw keys/values, truncated):")
+        for t in txns[:5]:
+            print(f"    {json.dumps(t, default=str)[:400]}")
     return new
 
 
@@ -818,7 +872,7 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
                         time.sleep(0.5)  # broker propagation
                         fill_price = client.get_deal_confirm_price(resp.get("dealReference"))
                         if fill_price:
-                            slip_pips = abs(fill_price - price) * (100 if "JPY" in epic else 10000)
+                            slip_pips = abs(fill_price - price) / pip_size(epic)
                             slip_record = {
                                 "ts": record["ts"], "epic": epic, "direction": direction,
                                 "expected_price": price, "fill_price": fill_price,
@@ -880,6 +934,9 @@ def main() -> None:
     parser.add_argument("--sync-realized", action="store_true",
                         help="Append new closed-trade PnL from Capital transaction history")
     parser.add_argument("--realized-lookback-days", type=int, default=7)
+    parser.add_argument("--debug-transactions", action="store_true",
+                        help="With --sync-realized (or alone): dump raw transaction rows "
+                             "to diagnose an empty realized_pnl.jsonl")
     parser.add_argument("--live-max-notional", type=float,
                           default=LIVE_MAX_NOTIONAL_USD_DEFAULT,
                           help=f"Per-order notional cap on live (default ${LIVE_MAX_NOTIONAL_USD_DEFAULT:,.0f})")
@@ -947,8 +1004,9 @@ def main() -> None:
             print(f"  {epic}: net_size={info['net_size']:+.2f} ({len(info['deals'])} deals)")
         return
 
-    if args.sync_realized:
-        n = sync_realized_from_transactions(client, args.realized_lookback_days)
+    if args.sync_realized or args.debug_transactions:
+        n = sync_realized_from_transactions(client, args.realized_lookback_days,
+                                            debug=args.debug_transactions)
         print(f"Synced {n} new realized trades → {REALIZED_LOG}")
         return
 

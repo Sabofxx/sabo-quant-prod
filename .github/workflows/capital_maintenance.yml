@@ -1,0 +1,80 @@
+name: Capital Maintenance
+
+# Manual ops toolbox against Capital.com accounts (read-mostly).
+# - positions   : list net open positions on the (switched) active account
+# - account-info: balance snapshot
+# - sync-debug  : run realized-PnL sync verbosely + dump raw transaction rows
+#                 (diagnoses an empty realized_pnl.jsonl)
+# - close-all   : close every position — REQUIRES account_id (pinned, asserted)
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'What to do'
+        type: choice
+        required: true
+        options:
+          - positions
+          - account-info
+          - sync-debug
+          - close-all
+      suffix:
+        description: 'Credential set'
+        type: choice
+        required: true
+        default: 'base'
+        options:
+          - base
+          - _GOLD
+          - _INDEX
+      account_id:
+        description: 'Switch to this accountId first (REQUIRED for close-all)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  maintenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - run: pip install -r sabo_lit/sandbox/requirements.txt
+
+      - name: Run ${{ inputs.action }}
+        env:
+          CAPITAL_API_KEY: ${{ inputs.suffix == '_GOLD' && secrets.CAPITAL_API_KEY_GOLD || inputs.suffix == '_INDEX' && secrets.CAPITAL_API_KEY_INDEX || secrets.CAPITAL_API_KEY }}
+          CAPITAL_IDENTIFIER: ${{ inputs.suffix == '_GOLD' && secrets.CAPITAL_IDENTIFIER_GOLD || inputs.suffix == '_INDEX' && secrets.CAPITAL_IDENTIFIER_INDEX || secrets.CAPITAL_IDENTIFIER }}
+          CAPITAL_API_PASSWORD: ${{ inputs.suffix == '_GOLD' && secrets.CAPITAL_API_PASSWORD_GOLD || inputs.suffix == '_INDEX' && secrets.CAPITAL_API_PASSWORD_INDEX || secrets.CAPITAL_API_PASSWORD }}
+          CAPITAL_ENVIRONMENT: ${{ secrets.CAPITAL_ENVIRONMENT || 'demo' }}
+          ACCOUNT_ID: ${{ inputs.account_id }}
+        run: |
+          cd sabo_lit/sandbox
+          SWITCH=""
+          if [ -n "$ACCOUNT_ID" ]; then
+            SWITCH="--switch-account $ACCOUNT_ID"
+          fi
+          case "${{ inputs.action }}" in
+            positions)
+              python capital_connector.py $SWITCH --positions ;;
+            account-info)
+              python capital_connector.py $SWITCH --account-info ;;
+            sync-debug)
+              python capital_connector.py $SWITCH --sync-realized --debug-transactions --realized-lookback-days 7 ;;
+            close-all)
+              if [ -z "$ACCOUNT_ID" ]; then
+                echo "::error::close-all requires account_id"
+                exit 7
+              fi
+              python capital_connector.py $SWITCH --reset --account-id "$ACCOUNT_ID" ;;
+          esac

@@ -48,6 +48,12 @@ jobs:
           cd sabo_lit/sandbox
           python -c "import automated_runner, capital_connector, telegram_notifier, dashboard_generator, intraday_risk_check, local_dashboard, propfirm_signal_generator, strategy_config, strategy_signals, strategy_runner; print('All imports OK')"
 
+      - name: Unit tests (signals, breakers, pip math, schedule guard)
+        run: |
+          pip install pytest
+          cd sabo_lit/sandbox
+          python -m pytest test_units.py -q
+
       - name: Strategy config + signal smoke (offline, data-tolerant)
         run: |
           cd sabo_lit/sandbox

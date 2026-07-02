@@ -47,6 +47,12 @@ def main() -> None:
     if not realized and not snaps:
         print("  No live data yet. (First run pending / no closed trades.)")
         return
+    if not realized:
+        n_exec = len(load_jsonl(d / "capital_executions.jsonl"))
+        if n_exec:
+            print(f"  ⚠️ realized_pnl.jsonl EMPTY despite {n_exec} logged executions — "
+                  "win/loss & Sharpe below are balance-only. Check --sync-realized "
+                  "(Capital Maintenance workflow, action=sync-debug).")
 
     profits = [float(r.get("profit", 0) or 0) for r in realized]
     n = len(profits)

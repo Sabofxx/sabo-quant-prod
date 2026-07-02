@@ -28,8 +28,76 @@ import capital_connector as cc
 from automated_runner import market_execution_allowed
 from strategy_config import StrategyConfig, load_config
 from strategy_signals import generate_delta_orders
+from telegram_notifier import send_telegram
 
 DATA_DIR = Path(__file__).parent / "data"
+
+
+def notify(text: str) -> None:
+    """Best-effort Telegram message; silent no-op when secrets absent."""
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+    if not (token and chat_id):
+        return
+    try:
+        send_telegram(token, chat_id, text)
+    except Exception as exc:
+        log(f"WARN: telegram send failed: {exc}")
+
+
+def _snapshot_rows(cfg: StrategyConfig) -> list[dict]:
+    path = cfg.live_dir / "automated_daily_pnl.jsonl"
+    rows: list[dict] = []
+    if path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rows.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+    return rows
+
+
+def daily_drawdown_check(rows: list[dict], balance: float,
+                         max_daily_dd_pct: float,
+                         today: str | None = None) -> tuple[bool, str]:
+    """Same-day loss vs the last PRIOR day's close balance.
+
+    (The pre-run snapshot rewrites today's row, so comparing against "today's
+    first snapshot" — the legacy approach — always reads ~0 on a daily cadence.)
+    Returns (allowed_to_trade, reason).
+    """
+    today = today or datetime.now(UTC).date().isoformat()
+    prior = [r for r in rows
+             if r.get("date", "") < today and float(r.get("balance", 0) or 0) > 0]
+    if not prior or balance <= 0:
+        return True, "no prior-day balance yet"
+    prev_close = float(prior[-1]["balance"])
+    dd_pct = (balance - prev_close) / prev_close * 100
+    if dd_pct < max_daily_dd_pct:
+        return False, (f"DAILY DD BREAKER: {dd_pct:+.2f}% < {max_daily_dd_pct:+.2f}% "
+                       f"(prev close {prev_close:,.2f} -> now {balance:,.2f})")
+    return True, f"daily DD {dd_pct:+.2f}% within budget"
+
+
+def peak_drawdown_check(rows: list[dict], balance: float,
+                        max_peak_dd_pct: float) -> tuple[bool, str, dict]:
+    """Drawdown from the all-time equity peak (FTMO-style max-loss guard)."""
+    balances = [float(r.get("balance", 0) or 0) for r in rows
+                if float(r.get("balance", 0) or 0) > 0]
+    if balance > 0:
+        balances.append(balance)
+    if not balances:
+        return True, "no balance history yet", {}
+    peak = max(balances)
+    dd_pct = (balance - peak) / peak * 100 if peak > 0 else 0.0
+    stats = {"peak": peak, "current": balance, "dd_pct": dd_pct}
+    if dd_pct < max_peak_dd_pct:
+        return False, (f"PEAK DD BREAKER: {dd_pct:+.2f}% < {max_peak_dd_pct:+.2f}% "
+                       f"(peak {peak:,.2f} -> now {balance:,.2f})"), stats
+    return True, f"peak DD {dd_pct:+.2f}% within budget (peak {peak:,.2f})", stats
 
 
 def refresh_csv(client: cc.CapitalClient, symbol: str, csv_name: str) -> int:
@@ -207,6 +275,7 @@ def run_once(cfg: StrategyConfig, dry_run: bool = False) -> int:
     # Confirm each instrument's epic + candle format against the live broker.
     # In dry-run this is the proof that "GOLD"/index/oil epics and the candle
     # schema are correct on THIS account — fail loud if not.
+    market_status: dict[str, str] = {}
     for ins in cfg.instruments:
         epic = cc.SYMBOL_MAP.get(ins.symbol)
         if not epic:
@@ -215,8 +284,10 @@ def run_once(cfg: StrategyConfig, dry_run: bool = False) -> int:
             mkt = client.get_market(epic)
             snap = mkt.get("snapshot", {})
             inst = mkt.get("instrument", {})
+            market_status[ins.symbol] = str(snap.get("marketStatus") or "?")
             log(f"  EPIC CONFIRM {ins.symbol} -> epic='{inst.get('epic', epic)}' "
-                f"name='{inst.get('name','?')}' bid={snap.get('bid')} offer={snap.get('offer')}")
+                f"name='{inst.get('name','?')}' bid={snap.get('bid')} offer={snap.get('offer')} "
+                f"status={market_status[ins.symbol]}")
         except Exception as exc:
             log(f"FATAL: epic '{epic}' for {ins.symbol} not resolvable on this account: {exc}")
             sys.exit(8)
@@ -227,11 +298,11 @@ def run_once(cfg: StrategyConfig, dry_run: bool = False) -> int:
             log(f"FATAL: candle fetch for {ins.symbol}/{epic} failed: {exc}")
             sys.exit(8)
 
-    rows = generate_delta_orders(cfg, equity)
-    nonflat = [r for r in rows if r["signal"] != 0]
-    log(f"Signals: {len(rows)} instruments, {len(nonflat)} non-flat, "
-        f"leverage={rows[0]['leverage'] if rows else 0}")
-    for r in rows:
+    rows_orders = generate_delta_orders(cfg, equity)
+    nonflat = [r for r in rows_orders if r["signal"] != 0]
+    log(f"Signals: {len(rows_orders)} instruments, {len(nonflat)} non-flat, "
+        f"leverage={rows_orders[0]['leverage'] if rows_orders else 0}")
+    for r in rows_orders:
         epic = cc.SYMBOL_MAP.get(r["instrument"], "?")
         side = "BUY" if r["delta_notional_usd"] > 0 else "SELL" if r["delta_notional_usd"] < 0 else "FLAT"
         log(f"  {'WOULD ORDER' if dry_run else 'ORDER'} {r['instrument']} (epic={epic}) "
@@ -241,6 +312,29 @@ def run_once(cfg: StrategyConfig, dry_run: bool = False) -> int:
     delta_csv = cfg.live_dir / "prop_delta_orders_latest.csv"
     allowed, reason = market_execution_allowed()
     log(f"Market execution: {reason}")
+
+    # Broker-reported market status is authoritative per instrument (the FX
+    # schedule guard above is FX-centric; gold/indices have their own hours).
+    tradeable = [s for s, st in market_status.items() if st.upper() == "TRADEABLE"]
+    if allowed and market_status and not tradeable:
+        allowed = False
+        reason = f"no instrument TRADEABLE (status={market_status})"
+        log(f"Market status guard: {reason}")
+
+    # Risk breakers (ported from the legacy runner — the new pipeline ran
+    # without any drawdown halt): daily loss vs prior close, and peak DD.
+    if allowed and not dry_run:
+        snap_rows = _snapshot_rows(cfg)
+        daily_pct = float(os.environ.get("DAILY_DD_BREAKER_PCT", "-2.0"))
+        peak_pct = float(os.environ.get("MAX_PEAK_DD_PCT", "-8.0"))
+        d_ok, d_msg = daily_drawdown_check(snap_rows, equity, daily_pct)
+        p_ok, p_msg, _ = peak_drawdown_check(snap_rows, equity, peak_pct)
+        log(f"Daily breaker: {d_msg}")
+        log(f"Peak breaker: {p_msg}")
+        if not d_ok or not p_ok:
+            allowed = False
+            reason = d_msg if not d_ok else p_msg
+            notify(f"⛔️ <b>{cfg.id}</b> execution HALTED\n{reason}")
 
     executed = False
     if dry_run:
@@ -254,13 +348,30 @@ def run_once(cfg: StrategyConfig, dry_run: bool = False) -> int:
                              reset=True, expected_account_id=cfg.account_id)
         executed = True
 
+    n_realized = 0
     if not dry_run:
         try:
-            cc.sync_realized_from_transactions(client)
+            n_realized = cc.sync_realized_from_transactions(client)
         except Exception as exc:
             log(f"WARN: realized sync failed: {exc}")
-    snapshot(client, cfg, "post")
+    post = snapshot(client, cfg, "post")
     write_account_state(client, cfg, allowed, reason, executed)
+
+    if not dry_run:
+        sig_lines = "\n".join(
+            f"  {r['instrument']}: {'LONG' if r['signal'] > 0 else 'SHORT' if r['signal'] < 0 else 'FLAT'}"
+            f" (${r['delta_notional_usd']:+,.0f})" for r in rows_orders)
+        _, _, peak_stats = peak_drawdown_check(_snapshot_rows(cfg), post["balance"],
+                                               float(os.environ.get("MAX_PEAK_DD_PCT", "-8.0")))
+        notify(
+            f"{'✅' if executed else '⏸'} <b>{cfg.id}</b> daily run\n"
+            f"Balance: {post['balance']:,.2f} {post['currency']}\n"
+            f"Peak DD: {peak_stats.get('dd_pct', 0.0):+.2f}%\n"
+            f"Executed: {'yes' if executed else f'no — {reason}'}\n"
+            f"Realized synced: +{n_realized}\n"
+            f"{sig_lines}"
+        )
+
     log(f"Done: {cfg.id}. State in {cfg.live_dir}")
     return 0
 

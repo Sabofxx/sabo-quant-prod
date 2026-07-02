@@ -4,148 +4,129 @@ Guidance for Claude Code when working in this repo. Overrides `/Users/oscarmisch
 
 ## Project overview
 
-**sabo-quant** — Automated FX prop-firm signal pipeline. Runs entirely on GitHub Actions (no Mac needed). Trades Capital.com demo (or live, with explicit gate) via REST API. Reports daily summaries to Telegram. Zero-cost free-tier stack.
+**sabo-quant** — Automated multi-strategy trading program on Capital.com demo accounts, run entirely from GitHub Actions (no Mac needed). One strategy = one config = one pinned broker account = one isolated state dir. Zero-cost free-tier stack. Telegram reporting.
 
-- **Strategy**: mean-reversion + regime-aware sizing (`ADAPTIVE_75_50` tiers `[(0.3, 1.0), (0.0, 0.75), (-1e9, 0.5)]`)
-- **Active instruments**: EURUSD, GBPUSD, USDJPY, AUDUSD, NZDUSD, USDCAD (daily bars from Capital.com)
-- **Cadence**: cron `5 22 * * *` (22:05 UTC every day). Mon-Fri trade, Sat-Sun status-only.
-- **Account model**: 8 prop-firm sub-accounts, deltas summed, single broker execution per epic.
+**⚠️ PIVOT (June 2026): the current production pipeline is `strategy_runner.py`**, NOT the legacy FX mean-reversion pipeline. The legacy workflows `Daily Prop Firm Signal` and `Intraday Risk Check` are **disabled manually** on GitHub. See "Legacy pipeline (DISABLED)" below before touching `automated_runner.py`.
+
+## Current production: Strategy Runner (multi-account)
+
+- **Workflow**: `.github/workflows/strategy_runner.yml` — cron `20 22 * * *` (22:20 UTC daily), matrix over strategies, `max-parallel: 1`.
+- **Entry point**: `sabo_lit/sandbox/strategy_runner.py --config <id> [--dry-run]`
+- **Configs**: `sabo_lit/sandbox/configs/*.json` (`StrategyConfig` schema in `strategy_config.py`). Signals: `tsm` | `ma` | `donchian` | `carry` (`strategy_signals.py`, momentum family — NOT the legacy mean-reversion).
+- **Active matrix**: `[gold, index]`.
+  - `gold` — TSM on XAUUSD, vol target 3%, account `323733202891256094` (100k USDd demo), creds suffix `_GOLD`.
+  - `index` — long-biased MA trend on US500/US100/DE40 with top-20% vol-regime filter, account `323735182871179550`, creds suffix `_INDEX`. **Status: OBSERVATION — trades demo daily to accumulate a live track record, NOT a validated edge** (residual gap-day tail risk documented in its config).
+- **Per-strategy state**: `sabo_lit/sandbox/live/<strategy>/` — `automated_daily_pnl.jsonl` (1 row/day), `capital_executions.jsonl`, `slippage.jsonl`, `realized_pnl.jsonl`, `account_state.json`, `prop_delta_orders_latest.csv`, `dashboard_full.html`.
+- **Account safety**: `account_id` pinned in config; session asserted == config BEFORE signal gen AND inside `execute_delta_csv` (defense in depth). Empty `account_id` + non-dry run → exit 7. Credential resolution: `secret_suffix` `""` = base `CAPITAL_*` (Cas A, switch accountId), `"_X"` = `CAPITAL_*_X` (Cas B, separate login).
+- **Risk controls in run_once**: FX schedule guard + per-epic broker `marketStatus` (TRADEABLE) guard, daily DD breaker vs prior-day close (`DAILY_DD_BREAKER_PCT`, default -2%), peak DD breaker (`MAX_PEAK_DD_PCT`, default -8%), GSL with ATR floor (`CAPITAL_GSL_ATR_MULT`, default 1.5), idempotent `--reset` rebalance.
+- **Telegram**: `run_once` sends a per-strategy daily summary and a ⛔️ alert on breaker trips; workflow sends ❌ on job failure. All silent no-op if `TELEGRAM_*` secrets absent.
+- **Elimination criteria** (pre-registered per config, reported by `strategy_status.py <id>`): `min_trades` 30, `min_live_sharpe` 0.50, tracking ≥ 0.50× backtest, median slippage ≤ 1.5 pip (pip size is per-epic: GOLD=0.1, indices=1.0 — see `PIP_SIZE` in `capital_connector.py`), 60 observation days.
+- **Monitoring**: each run appends a status recap to the GitHub run summary (`strategy_status.py`). Realized win/loss comes ONLY from `--sync-realized` (Capital transaction history — includes intraday GSL stop-outs the reset close-loop never sees).
+
+### Ops workflows (workflow_dispatch)
+
+| Workflow | Purpose |
+|----------|---------|
+| `Strategy Runner (multi-account)` | inputs: `strategy` (blank = all), `dry_run` (full chain, no order) |
+| `Capital Maintenance` | `action`: `positions` / `account-info` / `sync-debug` (verbose realized-PnL sync + raw transaction dump) / `close-all` (requires `account_id`); `suffix`: `base` / `_GOLD` / `_INDEX` |
+| `List Capital Accounts` | list accountIds under a login; `check_account` asserts the guard |
+| `PR Smoke Test` | compileall + imports + `pytest sabo_lit/sandbox/test_units.py` + offline renders |
+
+### Known operational gotchas
+
+- The state-commit step MUST commit before rebasing and MUST fail loudly on push failure — a swallowed push rejection silently lost `live/index/` state for 2 weeks (June 2026). Don't reintroduce `git push || echo`.
+- `actions/cache` with a fixed key never re-saves: the data cache key includes `github.run_id` (restore latest via `restore-keys`, save fresh each run). With a cold cache the runner bootstraps only ~200 daily bars from the broker — enough for lookback 60–100, thin for the 252d vol-rank filter.
+- The local clone lags the remote (the bot commits state daily). `git pull` before reading `live/`.
+- `data/` CSVs are gitignored; `*-m5-bid-*.csv` filenames may contain DAILY bars (filename kept for loader compatibility).
 
 ## File map
 
 | What | Where |
 |------|-------|
-| Production pipeline | `sabo_lit/sandbox/` (yes — sandbox is prod, see History below) |
-| Broker connector | `sabo_lit/sandbox/capital_connector.py` |
-| Daily runner (entry point) | `sabo_lit/sandbox/automated_runner.py` |
-| Signal generator | `sabo_lit/sandbox/propfirm_signal_generator.py` |
+| Production runner (entry point) | `sabo_lit/sandbox/strategy_runner.py` |
+| Strategy configs + schema | `sabo_lit/sandbox/configs/*.json`, `strategy_config.py` |
+| Signal generator (momentum family) | `sabo_lit/sandbox/strategy_signals.py` |
+| Broker connector (shared) | `sabo_lit/sandbox/capital_connector.py` |
+| Per-strategy status recap | `sabo_lit/sandbox/strategy_status.py` |
 | Telegram notifier | `sabo_lit/sandbox/telegram_notifier.py` |
-| Static dashboard generator (pipeline, TradingView widgets) | `sabo_lit/sandbox/dashboard_generator.py` → `live/dashboard.html` |
-| Rich local dashboard (equity/DD/realized/slippage/GSL stop-out) | `sabo_lit/sandbox/local_dashboard.py` → `live/dashboard_full.html` (`--serve` to open locally) |
-| TradingView filter | `sabo_lit/sandbox/tradingview_filter.py` |
-| TradingView webhook Worker | `infra/cloudflare-worker/` |
-| Live state files (JSONL/JSON) | `sabo_lit/sandbox/live/` |
+| Rich dashboard (per strategy: `--live-dir live/<id>`) | `sabo_lit/sandbox/local_dashboard.py` |
+| Unit tests (signals, breakers, pip math, guard) | `sabo_lit/sandbox/test_units.py` |
+| Per-strategy live state | `sabo_lit/sandbox/live/<strategy>/` |
+| Legacy live state (frozen) | `sabo_lit/sandbox/live/*.jsonl,*.json` |
 | Historical CSV (cached) | `sabo_lit/sandbox/data/` (gitignored, GH Actions cached) |
-| GitHub Actions workflow | `.github/workflows/daily_propfirm.yml` |
-| Intraday Telegram/risk workflow | `.github/workflows/intraday_risk.yml` |
+| Workflows | `.github/workflows/{strategy_runner,capital_maintenance,list_accounts,pr_smoke}.yml` |
+| Legacy workflows (disabled) | `.github/workflows/{daily_propfirm,intraday_risk}.yml` |
 | Setup doc | `SETUP_AUTOMATION.md` |
 | Architecture scaffold layers (docstring-only `__init__.py`) | `sabo_lit/{api,backtest,execution,risk,strategy,persistence,features,models,microstructure,filters}` — **do NOT delete**: hard-referenced in `governance/dependency_rules.py` as the canonical layer set with enforced import-edge rules; governance tests scan the real tree. Empty ≠ unused. |
 
-## Pipeline flow (`automated_runner.py`)
-
-1. `check_env()` — verify CAPITAL_* secrets present, exit 2 if not
-2. `CapitalClient.login()` — OAuth-style session, store CST + X-SECURITY-TOKEN
-3. `log_account_snapshot()` — append to `live/automated_daily_pnl.jsonl` (capped 1/day)
-4. Loop 6 pairs → `get_daily_candles()` → `update_historical_csv()` (bootstrap if missing else append)
-5. `propfirm_signal_generator.py --adaptive` → writes `live/prop_signals_latest.{json,md,csv}` + `prop_delta_orders_latest.csv`
-6. `tradingview_filter.py` — optional TradingView confirmation layer (`TV_FILTER_MODE=disabled` by default)
-7. `market_execution_allowed()` — guard FX schedule (Fri 20:59 → Sun 21:00 closed, daily 20:55-21:10 maintenance)
-7b. `circuit_breaker_check()` (same-day DD vs `DAILY_DD_BREAKER_PCT`) AND `peak_drawdown_check()` (DD from all-time equity peak vs `MAX_PEAK_DD_PCT`, default -8%) — either trips → skip execution
-8. If allowed: `capital_connector.py --execute --reset --min-notional 500` (close all then open fresh — idempotent rebalance). Guaranteed stops are mandatory on this account; distance floored at `max(exchange_min×buffer, ATR×CAPITAL_GSL_ATR_MULT)` so intraday noise can't clip a 24h hold.
-8b. `capital_connector.py --sync-realized` — pull Capital transaction history → append new closed-trade PnL to `live/realized_pnl.jsonl` (dedup by reference). Captures reset closes AND intraday GSL stop-outs (which never reach the close loop). This is the ONLY accurate per-trade win/loss source.
-9. `live_tracker.py` refresh
-10. `log_account_snapshot()` again (post-execution balance)
-11. `write_account_state()` — rich `live/account_state.json` (balance, positions, market, env)
-12. `dashboard_generator.py` → `live/dashboard.html` (TradingView widgets); `local_dashboard.py` → `live/dashboard_full.html` (equity, drawdown, realized PnL, slippage, GSL stop-out)
-13. `telegram_notifier.py --run-summary` (rich message: realized vs latent PnL, DD from peak, per-pair edge)
-
-GitHub Actions then `git commit -m "Daily run YYYY-MM-DD"` on `live/` deltas + `git push`.
-
 ## Risk controls & known cost structure
 
-- **GSL is mandatory** on this Capital account (every order errors `guaranteed-stop-loss.required` without it). `CAPITAL_GSL_MODE=off` therefore HALTS trading (every order rejected, execution aborts) — it is NOT "trade without a stop".
-- The bleed diagnosed 2026-06: directional signal was +EV but guaranteed stops sat at `exchange_min×2` (~12-32 pip), inside the daily range → ~75% of positions clipped intraday for a guaranteed loss. Fix = ATR floor (`CAPITAL_GSL_ATR_MULT` default 1.5). Set `CAPITAL_GSL_ATR_MULT=0` to disable the floor.
-- Telegram `PL ouvert` is **latent** (mark-to-market right after entry, includes entry spread) — not a trade result. Realized win/loss lives in `live/realized_pnl.jsonl`, sourced from Capital's transaction history (`--sync-realized`), NOT from the close loop — so it includes GSL stop-outs. Logging at close-time would undercount losses (stop-outs vanish before the daily reset).
-- Tunable repo variables: `MAX_PEAK_DD_PCT`, `CAPITAL_GSL_ATR_MULT`, `CAPITAL_GSL_ATR_PERIOD` (plus the existing `EXEC_MIN_NOTIONAL_USD`, `DAILY_DD_BREAKER_PCT`, `CAPITAL_GSL_*`).
-
-## Telegram cadence
-
-- Daily rebalance sends `telegram_notifier.py --run-summary` after the 22:05 UTC run.
-- Intraday risk workflow runs every 4h on weekdays and now defaults to `RISK_STATUS_MODE=always`, so it sends a non-trading status heartbeat even when there is no breach.
-- Set repo variable `RISK_STATUS_MODE=alert_only` to return to silent intraday checks unless a threshold is breached.
-- Intraday status writes `sabo_lit/sandbox/live/intraday_risk_state.json`; breach events still append to `intraday_risk_alerts.jsonl`.
+- **GSL is mandatory** on these Capital accounts (orders error `guaranteed-stop-loss.required` without it). `CAPITAL_GSL_MODE=off` therefore HALTS trading (every order rejected) — it is NOT "trade without a stop".
+- The bleed diagnosed 2026-06 (legacy): +EV signal but guaranteed stops at `exchange_min×2` (~12-32 pip) inside the daily range → ~75% of positions clipped intraday. Fix = ATR floor (`CAPITAL_GSL_ATR_MULT`, default 1.5; 0 disables).
+- Realized win/loss lives ONLY in `live/<strategy>/realized_pnl.jsonl` via `--sync-realized` (transaction history, dedup by reference) — close-loop logging would undercount losses (GSL stop-outs vanish before the daily reset). The sync prints a fetch/skip breakdown every run; a fetched>0/new=0 pattern means the filters are wrong — use `Capital Maintenance → sync-debug`.
+- Tunable repo variables: `DAILY_DD_BREAKER_PCT`, `MAX_PEAK_DD_PCT`, `CAPITAL_GSL_MODE`, `CAPITAL_GSL_DISTANCE_BUFFER`, `CAPITAL_GSL_FALLBACK_DISTANCE_PCT`, `CAPITAL_GSL_STOPLOSS_RETRY_MULTIPLIER`, `CAPITAL_GSL_ATR_MULT`, `CAPITAL_GSL_ATR_PERIOD`.
 
 ## Required GitHub secrets
 
-| Name | Source | Purpose |
-|------|--------|---------|
-| `CAPITAL_API_KEY` | Capital.com Settings → API integration | Auth header `X-CAP-API-KEY` |
-| `CAPITAL_IDENTIFIER` | Capital.com login email | Session login identifier |
-| `CAPITAL_API_PASSWORD` | Custom API password (NOT login pwd) | Session login password |
-| `CAPITAL_ENVIRONMENT` | `demo` or `live` (default `demo`) | Selects base URL |
-| `TELEGRAM_BOT_TOKEN` | @BotFather `/newbot` | Notifier auth |
-| `TELEGRAM_CHAT_ID` | @userinfobot | Notifier target chat |
-| `TRADINGVIEW_WORKER_URL` | Cloudflare Worker URL | Optional pull of fresh TV confirmations |
-| `TRADINGVIEW_WORKER_READ_TOKEN` | Cloudflare Worker secret | Optional auth for `/signals/today` |
-
-## TradingView confirmation layer
-
-Recommended architecture:
-
-`TradingView alert -> Cloudflare Worker -> KV + live/tradingview_signals.jsonl -> daily SABO cron filter`
-
-The Worker lives in `infra/cloudflare-worker/`. It accepts `POST /tradingview/webhook`, validates the shared secret or optional `X-Sabo-Sig` HMAC, deduplicates by `sha256(symbol|timeframe|side|time)`, stores the signal in KV for 36h, and can append accepted signals to `sabo_lit/sandbox/live/tradingview_signals.jsonl` through the GitHub Contents API.
-
-The bot consumes confirmations through `tradingview_filter.py`. Modes:
-
-- `TV_FILTER_MODE=disabled` — current default, no trading behavior change.
-- `TV_FILTER_MODE=veto_only` — only blocks a SABO delta when TradingView confirms the opposite side.
-- `TV_FILTER_MODE=require_confirm` — SABO delta executes only when TradingView confirms the same symbol and side.
-
-Start in `disabled` for observation, then `veto_only`, then `require_confirm` after enough overlap checks. Because the Capital execution uses `--reset`, TradingView should remain a confirmation layer for the daily rebalance, not a separate intraday execution source.
+| Name | Purpose |
+|------|---------|
+| `CAPITAL_API_KEY` / `CAPITAL_IDENTIFIER` / `CAPITAL_API_PASSWORD` | Base login (Cas A / legacy account) |
+| `CAPITAL_API_KEY_GOLD` / `CAPITAL_IDENTIFIER_GOLD` / `CAPITAL_API_PASSWORD_GOLD` | Gold strategy login (Cas B) |
+| `CAPITAL_API_KEY_INDEX` / `CAPITAL_IDENTIFIER_INDEX` / `CAPITAL_API_PASSWORD_INDEX` | Index strategy login (Cas B) |
+| `CAPITAL_ENVIRONMENT` | `demo` or `live` (default `demo`) |
+| `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` | Notifier |
+| `TRADINGVIEW_WORKER_URL` / `TRADINGVIEW_WORKER_READ_TOKEN` | Legacy TV filter (unused by strategy_runner) |
 
 ## Local commands
 
 ```bash
-# Test Capital login
-CAPITAL_API_KEY=... CAPITAL_IDENTIFIER=... CAPITAL_API_PASSWORD=... \
-  python sabo_lit/sandbox/capital_connector.py --account-info
+# Run a strategy locally (dry-run, needs CAPITAL_* env)
+python sabo_lit/sandbox/strategy_runner.py --config gold --dry-run
 
-# Test Telegram
-TELEGRAM_BOT_TOKEN=... TELEGRAM_CHAT_ID=... \
-  python sabo_lit/sandbox/telegram_notifier.py --test
+# Status recap from committed state (no broker calls)
+python sabo_lit/sandbox/strategy_status.py gold
 
-# Preview Telegram daily message (no send)
-python sabo_lit/sandbox/telegram_notifier.py --run-summary --print-only
+# Unit tests
+python -m pytest sabo_lit/sandbox/test_units.py -q
 
-# Dry-run rebalance
-python sabo_lit/sandbox/capital_connector.py \
-  --execute sabo_lit/sandbox/live/prop_delta_orders_latest.csv --dry-run
-
-# Trigger GH workflow
-gh workflow run "Daily Prop Firm Signal"
+# Trigger the daily run / a dry-run
+gh workflow run "Strategy Runner (multi-account)" -f dry_run=true
 gh run watch
+
+# Ops: probe positions / debug realized sync / close-all on a pinned account
+gh workflow run "Capital Maintenance" -f action=positions -f suffix=base
+gh workflow run "Capital Maintenance" -f action=sync-debug -f suffix=_GOLD
 ```
 
 ## Safety: live trading gate
 
-`CAPITAL_ENVIRONMENT=live` is NOT enough. Live execution requires also:
-- `--allow-live` flag (or `ALLOW_LIVE=1` env), AND
-- Each individual `delta_notional_usd` ≤ `--live-max-notional` (default $250k)
+`CAPITAL_ENVIRONMENT=live` is NOT enough. Live execution also requires `--allow-live` (or `ALLOW_LIVE=1`) AND each `delta_notional_usd` ≤ `--live-max-notional` (default $250k). Failsafe against a misconfigured demo-sized rebalance hitting a real account.
 
-Failsafe to prevent a misconfigured $3M demo rebalance from blowing a real account. To go live edit `automated_runner.py` execute step to pass `--allow-live` AND set GH secret `CAPITAL_ENVIRONMENT=live`.
+## Legacy pipeline (DISABLED — do not resurrect casually)
+
+The original prod was a 6-pair FX mean-reversion pipeline (`ADAPTIVE_75_50` regime sizing) driven by `automated_runner.py` on cron 22:05 UTC (`daily_propfirm.yml`) with a 4h intraday risk check (`intraday_risk.yml`). Both workflows are **disabled manually** on GitHub since ~2026-06-16. Its state files live at the ROOT of `sabo_lit/sandbox/live/` (frozen). Its account is the base-credential login, account `321896722115941534` — it had 39 open positions when disabled; check/clean via `Capital Maintenance` (`positions` / `close-all`). The TradingView confirmation layer (`tradingview_filter.py`, `infra/cloudflare-worker/`) belongs to this pipeline. `automated_runner.py` still exports `market_execution_allowed()` used by strategy_runner.
 
 ## History / context for AI agents
 
-- `sabo_lit/` was originally a strict framework scaffold (typed contracts per `sabo-conventions` skill — see `sabo_lit/api`, `risk`, `execution`, etc.). Plan never executed; those dirs hold docstring-only `__init__.py`.
+- `sabo_lit/` was originally a strict framework scaffold (typed contracts per `sabo-conventions` skill). Plan never executed; those dirs hold docstring-only `__init__.py`.
 - Real production lives in `sabo_lit/sandbox/`. "sandbox" is misleading — it IS prod.
 - Initial broker was OANDA; pivoted to Capital.com after Cloudflare blocked the OANDA API from this region.
-- M5 CSV files named `*-m5-bid-2019-01-01-2026-01-01.csv` may contain DAILY bars after Capital pivot (filename retained for compatibility with strategy modules that read them).
 - `live_news_calendar.py` falls back to a hardcoded NFP/CPI/FOMC calendar when `TRADING_ECONOMICS_KEY` is not set. The fallback is the documented default.
 
 ## Code conventions (this repo)
 
-- Single source of pipeline truth: `automated_runner.py`. Other entry points (`live_tracker.py`, `dashboard_generator.py`) are read-only consumers of `live/` state.
+- Single source of pipeline truth: `strategy_runner.py`. Other entry points (`strategy_status.py`, `local_dashboard.py`) are read-only consumers of `live/<strategy>/` state.
 - All state files are JSONL append-only OR JSON snapshots. JSONL `*_pnl.jsonl` are date-keyed and capped 1/day in the writer.
 - Sandbox-only edits: do NOT touch `sabo_lit/lit/`, `sabo_lit/core/`, `sabo_lit/governance/` without invoking the `sabo-conventions` skill — those carry typed-contract guarantees enforced by tests.
 
 ## Backtest scripts
 
-`sabo_lit/sandbox/strategy_*.py` are standalone walk-forward / OOS scripts. Run directly with Python 3. They read CSV files from `sabo_lit/sandbox/data/`. No test framework — results print to stdout.
+`sabo_lit/sandbox/strategy_*.py` (except `strategy_runner/config/signals/status`) are standalone walk-forward / OOS scripts. Run directly with Python 3; they read `sabo_lit/sandbox/data/` CSVs and print to stdout.
 
 ## What NOT to do
 
 - Do not commit `sabo_lit/sandbox/data/*.csv` (huge, GH Actions cached).
-- Do not bypass `market_execution_allowed()` — Capital rejects 100% of FX orders during the 20:55-21:10 UTC maintenance window.
+- Do not bypass the market guards — Capital rejects 100% of FX orders during the 20:55-21:10 UTC maintenance window; non-FX epics are gated by broker `marketStatus`.
 - Do not remove the `--reset` flag from the executor — without it, hedging-mode accounts accumulate stacked positions.
+- Do not weaken the state-commit step back to `git push || echo` (see Known operational gotchas).
 - Do not paste any `CAPITAL_*` or `TELEGRAM_*` value on a shell command line (`gh secret set NAME` then paste on stdin, Ctrl+D).
