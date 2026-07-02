@@ -91,6 +91,10 @@ jobs:
           CAPITAL_GSL_ATR_PERIOD: ${{ vars.CAPITAL_GSL_ATR_PERIOD || '14' }}
           DAILY_DD_BREAKER_PCT: ${{ vars.DAILY_DD_BREAKER_PCT || '-2.0' }}
           MAX_PEAK_DD_PCT: ${{ vars.MAX_PEAK_DD_PCT || '-8.0' }}
+          # reset = daily close+reopen (pays 1 spread/position/day).
+          # skip_unchanged = hold same-side positions within 20% size tolerance —
+          # validated 2026-07: gold net Sharpe 0.54->0.79, maxDD -10.2%->-7.2%.
+          EXEC_REBALANCE_MODE: ${{ vars.EXEC_REBALANCE_MODE || 'reset' }}
         run: |
           cd sabo_lit/sandbox
           python strategy_runner.py --config ${{ matrix.strategy }} \

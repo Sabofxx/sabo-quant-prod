@@ -326,6 +326,70 @@ class CapitalClient:
         return results
 
 
+REBALANCE_SIZE_TOL = 0.20  # keep position if same side and size within 20% of target
+
+
+def configured_rebalance_mode() -> str:
+    """reset (close-all + reopen, default) | skip_unchanged (hold same-side
+    positions within size tolerance — saves one spread per position per day;
+    validated: gold net Sharpe 0.54 -> 0.79 full, DD -10.2% -> -7.2%)."""
+    mode = os.environ.get("EXEC_REBALANCE_MODE", "reset").strip().lower()
+    if mode not in {"reset", "skip_unchanged"}:
+        print(f"WARN: invalid EXEC_REBALANCE_MODE={mode!r}; using reset", file=sys.stderr)
+        return "reset"
+    return mode
+
+
+def rebalance_action(target_size: float, net_size: float,
+                     tol: float = REBALANCE_SIZE_TOL) -> str:
+    """Decide what to do with one epic given signed target vs signed net size.
+
+    Returns one of: none (both flat), open (flat -> position), close
+    (position -> flat), skip (same side, size drift within tol), close_open
+    (side flip or drift beyond tol).
+
+    NOTE for skip: the held position keeps its ORIGINAL guaranteed stop
+    (distance from entry-day ATR). Acceptable for multi-day holds; the stop is
+    refreshed whenever the position is re-opened by a close_open.
+    """
+    if target_size == 0 and net_size == 0:
+        return "none"
+    if target_size == 0:
+        return "close"
+    if net_size == 0:
+        return "open"
+    same_side = (target_size > 0) == (net_size > 0)
+    if same_side and abs(target_size - net_size) <= tol * abs(target_size):
+        return "skip"
+    return "close_open"
+
+
+def close_epic_positions(client: CapitalClient, epic: str) -> int:
+    """Close every open deal on one epic. Returns count closed."""
+    closed = 0
+    for p in client.get_positions():
+        pos = p.get("position", {})
+        if p.get("market", {}).get("epic") != epic:
+            continue
+        deal_id = pos.get("dealId")
+        if not deal_id:
+            continue
+        try:
+            resp = client.close_position(deal_id)
+            append_log({"ts": datetime.now(UTC).isoformat(timespec="seconds"),
+                        "action": "close_epic", "epic": epic, "deal_id": deal_id,
+                        "status": "closed", "reference": resp.get("dealReference")})
+            print(f"  CLOSED {epic} {deal_id}")
+            closed += 1
+        except Exception as e:
+            append_log({"ts": datetime.now(UTC).isoformat(timespec="seconds"),
+                        "action": "close_epic", "epic": epic, "deal_id": deal_id,
+                        "status": "error", "error": str(e)[:200]})
+            print(f"  ERROR closing {epic} {deal_id}: {e}")
+        time.sleep(0.2)
+    return closed
+
+
 def positions_net_by_epic(client: CapitalClient) -> dict[str, dict]:
     """Return {epic: {"net_size": float, "deals": [(deal_id, direction, size)]}}."""
     out: dict[str, dict] = {}
@@ -728,7 +792,11 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
         except Exception as e:
             print(f"WARN: could not fetch Capital account preferences: {e}")
 
-    if reset and not dry_run:
+    rebalance_mode = configured_rebalance_mode()
+    if rebalance_mode == "skip_unchanged":
+        print("SKIP_UNCHANGED mode: holding same-side positions within "
+              f"{REBALANCE_SIZE_TOL:.0%} size tolerance (no daily close+reopen)")
+    elif reset and not dry_run:
         print("RESET mode: closing all existing positions first...")
         closes = client.close_all_positions()
         n_closed = sum(1 for c in closes if c["status"] == "closed")
@@ -745,6 +813,7 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
         print(f"  {epic}: net_size={info['net_size']:+.2f} ({len(info['deals'])} deals)")
 
     executions = []
+    handled_epics: set[str] = set()
     with csv_path.open() as f:
         for row in csv.DictReader(f):
             internal = row["instrument"]
@@ -752,9 +821,16 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
             if not epic:
                 print(f"  SKIP {internal} : not in Capital.com symbol map")
                 continue
+            handled_epics.add(epic)
             delta_usd = float(row.get("delta_notional_usd", 0))
             if abs(delta_usd) < min_notional:
                 print(f"  SKIP {epic} delta ${delta_usd:.0f} < ${min_notional} threshold")
+                # target ~0: in skip mode an open position must still be closed
+                # (reset mode closes it via close_all and never reopens)
+                if (rebalance_mode == "skip_unchanged" and not dry_run
+                        and abs(current.get(epic, {}).get("net_size", 0.0)) > 0):
+                    print(f"  CLOSE {epic}: target below threshold, flattening")
+                    close_epic_positions(client, epic)
                 continue
 
             try:
@@ -781,6 +857,29 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
             if size == 0:
                 continue
             direction = "BUY" if delta_usd > 0 else "SELL"
+
+            if rebalance_mode == "skip_unchanged" and not dry_run:
+                net = current.get(epic, {}).get("net_size", 0.0)
+                signed_target = size if delta_usd > 0 else -size
+                action = rebalance_action(signed_target, net)
+                if action == "skip":
+                    print(f"  HOLD {epic}: net {net:+.2f} ~ target {signed_target:+.2f} "
+                          "(same side, within tolerance) — position kept, no spread paid")
+                    record = {
+                        "ts": datetime.now(UTC).isoformat(timespec="seconds"),
+                        "account_id": row.get("account_id"), "epic": epic,
+                        "direction": direction, "delta_usd": delta_usd,
+                        "price_mid": price, "size": size, "dry_run": dry_run,
+                        "status": "skip_unchanged", "net_size_held": net,
+                    }
+                    executions.append(record)
+                    append_log(record)
+                    continue
+                if action == "close_open":
+                    print(f"  REBALANCE {epic}: net {net:+.2f} -> target {signed_target:+.2f}, "
+                          "closing then reopening")
+                    close_epic_positions(client, epic)
+                # action == "open": fall through to the normal open path
 
             print(f"  ORDER {epic} {direction} size={size} "
                   f"(delta_usd ${delta_usd:+.0f} @ {price:.5f})")
@@ -922,6 +1021,14 @@ def execute_delta_csv(client: CapitalClient, csv_path: Path,
                 print("  ABORT: broker policy error applies to every remaining order")
                 break
             time.sleep(0.3)
+
+    # skip mode never ran close_all: flatten any epic holding a position that
+    # the strategy no longer targets at all (absent from the delta CSV).
+    if rebalance_mode == "skip_unchanged" and not dry_run:
+        for epic, info in current.items():
+            if epic not in handled_epics and abs(info.get("net_size", 0.0)) > 0:
+                print(f"  CLOSE {epic}: no longer targeted by strategy, flattening")
+                close_epic_positions(client, epic)
 
     return executions
 

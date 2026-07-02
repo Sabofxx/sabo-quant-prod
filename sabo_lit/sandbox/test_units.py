@@ -118,6 +118,30 @@ def test_txn_without_reference_skipped():
     assert rec is None and why == "no_ref"
 
 
+# --- skip_unchanged rebalance decision --------------------------------------------
+
+def test_rebalance_skip_same_side_within_tolerance():
+    assert cc.rebalance_action(3.30, 3.34) == "skip"      # gold daily drift
+    assert cc.rebalance_action(-3.30, -3.00) == "skip"
+
+
+def test_rebalance_close_open_on_side_flip_or_big_drift():
+    assert cc.rebalance_action(3.30, -3.30) == "close_open"
+    assert cc.rebalance_action(3.30, 1.00) == "close_open"  # >20% drift
+
+
+def test_rebalance_open_close_none():
+    assert cc.rebalance_action(3.30, 0.0) == "open"
+    assert cc.rebalance_action(0.0, 3.30) == "close"
+    assert cc.rebalance_action(0.0, 0.0) == "none"
+
+
+def test_rebalance_boundary_exactly_at_tolerance():
+    # |target - net| == tol * |target| -> still a skip (<=)
+    assert cc.rebalance_action(10.0, 8.0, tol=0.20) == "skip"
+    assert cc.rebalance_action(10.0, 7.99, tol=0.20) == "close_open"
+
+
 # --- FX schedule guard ----------------------------------------------------------
 
 def test_market_guard_saturday_closed():
