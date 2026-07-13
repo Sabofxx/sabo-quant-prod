@@ -41,3 +41,6 @@
 {"ts": "2026-07-12T23:12:18.466", "reference": "133120842168323", "epic": "US100", "type": "TRADE", "note": "Trade closed", "profit": -15.88, "win": false, "currency": "USDd"}
 {"ts": "2026-07-12T23:12:17.981", "reference": "133120841119746", "epic": "US500", "type": "TRADE", "note": "Trade closed", "profit": 10.37, "win": true, "currency": "USDd"}
 {"ts": "2026-07-12T23:12:17.421", "reference": "133120841119741", "epic": "DE40", "type": "TRADE", "note": "Trade closed", "profit": -51.23, "win": false, "currency": "USDd"}
+{"ts": "2026-07-13T23:16:09.569", "reference": "133211681448477", "epic": "DE40", "type": "TRADE", "note": "Trade closed", "profit": -19.41, "win": false, "currency": "USDd"}
+{"ts": "2026-07-13T23:16:08.914", "reference": "133211680399897", "epic": "US500", "type": "TRADE", "note": "Trade closed", "profit": -54.8, "win": false, "currency": "USDd"}
+{"ts": "2026-07-13T23:16:08.251", "reference": "133211680399892", "epic": "US100", "type": "TRADE", "note": "Trade closed", "profit": -136.13, "win": false, "currency": "USDd"}
