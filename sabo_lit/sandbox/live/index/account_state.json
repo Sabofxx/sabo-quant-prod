@@ -1,16 +1,16 @@
 {
-  "ts": "2026-07-31T23:17:42+00:00",
+  "ts": "2026-08-01T23:14:02+00:00",
   "strategy": "index",
   "account_id": "323735182871179550",
   "environment": "demo",
-  "balance": 99593.09,
-  "available": 98783.26,
+  "balance": 99589.97,
+  "available": 98780.14,
   "margin_used": 809.3600000000006,
   "profit_loss": 0.47,
-  "deposit": 99592.62,
+  "deposit": 99589.5,
   "currency": "USDd",
   "market_open": false,
-  "market_reason": "Friday post-close FX market closed",
+  "market_reason": "Saturday FX market closed",
   "executed_this_run": false,
   "positions": [
     {
