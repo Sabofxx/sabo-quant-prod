@@ -98,3 +98,5 @@
 {"ts": "2026-07-30T20:00:19.904", "reference": "134739509039113", "epic": "US100", "type": "CORPORATE_ACTION", "note": "Dividend", "profit": 0.47, "win": true, "currency": "USDd"}
 {"ts": "2026-07-30T20:00:06.873", "reference": "134739495389869", "epic": "US500", "type": "CORPORATE_ACTION", "note": "Dividend", "profit": 0.49, "win": true, "currency": "USDd"}
 {"ts": "2026-07-31T20:00:12.664", "reference": "134830098616579", "epic": "US500", "type": "CORPORATE_ACTION", "note": "Dividend", "profit": 0.45, "win": true, "currency": "USDd"}
+{"ts": "2026-08-02T23:15:27.337", "reference": "135023576679867", "epic": "US500", "type": "TRADE", "note": "Trade closed", "profit": 65.55, "win": true, "currency": "USDd"}
+{"ts": "2026-08-02T23:15:26.685", "reference": "135023575631287", "epic": "DE40", "type": "TRADE", "note": "Trade closed", "profit": 32.78, "win": true, "currency": "USDd"}
