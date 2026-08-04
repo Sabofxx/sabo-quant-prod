@@ -40,6 +40,7 @@ secrets.json
 sabo_lit/sandbox/data/
 sabo_lit/sandbox/reports/
 *.csv
+pour_claude.md
 *.parquet
 *.feather
 
