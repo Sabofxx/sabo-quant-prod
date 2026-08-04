@@ -64,3 +64,5 @@
 {"ts": "2026-08-02T23:15:37+00:00", "epic": "DE40", "direction": "BUY", "expected_price": 25811.1, "fill_price": 25816.2, "slippage_pips": 5.1, "size": 0.29}
 {"ts": "2026-08-03T23:29:25+00:00", "epic": "US500", "direction": "BUY", "expected_price": 7607.5, "fill_price": 7607.8, "slippage_pips": 0.3, "size": 0.98}
 {"ts": "2026-08-03T23:29:27+00:00", "epic": "DE40", "direction": "BUY", "expected_price": 26105.3, "fill_price": 26109.3, "slippage_pips": 4.0, "size": 0.29}
+{"ts": "2026-08-04T23:20:58+00:00", "epic": "US500", "direction": "BUY", "expected_price": 7755.9, "fill_price": 7755.9, "slippage_pips": 0.0, "size": 0.95}
+{"ts": "2026-08-04T23:21:01+00:00", "epic": "DE40", "direction": "BUY", "expected_price": 26412.3, "fill_price": 26416.3, "slippage_pips": 4.0, "size": 0.28}
