@@ -21,6 +21,7 @@ Usage:
   python telegram_notifier.py --message "Hello from bot"
   python telegram_notifier.py --test
 """
+
 from __future__ import annotations
 
 import argparse
@@ -33,7 +34,6 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import requests
-
 
 HERE = Path(__file__).parent
 LIVE_DIR = HERE / "live"
@@ -78,7 +78,9 @@ def chunk_html_by_lines(text: str) -> list[str]:
     return chunks or [""]
 
 
-def send_telegram(token: str, chat_id: str, text: str, parse_mode: str = "HTML") -> list[dict]:
+def send_telegram(
+    token: str, chat_id: str, text: str, parse_mode: str = "HTML"
+) -> list[dict]:
     url = TELEGRAM_API.format(token=token)
     responses = []
     for chunk in chunk_html_by_lines(text):
@@ -93,7 +95,10 @@ def send_telegram(token: str, chat_id: str, text: str, parse_mode: str = "HTML")
             timeout=15,
         )
         if not response.ok:
-            print(f"Telegram API error {response.status_code}: {response.text[:300]}", file=sys.stderr)
+            print(
+                f"Telegram API error {response.status_code}: {response.text[:300]}",
+                file=sys.stderr,
+            )
             response.raise_for_status()
         responses.append(response.json())
     return responses
@@ -139,6 +144,7 @@ def fmt_pct(value: float) -> str:
 # Market schedule helpers
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def next_market_open_utc(now: datetime) -> datetime:
     """Return next FX market open UTC after `now`.
 
@@ -160,7 +166,9 @@ def next_market_open_utc(now: datetime) -> datetime:
         sunday = now + timedelta(days=2)
         return sunday.replace(hour=21, minute=10, second=0, microsecond=0)
     # Weekday 20:55 - 21:10 maintenance break
-    if weekday in {0, 1, 2, 3} and (20 * 60 + 55) <= (now.hour * 60 + now.minute) < (21 * 60 + 10):
+    if weekday in {0, 1, 2, 3} and (20 * 60 + 55) <= (now.hour * 60 + now.minute) < (
+        21 * 60 + 10
+    ):
         return now.replace(hour=21, minute=10, second=0, microsecond=0)
     return now  # market already open
 
@@ -203,12 +211,16 @@ def fmt_market_status(state: dict, now: datetime) -> tuple[str, str]:
     minutes = int((delta.total_seconds() % 3600) // 60)
     eta = f"{hours}h{minutes:02d}m"
     open_str = next_open.strftime("%a %d/%m %H:%M UTC")
-    return "🌙", f"Marché FX : <b>FERMÉ</b> ({html_escape(reason)}) · réouverture {open_str} (dans {eta})"
+    return (
+        "🌙",
+        f"Marché FX : <b>FERMÉ</b> ({html_escape(reason)}) · réouverture {open_str} (dans {eta})",
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Sections
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def section_header(now: datetime, state: dict, status: str, weekend: bool) -> list[str]:
     weekday = WEEKDAY_FR[now.weekday()]
@@ -252,8 +264,10 @@ def section_account(state: dict) -> list[str]:
         f"<i>(latent, spread d'entrée inclus — pas un résultat)</i>",
     ]
     if deposit:
-        lines.append(f"   Dépôt initial : {deposit:,.2f} {html_escape(currency)} "
-                     f"(net total Δ : {fmt_money(bal - deposit, str(currency))})")
+        lines.append(
+            f"   Dépôt initial : {deposit:,.2f} {html_escape(currency)} "
+            f"(net total Δ : {fmt_money(bal - deposit, str(currency))})"
+        )
     return lines + [""]
 
 
@@ -348,7 +362,9 @@ def section_quick_digest(state: dict, snapshots: list[dict], status: str) -> lis
     pl = float(state.get("profit_loss", 0) or 0)
     margin_pct = (margin / balance * 100) if balance else 0.0
     pl_pct = (pl / balance * 100) if balance else 0.0
-    positions = state.get("positions", []) if isinstance(state.get("positions"), list) else []
+    positions = (
+        state.get("positions", []) if isinstance(state.get("positions"), list) else []
+    )
     delta = today_balance_delta(snapshots)
     status_label = "OK" if status == "success" else "ÉCHEC"
     risk = "normal"
@@ -365,7 +381,9 @@ def section_quick_digest(state: dict, snapshots: list[dict], status: str) -> lis
         f"   PL ouvert : {fmt_money(pl, currency)} ({fmt_pct(pl_pct)})",
     ]
     if delta:
-        lines.append(f"   Δ jour balance : {fmt_money(delta[0], currency)} ({fmt_pct(delta[1])})")
+        lines.append(
+            f"   Δ jour balance : {fmt_money(delta[0], currency)} ({fmt_pct(delta[1])})"
+        )
     return lines + [""]
 
 
@@ -406,7 +424,9 @@ def section_exposure_summary(state: dict) -> list[str]:
     by_epic: dict[str, dict[str, float]] = {}
     for pos in positions:
         epic = str(pos.get("epic", "?"))
-        row = by_epic.setdefault(epic, {"buy": 0.0, "sell": 0.0, "pl": 0.0, "count": 0.0})
+        row = by_epic.setdefault(
+            epic, {"buy": 0.0, "sell": 0.0, "pl": 0.0, "count": 0.0}
+        )
         size = float(pos.get("size", 0) or 0)
         if pos.get("direction") == "BUY":
             row["buy"] += size
@@ -414,7 +434,11 @@ def section_exposure_summary(state: dict) -> list[str]:
             row["sell"] += size
         row["pl"] += float(pos.get("profit_loss", 0) or 0)
         row["count"] += 1
-    rows = sorted(by_epic.items(), key=lambda item: abs(item[1]["buy"] - item[1]["sell"]), reverse=True)
+    rows = sorted(
+        by_epic.items(),
+        key=lambda item: abs(item[1]["buy"] - item[1]["sell"]),
+        reverse=True,
+    )
     lines = ["🧱 <b>Exposition nette par symbole</b>"]
     for epic, row in rows[:8]:
         net = row["buy"] - row["sell"]
@@ -432,7 +456,9 @@ def section_position_extremes(state: dict) -> list[str]:
     if not positions:
         return []
     currency = str(state.get("currency", ""))
-    sorted_pos = sorted(positions, key=lambda pos: float(pos.get("profit_loss", 0) or 0))
+    sorted_pos = sorted(
+        positions, key=lambda pos: float(pos.get("profit_loss", 0) or 0)
+    )
     worst = sorted_pos[:3]
     best = list(reversed(sorted_pos[-3:]))
     lines = ["🎚️ <b>Top positions PL</b>"]
@@ -454,7 +480,9 @@ def section_signals() -> list[str]:
     data = load_json(LIVE_DIR / "prop_signals_latest.json")
     if not isinstance(data, dict) or not data:
         return []
-    accounts = data.get("accounts", []) if isinstance(data.get("accounts"), list) else []
+    accounts = (
+        data.get("accounts", []) if isinstance(data.get("accounts"), list) else []
+    )
     orders = data.get("orders", []) if isinstance(data.get("orders"), list) else []
     summary = data.get("summary", {}) if isinstance(data.get("summary"), dict) else {}
     n_nonflat = sum(1 for order in orders if order.get("side") != "FLAT")
@@ -465,7 +493,9 @@ def section_signals() -> list[str]:
         f"   Delta exec  : ${float(summary.get('total_delta_notional_usd', 0)):,.0f}",
     ]
     if summary.get("blackout_day"):
-        lines.append(f"   ⚠️ Blackout news : {html_escape(summary.get('blackout_reason', '?'))}")
+        lines.append(
+            f"   ⚠️ Blackout news : {html_escape(summary.get('blackout_reason', '?'))}"
+        )
     if summary.get("as_of"):
         lines.append(f"   As of : {html_escape(summary.get('as_of'))}")
     return lines + [""]
@@ -489,8 +519,14 @@ def section_signal_bias() -> list[str]:
     if not by_symbol:
         return []
     lines = ["🧮 <b>Biais signal / delta</b>"]
-    for symbol, row in sorted(by_symbol.items(), key=lambda item: item[1]["gross"], reverse=True)[:8]:
-        bias = "BUY" if row["buy"] > row["sell"] else "SELL" if row["sell"] > row["buy"] else "MIX"
+    for symbol, row in sorted(
+        by_symbol.items(), key=lambda item: item[1]["gross"], reverse=True
+    )[:8]:
+        bias = (
+            "BUY"
+            if row["buy"] > row["sell"]
+            else "SELL" if row["sell"] > row["buy"] else "MIX"
+        )
         lines.append(
             f"   {html_escape(symbol)} : {bias} · buy ${row['buy']:,.0f} · "
             f"sell ${row['sell']:,.0f}"
@@ -527,12 +563,21 @@ def section_executions_today(state: dict) -> list[str]:
     today_execs = [row for row in executions if row.get("ts", "").startswith(today)]
     if not today_execs:
         if state.get("market_open"):
-            return ["⚡ <b>Exécutions du jour</b> : 0 (aucun delta dépassant seuil)", ""]
+            return [
+                "⚡ <b>Exécutions du jour</b> : 0 (aucun delta dépassant seuil)",
+                "",
+            ]
         return []  # silent when market closed — nothing to say
-    n_open = sum(1 for row in today_execs
-                  if row.get("status") in {"submitted", "filled", "dry_run_only"})
-    n_close = sum(1 for row in today_execs
-                   if row.get("status") == "closed" or row.get("action") == "close_all")
+    n_open = sum(
+        1
+        for row in today_execs
+        if row.get("status") in {"submitted", "filled", "dry_run_only"}
+    )
+    n_close = sum(
+        1
+        for row in today_execs
+        if row.get("status") == "closed" or row.get("action") == "close_all"
+    )
     n_err = sum(1 for row in today_execs if row.get("status") == "error")
     lines = [
         f"⚡ <b>Exécutions du jour</b> : {len(today_execs)} "
@@ -546,10 +591,16 @@ def section_executions_today(state: dict) -> list[str]:
             lines.append(f"   {ts} {mark} CLOSE {html_escape(row.get('epic', '?'))}")
         else:
             status = row.get("status", "?")
-            mark = "✓" if status in {"submitted", "filled", "dry_run_only"} else "✗" \
-                if status == "error" else "?"
-            arrow = "▲" if row.get("direction") == "BUY" else \
-                "▼" if row.get("direction") == "SELL" else "·"
+            mark = (
+                "✓"
+                if status in {"submitted", "filled", "dry_run_only"}
+                else "✗" if status == "error" else "?"
+            )
+            arrow = (
+                "▲"
+                if row.get("direction") == "BUY"
+                else "▼" if row.get("direction") == "SELL" else "·"
+            )
             lines.append(
                 f"   {ts} {mark} {arrow} {html_escape(row.get('epic', '?'))} "
                 f"{html_escape(row.get('direction', '?'))} "
@@ -571,13 +622,19 @@ def section_weekly_exec_summary() -> list[str]:
     if not recent:
         return []
     n_total = len(recent)
-    n_opens = sum(1 for row in recent
-                   if row.get("status") in {"submitted", "filled"}
-                   and row.get("action") != "close_all")
+    n_opens = sum(
+        1
+        for row in recent
+        if row.get("status") in {"submitted", "filled"}
+        and row.get("action") != "close_all"
+    )
     n_closes = sum(1 for row in recent if row.get("action") == "close_all")
     n_errs = sum(1 for row in recent if row.get("status") == "error")
-    gross = sum(abs(float(row.get("delta_usd", 0) or 0)) for row in recent
-                 if row.get("status") in {"submitted", "filled"})
+    gross = sum(
+        abs(float(row.get("delta_usd", 0) or 0))
+        for row in recent
+        if row.get("status") in {"submitted", "filled"}
+    )
     lines = [
         "📅 <b>Activité 7 derniers jours</b>",
         f"   Trades       : {n_total} (opens: {n_opens}, closes: {n_closes}, err: {n_errs})",
@@ -600,8 +657,11 @@ def section_next_run() -> list[str]:
     hours = int(delta.total_seconds() // 3600)
     minutes = int((delta.total_seconds() % 3600) // 60)
     weekday = WEEKDAY_FR[next_run.weekday()]
-    return [f"⏰ Prochain run : <b>{weekday} {next_run.strftime('%Y-%m-%d %H:%M UTC')}</b> "
-            f"(dans {hours}h{minutes:02d}m)", ""]
+    return [
+        f"⏰ Prochain run : <b>{weekday} {next_run.strftime('%Y-%m-%d %H:%M UTC')}</b> "
+        f"(dans {hours}h{minutes:02d}m)",
+        "",
+    ]
 
 
 def section_reconcile_circuit() -> list[str]:
@@ -622,10 +682,14 @@ def section_reconcile_circuit() -> list[str]:
     for line in run_lines:
         if "Position reconciliation FAILED" in line:
             msg = line.split("] ", 1)[-1] if "]" in line else line
-            lines.append(f"🔧 <b>Reconciliation</b> : <code>{html_escape(msg[:240])}</code>")
+            lines.append(
+                f"🔧 <b>Reconciliation</b> : <code>{html_escape(msg[:240])}</code>"
+            )
         elif "DAILY DD BREAKER" in line:
             msg = line.split("] ", 1)[-1] if "]" in line else line
-            lines.append(f"🛑 <b>Circuit breaker activé</b> : <code>{html_escape(msg[:240])}</code>")
+            lines.append(
+                f"🛑 <b>Circuit breaker activé</b> : <code>{html_escape(msg[:240])}</code>"
+            )
     if lines:
         lines.append("")
     return lines
@@ -644,7 +708,11 @@ def section_errors_warnings() -> list[str]:
     if marker_idx is None:
         return []
     run_lines = log_lines[marker_idx:]
-    errors = [line for line in run_lines if any(k in line for k in ("ERROR", "FATAL", "STEP FAILED"))]
+    errors = [
+        line
+        for line in run_lines
+        if any(k in line for k in ("ERROR", "FATAL", "STEP FAILED"))
+    ]
     warns = [line for line in run_lines if "WARN" in line]
     lines: list[str] = []
     if errors:
@@ -672,7 +740,9 @@ def section_tracker_alerts() -> list[str]:
     return lines + [""]
 
 
-def section_weekly_digest(now: datetime, snapshots: list[dict], currency: str) -> list[str]:
+def section_weekly_digest(
+    now: datetime, snapshots: list[dict], currency: str
+) -> list[str]:
     """Sunday only — week-in-review: PnL, trade count, hit rate, best/worst day."""
     if now.weekday() != 6:
         return []
@@ -690,28 +760,40 @@ def section_weekly_digest(now: datetime, snapshots: list[dict], currency: str) -
         delta = end_bal - start_bal
         delta_pct = (delta / start_bal * 100) if start_bal else 0.0
         emoji = "🟢" if delta >= 0 else "🔴"
-        lines.append(f"   {emoji} PnL semaine : {fmt_money(delta, currency)} ({fmt_pct(delta_pct)})")
+        lines.append(
+            f"   {emoji} PnL semaine : {fmt_money(delta, currency)} ({fmt_pct(delta_pct)})"
+        )
         # Best / worst day
         daily_deltas = []
         for i in range(1, len(week_snaps)):
-            prev = float(week_snaps[i-1].get("balance", 0))
+            prev = float(week_snaps[i - 1].get("balance", 0))
             curr = float(week_snaps[i].get("balance", 0))
             daily_deltas.append((week_snaps[i].get("date", "?"), curr - prev))
         if daily_deltas:
             best = max(daily_deltas, key=lambda x: x[1])
             worst = min(daily_deltas, key=lambda x: x[1])
-            lines.append(f"   📈 Meilleur jour : {best[0]} {fmt_money(best[1], currency)}")
-            lines.append(f"   📉 Pire jour    : {worst[0]} {fmt_money(worst[1], currency)}")
-    n_opens = sum(1 for e in week_execs
-                   if e.get("status") in {"submitted", "filled"}
-                   and e.get("action") != "close_all")
+            lines.append(
+                f"   📈 Meilleur jour : {best[0]} {fmt_money(best[1], currency)}"
+            )
+            lines.append(
+                f"   📉 Pire jour    : {worst[0]} {fmt_money(worst[1], currency)}"
+            )
+    n_opens = sum(
+        1
+        for e in week_execs
+        if e.get("status") in {"submitted", "filled"} and e.get("action") != "close_all"
+    )
     n_errs = sum(1 for e in week_execs if e.get("status") == "error")
     if week_execs:
         lines.append(f"   Trades exécutés : {n_opens} (erreurs broker : {n_errs})")
     if week_slip:
-        avg_slip = sum(float(s.get("slippage_pips", 0)) for s in week_slip) / len(week_slip)
+        avg_slip = sum(float(s.get("slippage_pips", 0)) for s in week_slip) / len(
+            week_slip
+        )
         max_slip = max(float(s.get("slippage_pips", 0)) for s in week_slip)
-        lines.append(f"   Slippage : {avg_slip:.2f} pips moyen · {max_slip:.2f} pips max ({len(week_slip)} fills)")
+        lines.append(
+            f"   Slippage : {avg_slip:.2f} pips moyen · {max_slip:.2f} pips max ({len(week_slip)} fills)"
+        )
     return lines + [""]
 
 
@@ -723,9 +805,9 @@ def section_footer(repo: str) -> list[str]:
     )
     return [
         "━━━━━━━━━━━━━━━━━━━",
-        f"🔗 <a href=\"https://github.com/{safe_repo}/actions\">Actions</a> · "
-        f"<a href=\"{dashboard_url}\">Dashboard</a> · "
-        f"<a href=\"https://capital.com\">Capital.com</a>",
+        f'🔗 <a href="https://github.com/{safe_repo}/actions">Actions</a> · '
+        f'<a href="{dashboard_url}">Dashboard</a> · '
+        f'<a href="https://capital.com">Capital.com</a>',
     ]
 
 
@@ -733,10 +815,14 @@ def section_footer(repo: str) -> list[str]:
 # Build messages
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def section_drawdown(snapshots: list[dict], state: dict, currency: str) -> list[str]:
     """Drawdown from all-time equity peak — the FTMO-relevant number."""
-    balances = [float(s.get("balance", 0) or 0) for s in snapshots
-                if float(s.get("balance", 0) or 0) > 0]
+    balances = [
+        float(s.get("balance", 0) or 0)
+        for s in snapshots
+        if float(s.get("balance", 0) or 0) > 0
+    ]
     cur = float(state.get("balance", 0) or 0)
     if cur > 0:
         balances.append(cur)
@@ -752,7 +838,9 @@ def section_drawdown(snapshots: list[dict], state: dict, currency: str) -> list[
         f"   {emoji} DD actuel : {fmt_pct(dd)} ({fmt_money(now - peak, str(currency))})",
     ]
     if dd <= -5:
-        lines.append("   ⚠️ <b>Proche/au-delà de la limite -5% — challenge à risque</b>")
+        lines.append(
+            "   ⚠️ <b>Proche/au-delà de la limite -5% — challenge à risque</b>"
+        )
     return lines + [""]
 
 
@@ -781,22 +869,27 @@ def section_realized(currency: str) -> list[str]:
     if losses:
         lines.append(f"   Worst: {fmt_money(min(losses), str(currency))}")
     if recent:
-        lines.append(f"   Σ 7j : {fmt_money(sum(recent), str(currency))} ({len(recent)} trades)")
+        lines.append(
+            f"   Σ 7j : {fmt_money(sum(recent), str(currency))} ({len(recent)} trades)"
+        )
     # per-pair breakdown
     by_pair: dict[str, float] = {}
     for r in rows:
-        by_pair[r.get("epic", "?")] = by_pair.get(r.get("epic", "?"), 0.0) + float(r.get("profit", 0) or 0)
+        by_pair[r.get("epic", "?")] = by_pair.get(r.get("epic", "?"), 0.0) + float(
+            r.get("profit", 0) or 0
+        )
     if by_pair:
         ranked = sorted(by_pair.items(), key=lambda kv: kv[1])
         worst = ranked[0]
         best = ranked[-1]
-        lines.append(f"   Paire+ : {html_escape(best[0])} {fmt_money(best[1], str(currency))}  "
-                     f"Paire- : {html_escape(worst[0])} {fmt_money(worst[1], str(currency))}")
+        lines.append(
+            f"   Paire+ : {html_escape(best[0])} {fmt_money(best[1], str(currency))}  "
+            f"Paire- : {html_escape(worst[0])} {fmt_money(worst[1], str(currency))}"
+        )
     return lines + [""]
 
 
-def build_summary(status: str = "success",
-                   repo: str | None = None) -> str:
+def build_summary(status: str = "success", repo: str | None = None) -> str:
     """Build the full HTML message for Telegram."""
     if not repo:
         repo = os.environ.get("GITHUB_REPOSITORY") or "Sabofxx/sabo-quant-prod"
@@ -838,15 +931,24 @@ def build_summary(status: str = "success",
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--run-summary", action="store_true",
-                          help="Build comprehensive summary from live state files")
+    parser.add_argument(
+        "--run-summary",
+        action="store_true",
+        help="Build comprehensive summary from live state files",
+    )
     parser.add_argument("--message", type=str, help="Send literal message")
     parser.add_argument("--status", default="success", choices=["success", "failure"])
     parser.add_argument("--test", action="store_true", help="Send test message")
-    parser.add_argument("--repo", default=os.environ.get("GITHUB_REPOSITORY"),
-                          help="owner/repo for footer links (default: $GITHUB_REPOSITORY)")
-    parser.add_argument("--print-only", action="store_true",
-                          help="Render message without sending to Telegram")
+    parser.add_argument(
+        "--repo",
+        default=os.environ.get("GITHUB_REPOSITORY"),
+        help="owner/repo for footer links (default: $GITHUB_REPOSITORY)",
+    )
+    parser.add_argument(
+        "--print-only",
+        action="store_true",
+        help="Render message without sending to Telegram",
+    )
     return parser
 
 
@@ -877,7 +979,10 @@ def main() -> None:
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")
     if not token or not chat_id:
-        print("ERROR: TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID env vars missing", file=sys.stderr)
+        print(
+            "ERROR: TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID env vars missing",
+            file=sys.stderr,
+        )
         sys.exit(2)
 
     responses = send_telegram(token, chat_id, text)
