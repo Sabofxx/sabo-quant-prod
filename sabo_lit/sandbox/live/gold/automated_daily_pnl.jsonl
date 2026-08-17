@@ -58,3 +58,4 @@
 {"ts": "2026-08-14T22:42:42+00:00", "date": "2026-08-14", "tag": "post", "strategy": "gold", "account_id": "323733202891256094", "balance": 100004.01, "available": 99392.04, "deposit": 100075.43, "profit_loss": -71.42, "currency": "USDd"}
 {"ts": "2026-08-15T22:40:33+00:00", "date": "2026-08-15", "tag": "post", "strategy": "gold", "account_id": "323733202891256094", "balance": 100003.51, "available": 99395.11, "deposit": 100074.93, "profit_loss": -71.42, "currency": "USD"}
 {"ts": "2026-08-16T22:39:35+00:00", "date": "2026-08-16", "tag": "post", "strategy": "gold", "account_id": "323733202891256094", "balance": 99999.93, "available": 99372.38, "deposit": 100000.04, "profit_loss": -0.11, "currency": "USD"}
+{"ts": "2026-08-17T22:43:57+00:00", "date": "2026-08-17", "tag": "post", "strategy": "gold", "account_id": "323733202891256094", "balance": 100105.29, "available": 99479.01, "deposit": 100104.47, "profit_loss": 0.82, "currency": "USD"}
