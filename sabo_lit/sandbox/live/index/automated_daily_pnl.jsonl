@@ -45,3 +45,4 @@
 {"ts": "2026-08-16T22:40:32+00:00", "date": "2026-08-16", "tag": "post", "strategy": "index", "account_id": "323735182871179550", "balance": 100203.37, "available": 99281.05, "deposit": 100206.99, "profit_loss": -3.62, "currency": "USD"}
 {"ts": "2026-08-17T22:44:58+00:00", "date": "2026-08-17", "tag": "post", "strategy": "index", "account_id": "323735182871179550", "balance": 100083.32, "available": 99147.19, "deposit": 100087.15, "profit_loss": -3.83, "currency": "USD"}
 {"ts": "2026-08-18T22:44:33+00:00", "date": "2026-08-18", "tag": "post", "strategy": "index", "account_id": "323735182871179550", "balance": 99954.15, "available": 99020.48, "deposit": 99957.88, "profit_loss": -3.73, "currency": "USD"}
+{"ts": "2026-08-19T22:45:36+00:00", "date": "2026-08-19", "tag": "post", "strategy": "index", "account_id": "323735182871179550", "balance": 99978.64, "available": 98962.04, "deposit": 99982.6, "profit_loss": -3.96, "currency": "USD"}
