@@ -1,16 +1,16 @@
 {
-  "ts": "2026-08-29T03:45:15+00:00",
+  "ts": "2026-08-30T00:24:11+00:00",
   "strategy": "index",
   "account_id": "323735182871179550",
   "environment": "demo",
-  "balance": 100091.68,
-  "available": 98628.1,
-  "margin_used": 1464.7099999999919,
+  "balance": 100085.86,
+  "available": 98622.28,
+  "margin_used": 1464.7100000000064,
   "profit_loss": -1.13,
-  "deposit": 100092.81,
+  "deposit": 100086.99,
   "currency": "USD",
   "market_open": false,
-  "market_reason": "Saturday FX market closed",
+  "market_reason": "Sunday pre-open FX market closed",
   "executed_this_run": false,
   "positions": [
     {
