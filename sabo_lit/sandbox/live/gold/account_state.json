@@ -1,5 +1,5 @@
 {
-  "ts": "2026-08-29T03:44:23+00:00",
+  "ts": "2026-08-30T00:23:20+00:00",
   "strategy": "gold",
   "account_id": "323733202891256094",
   "environment": "demo",
@@ -10,7 +10,7 @@
   "deposit": 100179.31,
   "currency": "USD",
   "market_open": false,
-  "market_reason": "Saturday FX market closed",
+  "market_reason": "Sunday pre-open FX market closed",
   "executed_this_run": false,
   "positions": []
 }
