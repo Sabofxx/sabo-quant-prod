@@ -165,3 +165,9 @@
 {"ts": "2026-08-31T00:39:51.703", "reference": "137565601661902", "epic": "DE40", "type": "TRADE", "note": "Trade closed", "profit": 18.7, "win": true, "currency": "USD"}
 {"ts": "2026-08-31T00:39:51.069", "reference": "137565601661897", "epic": "US100", "type": "TRADE", "note": "Trade closed", "profit": -68.48, "win": false, "currency": "USD"}
 {"ts": "2026-08-31T00:39:50.428", "reference": "137565600613319", "epic": "US500", "type": "TRADE", "note": "Trade closed", "profit": -40.32, "win": false, "currency": "USD"}
+{"ts": "2026-09-01T01:20:06.038", "reference": "137658731056527", "epic": "US500", "type": "TRADE", "note": "Trade closed", "profit": 2.04, "win": true, "currency": "USD"}
+{"ts": "2026-09-01T01:20:05.280", "reference": "137658730007944", "epic": "US100", "type": "TRADE", "note": "Trade closed", "profit": 37.45, "win": true, "currency": "USD"}
+{"ts": "2026-08-31T20:54:14.608", "reference": "137642004103314", "epic": "US500", "type": "CORPORATE_ACTION", "note": "Dividend", "profit": 0.83, "win": true, "currency": "USD"}
+{"ts": "2026-08-31T20:00:23.457", "reference": "137638616114877", "epic": "US100", "type": "CORPORATE_ACTION", "note": "Dividend", "profit": 0.22, "win": true, "currency": "USD"}
+{"ts": "2026-08-31T15:38:43.178", "reference": "137622153581687", "epic": "DE40", "type": "TRADE_COMMISSION_GSL", "note": "GSL fee", "profit": -2.16, "win": false, "currency": "USD"}
+{"ts": "2026-08-31T15:38:43.178", "reference": "137622153581686", "epic": "DE40", "type": "TRADE", "note": "Trade closed", "profit": -104.13, "win": false, "currency": "USD"}
