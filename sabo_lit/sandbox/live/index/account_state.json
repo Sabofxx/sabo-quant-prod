@@ -1,32 +1,32 @@
 {
-  "ts": "2026-09-14T00:15:51+00:00",
+  "ts": "2026-09-15T00:42:10+00:00",
   "strategy": "index",
   "account_id": "323735182871179550",
   "environment": "demo",
-  "balance": 99349.05,
-  "available": 98413.06,
-  "margin_used": 938.2400000000052,
-  "profit_loss": -2.25,
-  "deposit": 99351.3,
+  "balance": 99367.49,
+  "available": 98406.17,
+  "margin_used": 963.1999999999971,
+  "profit_loss": -1.88,
+  "deposit": 99369.37,
   "currency": "USD",
   "market_open": true,
   "market_reason": "FX execution window open",
   "executed_this_run": true,
   "positions": [
     {
-      "deal_id": "00000000-62d4-84eb-047e-236f0055311e",
+      "deal_id": "00000000-6318-de3f-047e-236f0055311e",
       "epic": "US500",
       "direction": "BUY",
-      "size": 1.13,
-      "open_level": 7618.6,
+      "size": 1.16,
+      "open_level": 7626.6,
       "profit_loss": 0.0
     },
     {
-      "deal_id": "00000000-62d4-850c-047e-236f0055311e",
+      "deal_id": "00000000-6318-deae-047e-236f0055311e",
       "epic": "DE40",
       "direction": "BUY",
-      "size": 0.34,
-      "open_level": 25470.0,
+      "size": 0.35,
+      "open_level": 25504.7,
       "profit_loss": 0.0
     }
   ]
