@@ -250,3 +250,6 @@
 {"ts": "2026-09-28T00:50:42.137", "reference": "140102999349276", "epic": "US100", "type": "TRADE", "note": "Trade closed", "profit": 34.26, "win": true, "currency": "USD"}
 {"ts": "2026-09-28T00:50:41.640", "reference": "140102998300698", "epic": "DE40", "type": "TRADE", "note": "Trade closed", "profit": 51.96, "win": true, "currency": "USD"}
 {"ts": "2026-09-28T00:50:40.977", "reference": "140102998300695", "epic": "US500", "type": "TRADE", "note": "Trade closed", "profit": 38.28, "win": true, "currency": "USD"}
+{"ts": "2026-09-29T02:02:17.725", "reference": "140198099975013", "epic": "DE40", "type": "TRADE", "note": "Trade closed", "profit": -13.3, "win": false, "currency": "USD"}
+{"ts": "2026-09-29T02:02:17.079", "reference": "140198099975011", "epic": "US100", "type": "TRADE", "note": "Trade closed", "profit": -98.7, "win": false, "currency": "USD"}
+{"ts": "2026-09-29T02:02:16.466", "reference": "140198098926434", "epic": "US500", "type": "TRADE", "note": "Trade closed", "profit": -61.05, "win": false, "currency": "USD"}
