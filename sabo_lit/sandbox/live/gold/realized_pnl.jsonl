@@ -76,3 +76,4 @@
 {"ts": "2026-09-28T00:49:50.204", "reference": "140102944823018", "epic": "GOLD", "type": "TRADE", "note": "Trade closed", "profit": -113.34, "win": false, "currency": "USD"}
 {"ts": "2026-09-28T14:36:21.374", "reference": "140154944867443", "epic": "GOLD", "type": "TRADE_COMMISSION_GSL", "note": "GSL fee", "profit": -4.14, "win": false, "currency": "USD"}
 {"ts": "2026-09-28T14:36:21.374", "reference": "140154944867433", "epic": "GOLD", "type": "TRADE", "note": "Trade closed", "profit": -328.6, "win": false, "currency": "USD"}
+{"ts": "2026-09-30T01:19:20.026", "reference": "140285994771873", "epic": "GOLD", "type": "TRADE", "note": "Trade closed", "profit": 125.33, "win": true, "currency": "USD"}

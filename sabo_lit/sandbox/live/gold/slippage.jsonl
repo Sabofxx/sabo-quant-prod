@@ -73,3 +73,4 @@
 {"ts": "2026-09-25T00:35:00+00:00", "epic": "GOLD", "direction": "BUY", "expected_price": 4269.96, "fill_price": 4270.2, "slippage_pips": 2.4, "size": 3.23}
 {"ts": "2026-09-28T00:49:53+00:00", "epic": "GOLD", "direction": "BUY", "expected_price": 4235.0, "fill_price": 4234.98, "slippage_pips": 0.2, "size": 3.26}
 {"ts": "2026-09-29T02:01:23+00:00", "epic": "GOLD", "direction": "BUY", "expected_price": 4132.875, "fill_price": 4133.36, "slippage_pips": 4.85, "size": 3.3}
+{"ts": "2026-09-30T01:19:22+00:00", "epic": "GOLD", "direction": "BUY", "expected_price": 4171.79, "fill_price": 4171.92, "slippage_pips": 1.3, "size": 3.26}
