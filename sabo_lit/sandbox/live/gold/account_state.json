@@ -1,16 +1,16 @@
 {
-  "ts": "2026-10-24T00:45:51+00:00",
+  "ts": "2026-10-25T00:21:39+00:00",
   "strategy": "gold",
   "account_id": "323733202891256094",
   "environment": "demo",
-  "balance": 99658.89,
-  "available": 98868.94,
-  "margin_used": 706.1199999999953,
+  "balance": 99659.99,
+  "available": 98870.04,
+  "margin_used": 706.1200000000099,
   "profit_loss": 83.83,
-  "deposit": 99575.06,
+  "deposit": 99576.16,
   "currency": "USD",
   "market_open": false,
-  "market_reason": "Saturday FX market closed",
+  "market_reason": "Sunday pre-open FX market closed",
   "executed_this_run": false,
   "positions": [
     {
