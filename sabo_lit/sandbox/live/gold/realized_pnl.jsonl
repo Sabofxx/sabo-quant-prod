@@ -95,3 +95,4 @@
 {"ts": "2026-10-22T00:42:31.607", "reference": "142276811814958", "epic": "GOLD", "type": "TRADE", "note": "Trade closed", "profit": 11.71, "win": true, "currency": "USD"}
 {"ts": "2026-10-23T00:42:24.589", "reference": "142367401338014", "epic": "GOLD", "type": "TRADE", "note": "Trade closed", "profit": 386.84, "win": true, "currency": "USD"}
 {"ts": "2026-10-26T00:25:26.271", "reference": "142638124846876", "epic": "GOLD", "type": "TRADE", "note": "Trade closed", "profit": 123.13, "win": true, "currency": "USD"}
+{"ts": "2026-10-27T01:30:20.937", "reference": "142732804946620", "epic": "GOLD", "type": "TRADE", "note": "Trade closed", "profit": -116.73, "win": false, "currency": "USD"}
