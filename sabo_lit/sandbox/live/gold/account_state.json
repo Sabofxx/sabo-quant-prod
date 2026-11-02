@@ -1,24 +1,24 @@
 {
-  "ts": "2026-11-01T01:14:32+00:00",
+  "ts": "2026-11-02T01:32:14+00:00",
   "strategy": "gold",
   "account_id": "323733202891256094",
   "environment": "demo",
-  "balance": 100240.31,
-  "available": 99345.32,
-  "margin_used": 281.2199999999866,
-  "profit_loss": 613.77,
-  "deposit": 99626.54,
+  "balance": 100069.93,
+  "available": 99184.16,
+  "margin_used": 890.2200000000012,
+  "profit_loss": -4.45,
+  "deposit": 100074.38,
   "currency": "USD",
-  "market_open": false,
-  "market_reason": "Sunday pre-open FX market closed",
-  "executed_this_run": false,
+  "market_open": true,
+  "market_reason": "FX execution window open",
+  "executed_this_run": true,
   "positions": [
     {
-      "deal_id": "00000000-6f74-f8d2-047e-21a20055311e",
+      "deal_id": "00000000-6ffe-74a4-047e-21a20055311e",
       "epic": "GOLD",
       "direction": "SELL",
-      "size": 4.59,
-      "open_level": 4009.42,
+      "size": 4.5,
+      "open_level": 3912.3,
       "profit_loss": 0.0
     }
   ]
