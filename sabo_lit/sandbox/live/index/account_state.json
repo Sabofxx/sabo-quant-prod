@@ -1,5 +1,5 @@
 {
-  "ts": "2026-11-06T02:31:18+00:00",
+  "ts": "2026-11-07T01:58:51+00:00",
   "strategy": "index",
   "account_id": "323735182871179550",
   "environment": "demo",
@@ -9,8 +9,8 @@
   "profit_loss": 0.0,
   "deposit": 97383.09,
   "currency": "USD",
-  "market_open": true,
-  "market_reason": "FX execution window open",
-  "executed_this_run": true,
+  "market_open": false,
+  "market_reason": "Saturday FX market closed",
+  "executed_this_run": false,
   "positions": []
 }
